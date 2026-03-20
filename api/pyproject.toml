@@ -1,0 +1,28 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "ChatPPT API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+"alembic>=1.16.3",
+    "bcrypt==3.2.0",
+    "cryptography>=45.0.5",
+    "docker>=7.1.0",
+    "fastapi[standard]>=0.115.12",
+    "httpx>=0.28.1",
+    "mysqlclient>=2.2.7",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-settings>=2.10.1",
+    "pymysql>=1.1.1",
+    "python-jose[cyptography]>=3.5.0",
+    "python-ulid[pydantic]>=3.0.0",
+    "sqlalchemy>=2.0.44",
+    "types-passlib>=1.7.7.20260211",
+    "types-python-jose>=3.5.0.20250531",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.10",
+]
