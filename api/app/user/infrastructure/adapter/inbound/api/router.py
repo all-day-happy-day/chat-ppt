@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, status
 from ulid import ULID
 
@@ -9,14 +11,25 @@ from app.user.application.usecase import (
     UpdateUserUseCase,
 )
 from app.user.domain.entity import User
-from app.user.infrastructure.adapter.inbound.api.message import CreateUserRequest, CreateUserResponse, GetUserResponse
+from app.user.infrastructure.adapter.inbound.api.message import (
+    CreateUserRequest,
+    CreateUserResponse,
+    GetUserResponse,
+    UpdateUserRequest,
+    UpdateUserResponse,
+)
 
 router: APIRouter = APIRouter(tags=["User"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CreateUserResponse)
-def create_user(request: CreateUserRequest, usecase: CreateUserUseCase):
-    user: User = usecase(email=request.email, username=request.username, password=request.password, role=request.role)
+def create_user(request_model: CreateUserRequest, usecase: CreateUserUseCase):
+    user: User = usecase(
+        email=request_model.email,
+        username=request_model.username,
+        password=request_model.password,
+        role=request_model.role,
+    )
     return CreateUserResponse.from_domain_entity(user)
 
 
@@ -41,3 +54,13 @@ def get_user(user_id: ULID, usecase: GetUserUseCase):
 def get_users(usecase: GetUsersUseCase):
     users: list[User] = usecase()
     return [GetUserResponse.from_domain_entity(user) for user in users]
+
+
+@router.patch("/{user_id}", status_code=status.HTTP_200_OK, response_model=UpdateUserResponse)
+def patch_user(user_id: ULID, request_model: UpdateUserRequest, usecase: UpdateUserUseCase):
+    try:
+        update_fields: dict[str, Any] = {k: v for k, v in request_model.model_dump().items() if v is not None}
+        user: User = usecase(user_id=user_id, update_fields=update_fields)
+        return UpdateUserResponse.from_domain_entity(user)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
