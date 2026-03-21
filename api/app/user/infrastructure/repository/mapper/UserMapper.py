@@ -16,7 +16,11 @@ class UserMapper:
             password=alchemy_entity.password,
             created_at=alchemy_entity.created_at.replace(tzinfo=timezone.utc),
             updated_at=alchemy_entity.updated_at.replace(tzinfo=timezone.utc),
-            last_sign_in=alchemy_entity.last_sign_in.replace(tzinfo=timezone.utc),
+            last_sign_in=(
+                alchemy_entity.last_sign_in.replace(tzinfo=timezone.utc)
+                if alchemy_entity.last_sign_in is not None
+                else None
+            ),
             role=alchemy_entity.role,
         )
 
