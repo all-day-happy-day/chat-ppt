@@ -15,7 +15,8 @@ class DBConfig(BaseSettings):
 
     @property
     def url(self) -> str:
-        return f"mysql+pymysql://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
+        # return f"mysql+pymysql://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
+        return f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 
 db_config: DBConfig = DBConfig()  # type: ignore[call-arg]
