@@ -4,6 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.user.infrastructure.repository.entity import UserAlchemyEntity  # noqa: F401
+from core.db.config import db_config
 from core.db.db import Base
 
 # this is the Alembic Config object, which provides
@@ -14,6 +15,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+config.set_main_option("sqlalchemy.url", db_config.url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
