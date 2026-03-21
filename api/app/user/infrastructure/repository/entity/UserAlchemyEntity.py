@@ -22,7 +22,5 @@ class UserAlchemyEntity(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DATETIME(), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
     )
-    last_sign_in: Mapped[datetime] = mapped_column(
-        DATETIME(), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
-    )
+    last_sign_in: Mapped[datetime] = mapped_column(DATETIME(), nullable=True)
     role: Mapped[Role] = mapped_column(Enum(Role), nullable=False, default=Role.USER)
