@@ -1,4 +1,10 @@
 __pycache__/
+.venv/
 uv.lock
+
+.ruff_cache/
+.mypy_cache/
+
 .env*
+
 testbed/
