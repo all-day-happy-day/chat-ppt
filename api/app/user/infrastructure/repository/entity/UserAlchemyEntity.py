@@ -17,10 +17,10 @@ class UserAlchemyEntity(Base):
     password: Mapped[str] = mapped_column(String(64), nullable=False)
     email: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DATETIME(), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
+        DATETIME(fsp=0), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DATETIME(), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
+        DATETIME(fsp=0), nullable=False, default=lambda: datetime.now(tz=timezone.utc)
     )
-    last_sign_in: Mapped[datetime] = mapped_column(DATETIME(), nullable=True)
+    last_sign_in: Mapped[datetime] = mapped_column(DATETIME(fsp=0), nullable=True)
     role: Mapped[Role] = mapped_column(Enum(Role), nullable=False, default=Role.USER)
