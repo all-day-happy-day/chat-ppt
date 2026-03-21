@@ -5,7 +5,7 @@ description = "ChatPPT API"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-"alembic>=1.16.3",
+    "alembic>=1.16.3",
     "bcrypt==3.2.0",
     "cryptography>=45.0.5",
     "docker>=7.1.0",
@@ -13,6 +13,7 @@ dependencies = [
     "httpx>=0.28.1",
     "mysqlclient>=2.2.7",
     "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.11",
     "pydantic-settings>=2.10.1",
     "pymysql>=1.1.1",
     "python-jose[cyptography]>=3.5.0",
