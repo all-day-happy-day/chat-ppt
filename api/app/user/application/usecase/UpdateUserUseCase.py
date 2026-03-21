@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any
 
 from ulid import ULID
@@ -20,5 +21,6 @@ class UpdateUserUseCase:
                 has_change = True
 
         if has_change:
+            user.updated_at = datetime.now(timezone.utc)
             return self.user_repository.patch(user)
         return user
