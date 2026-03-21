@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_db() -> Generator[SQLAlchemySession]:
+def get_db() -> Generator[SQLAlchemySession, None, None]:
     db: SQLAlchemySession = Session()
 
     try:
