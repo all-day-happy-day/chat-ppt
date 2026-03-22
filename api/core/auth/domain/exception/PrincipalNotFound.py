@@ -1,0 +1,2 @@
+class PrincipalNotFound(Exception):
+    pass

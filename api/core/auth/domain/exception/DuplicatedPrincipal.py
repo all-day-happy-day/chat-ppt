@@ -1,0 +1,2 @@
+class DuplicatedPrincipal(Exception):
+    pass

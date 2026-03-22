@@ -1,0 +1,2 @@
+class AlchemyMismatch(Exception):
+    pass
