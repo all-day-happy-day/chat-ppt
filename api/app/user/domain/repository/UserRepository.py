@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from pydantic import EmailStr
 from ulid import ULID
 
 from app.user.domain.entity import User
@@ -24,4 +25,12 @@ class UserRepository(ABC):
 
     @abstractmethod
     def get(self) -> list[User]:
+        pass
+
+    @abstractmethod
+    def get_by_email(self, email: EmailStr) -> User:
+        pass
+
+    @abstractmethod
+    def get_by_username(self, username: str) -> User:
         pass

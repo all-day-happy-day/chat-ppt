@@ -1,3 +1,4 @@
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from ulid import ULID
 
@@ -45,3 +46,19 @@ class AlchemyUserRepository(UserRepository):
     def get(self) -> list[User]:
         alchemy_entities: list[UserAlchemyEntity] = self.db.query(UserAlchemyEntity).all()
         return [UserMapper.to_domain_entity(entity) for entity in alchemy_entities]
+
+    def get_by_email(self, email: EmailStr) -> User:
+        alchemy_entity: UserAlchemyEntity | None = (
+            self.db.query(UserAlchemyEntity).filter(UserAlchemyEntity.email == email).first()
+        )
+        if alchemy_entity is None:
+            raise UserNotFound(f"User not found: {email}")
+        return UserMapper.to_domain_entity(alchemy_entity)
+
+    def get_by_username(self, username: str) -> User:
+        alchemy_entity: UserAlchemyEntity | None = (
+            self.db.query(UserAlchemyEntity).filter(UserAlchemyEntity.username == username).first()
+        )
+        if alchemy_entity is None:
+            raise UserNotFound(f"User not found: {username}")
+        return UserMapper.to_domain_entity(alchemy_entity)
