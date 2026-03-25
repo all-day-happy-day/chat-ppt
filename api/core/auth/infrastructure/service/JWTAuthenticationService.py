@@ -3,8 +3,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 
 from jose import jwt
+from pydantic import validate_email
 from ulid import ULID
 
+from app.user.domain.repository import UserRepository
 from core.auth.domain.entity import Principal
 from core.auth.domain.enum import CredentialsType
 from core.auth.domain.exception import InvalidCredentials
@@ -21,15 +23,17 @@ class JWTAuthenticationService(AuthenticationService):
     def __init__(
         self,
         password_hasher: PasswordHasher,
-        principal_repo: PrincipalRepository,
-        credentials_repo: CredentialsRepository,
+        principal_repository: PrincipalRepository,
+        credentials_repository: CredentialsRepository,
+        user_repository: UserRepository,
         secret_key: str = SECRET_KEY,
         short_days: int = ACCESS_TOKEN_EXPIRE_DAYS,
         long_days: int = REFRESH_TOKEN_EXPIRE_DAYS,
     ) -> None:
         self.password_hasher: PasswordHasher = password_hasher
-        self.principal_repo: PrincipalRepository = principal_repo
-        self.credentials_repo: CredentialsRepository = credentials_repo
+        self.principal_repository: PrincipalRepository = principal_repository
+        self.credentials_repository: CredentialsRepository = credentials_repository
+        self.user_repository: UserRepository = user_repository
         self.secret_key: str = secret_key
         self.short_delta: timedelta = timedelta(days=short_days)
         self.long_delta: timedelta = timedelta(days=long_days)
@@ -59,7 +63,14 @@ class JWTAuthenticationService(AuthenticationService):
 
     def authenticate(self, principal: str, secret: str) -> tuple[Credentials, Credentials]:
         # Load and verify principal
-        principal_entity: Principal = self.principal_repo.get_by_principal(principal=principal)
+        user_id: ULID
+        try:
+            validate_email(value=principal)
+            user_id = self.user_repository.get_by_email(email=principal).id
+        except ValueError:
+            user_id = self.user_repository.get_by_username(username=principal).id
+
+        principal_entity: Principal = self.principal_repository.get_by_user_id(user_id=user_id)
         if not principal_entity.verify_password(plain=secret, hasher=self.password_hasher):
             raise InvalidCredentials(f"Invalid credentials: {principal}")
 
@@ -67,21 +78,21 @@ class JWTAuthenticationService(AuthenticationService):
 
         # Issue short lived credentials
         short_credentials: Credentials = self._issue_credentials(
-            user_id=principal_entity.user_id,
+            user_id=user_id,
             now=now,
             type=CredentialsType.SHORT_LIVED,
         )
 
         # Issue long lived credentials
         long_credentials: Credentials = self._issue_credentials(
-            user_id=principal_entity.user_id,
+            user_id=user_id,
             now=now,
             type=CredentialsType.LONG_LIVED,
         )
 
         # Persist both credentials
-        self.credentials_repo.save(credentials=short_credentials)
-        self.credentials_repo.save(credentials=long_credentials)
+        self.credentials_repository.save(credentials=short_credentials)
+        self.credentials_repository.save(credentials=long_credentials)
 
         return short_credentials, long_credentials
 
@@ -96,11 +107,11 @@ class JWTAuthenticationService(AuthenticationService):
             type=CredentialsType.LONG_LIVED,
             raw_value=raw_long_lived_credentials,
         )
-        if not self.credentials_repo.exists(credentials=refresh_credentials):
+        if not self.credentials_repository.exists(credentials=refresh_credentials):
             raise InvalidCredentials("Refresh credential revoked or unknown")
 
         # Revoke the old refresh
-        self.credentials_repo.revoke(credentials=refresh_credentials)
+        self.credentials_repository.revoke(credentials=refresh_credentials)
 
         now: datetime = datetime.now(timezone.utc)
 
@@ -119,8 +130,8 @@ class JWTAuthenticationService(AuthenticationService):
         )
 
         # Persist both credentials
-        self.credentials_repo.save(credentials=short_credentials)
-        self.credentials_repo.save(credentials=long_credentials)
+        self.credentials_repository.save(credentials=short_credentials)
+        self.credentials_repository.save(credentials=long_credentials)
 
         return short_credentials, long_credentials
 
@@ -131,7 +142,7 @@ class JWTAuthenticationService(AuthenticationService):
             type=CredentialsType.SHORT_LIVED,
             raw_value=raw_short_lived_credentials,
         )
-        if not self.credentials_repo.exists(credentials=credentials):
+        if not self.credentials_repository.exists(credentials=credentials):
             raise InvalidCredentials("Invalid credentials")
         return credentials.user_id
 
@@ -143,4 +154,4 @@ class JWTAuthenticationService(AuthenticationService):
             type=CredentialsType(data["token_type"]),
             raw_value=raw_token,
         )
-        self.credentials_repo.revoke(credentials=credentials)
+        self.credentials_repository.revoke(credentials=credentials)
