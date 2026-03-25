@@ -15,5 +15,5 @@ class SignOutUseCase:
         self.auth_service.revoke(raw_short_lived_credentials)
         if raw_long_lived_credentials is not None:
             self.auth_service.revoke(raw_long_lived_credentials)
-        user: User = self.user_repository.get_by_id(id=user_id)
+        user: User = self.user_repository.get_by_id(user_id=user_id)
         return user

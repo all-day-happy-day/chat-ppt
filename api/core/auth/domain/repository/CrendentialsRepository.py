@@ -19,5 +19,5 @@ class CredentialsRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete_by_id(self, user_id: ULID) -> None:
+    def delete_by_user_id(self, user_id: ULID) -> None:
         raise NotImplementedError

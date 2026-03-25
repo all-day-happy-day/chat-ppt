@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ulid import ULID
 
 from core.auth.domain.enum import CredentialsType
-from core.auth.domain.exception import AlchemyMismatch, InvalidCredentials
+from core.auth.domain.exception import InvalidCredentials
 from core.auth.domain.repository import CredentialsRepository
 from core.auth.domain.valueobject import Credentials
 from core.auth.infrastructure.repository.credentials.entity import CredentialsAlchemyEntity
@@ -26,9 +26,6 @@ class AlchemyCredentialsRepository(CredentialsRepository):
             alchemy_entity = CredentialsMapper.to_alchemy_entity(credentials)
             self.db.add(alchemy_entity)
         else:
-            if credentials != CredentialsMapper.to_domain_entity(alchemy_entity):
-                raise AlchemyMismatch(f"Credentials not saved: {credentials}")
-
             if credentials.type == CredentialsType.SHORT_LIVED:
                 alchemy_entity.access_key = credentials.raw_value
             elif credentials.type == CredentialsType.LONG_LIVED:
@@ -64,7 +61,7 @@ class AlchemyCredentialsRepository(CredentialsRepository):
         self.db.execute(stmt)
         self.db.commit()
 
-    def delete_by_id(self, user_id: ULID) -> None:
+    def delete_by_user_id(self, user_id: ULID) -> None:
         stmt: Delete = delete(CredentialsAlchemyEntity).where(CredentialsAlchemyEntity.user_id == str(user_id))
         self.db.execute(stmt)
         self.db.commit()

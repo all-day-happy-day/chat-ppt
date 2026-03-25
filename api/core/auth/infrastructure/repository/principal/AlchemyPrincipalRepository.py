@@ -48,7 +48,7 @@ class AlchemyPrincipalRepository(PrincipalRepository):
 
     def get_by_user_id(self, user_id: ULID) -> Principal:
         alchemy_entity: PrincipalAlchemyEntity | None = (
-            self.db.query(PrincipalAlchemyEntity).filter(PrincipalAlchemyEntity.user_id == user_id).first()
+            self.db.query(PrincipalAlchemyEntity).filter(PrincipalAlchemyEntity.user_id == str(user_id)).first()
         )
         if alchemy_entity is None:
             raise PrincipalNotFound(f"Principal not found: {user_id}")

@@ -8,7 +8,7 @@ from app.auth.application.usecase import (
     VerifyCredentialsUseCase,
     VerifyPasswordUseCase,
 )
-from app.di.domain.repository import get_principal_repository, get_user_repository
+from app.di.domain.repository import get_credentials_repository, get_principal_repository, get_user_repository
 from app.di.domain.service import get_authentication_service, get_password_hasher
 from app.user.application.usecase import (
     CreateUserUseCase,
@@ -18,7 +18,7 @@ from app.user.application.usecase import (
     UpdateUserUseCase,
 )
 from app.user.domain.repository import UserRepository
-from core.auth.domain.repository import PrincipalRepository
+from core.auth.domain.repository import CredentialsRepository, PrincipalRepository
 from core.auth.domain.service import AuthenticationService, PasswordHasher
 
 
@@ -27,8 +27,16 @@ def get_create_user_use_case(user_repository: UserRepository = Depends(get_user_
     return CreateUserUseCase(user_repository=user_repository)
 
 
-def get_delete_user_use_case(user_repository: UserRepository = Depends(get_user_repository)) -> DeleteUserUseCase:
-    return DeleteUserUseCase(user_repository=user_repository)
+def get_delete_user_use_case(
+    user_repository: UserRepository = Depends(get_user_repository),
+    credentials_repository: CredentialsRepository = Depends(get_credentials_repository),
+    principal_repository: PrincipalRepository = Depends(get_principal_repository),
+) -> DeleteUserUseCase:
+    return DeleteUserUseCase(
+        user_repository=user_repository,
+        credentials_repository=credentials_repository,
+        principal_repository=principal_repository,
+    )
 
 
 def get_get_users_use_case(user_repository: UserRepository = Depends(get_user_repository)) -> GetUsersUseCase:

@@ -4,6 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.user.infrastructure.repository.entity import UserAlchemyEntity  # noqa: F401
+from core.auth.infrastructure.repository.credentials.entity import CredentialsAlchemyEntity  # noqa: F401
+from core.auth.infrastructure.repository.principal.entity import PrincipalAlchemyEntity  # noqa: F401
 from core.db.config import db_config
 from core.db.db import Base
 

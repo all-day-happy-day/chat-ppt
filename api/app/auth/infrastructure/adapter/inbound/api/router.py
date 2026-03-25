@@ -89,8 +89,8 @@ def signout(
             raw_short_lived_credentials=access_token or "",  # if access_token is not provided, empty string is passed
             raw_long_lived_credentials=refresh_token,
         )
-        response.delete_cookie(key="access_token")
-        response.delete_cookie(key="refresh_token")
+        response.delete_cookie(key="access_token", path="/")
+        response.delete_cookie(key="refresh_token", path="/")
         return SignOutResponse.from_user_entity(user=user)
 
     except DuplicatedPrincipal as e:

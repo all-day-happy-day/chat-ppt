@@ -13,7 +13,7 @@ class SignInUseCase:
 
     def __call__(self, principal: str, secret: str) -> tuple[User, Credentials, Credentials]:
         short_credentials, long_credentials = self.auth_service.authenticate(principal=principal, secret=secret)
-        user: User = self.user_repository.get_by_id(id=short_credentials.user_id)
+        user: User = self.user_repository.get_by_id(user_id=short_credentials.user_id)
         user.last_sign_in = datetime.now(timezone.utc)
         self.user_repository.patch(user=user)
         return user, short_credentials, long_credentials

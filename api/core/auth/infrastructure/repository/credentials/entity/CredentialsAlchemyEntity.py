@@ -10,5 +10,5 @@ class CredentialsAlchemyEntity(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(ULID()))
     user_id: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
-    access_key: Mapped[str] = mapped_column(String(512), nullable=False)
-    refresh_key: Mapped[str] = mapped_column(String(512), nullable=False)
+    access_key: Mapped[str] = mapped_column(String(512), nullable=True)
+    refresh_key: Mapped[str] = mapped_column(String(512), nullable=True)
