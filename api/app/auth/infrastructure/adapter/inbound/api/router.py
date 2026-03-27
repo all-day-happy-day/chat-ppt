@@ -1,7 +1,7 @@
 import os
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Response, status
 
 from app.auth.application.usecase import (
     RefreshCredentialsUseCase,
@@ -30,6 +30,7 @@ from app.di.application.usecase import (
 )
 from app.user.domain.entity import User
 from core.auth.domain.exception import AlchemyMismatch, DuplicatedPrincipal, InvalidCredentials, PrincipalNotFound
+from core.notifier import EmailNotifier
 
 ACCESS_TOKEN_EXPIRE_DAYS: int = int(os.getenv("AUTH_TOKEN_LIFE_DAY", "1825"))
 REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("AUTH_TOKEN_LIFE_DAY", "1825"))
@@ -105,7 +106,10 @@ def signout(
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=SignUpResponse)
 def signup(
-    request_model: SignUpRequest, response: Response, usecase: Annotated[SignUpUseCase, Depends(get_sign_up_use_case)]
+    request_model: SignUpRequest,
+    response: Response,
+    background_tasks: BackgroundTasks,
+    usecase: Annotated[SignUpUseCase, Depends(get_sign_up_use_case)],
 ):
     try:
         user, short_credentials, long_credentials = usecase(
@@ -133,6 +137,21 @@ def signup(
             httponly=True,
             max_age=max_age_access_token,
             expires=max_age_access_token,
+        )
+
+        # Add send-email background task
+        email_notifier: EmailNotifier = EmailNotifier()
+        background_tasks.add_task(
+            email_notifier.notify,
+            receiver=user,
+            subject="Welcome to ChatPPT!",
+            body=(
+                f"Hi {user.username},\n\n"
+                "Thanks for using ChatPPT!\n\n"
+                "We hope you enjoy your time here.\n\n"
+                "If you have any questions, please feel free to contact us.\n\n"
+                "- All Day Happy Day Team"
+            ),
         )
 
         return SignUpResponse.from_user_entity(user=user)
