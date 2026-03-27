@@ -3,9 +3,9 @@ set -e
 
 source .venv/bin/activate
 
-echo "Starting MySQL container..."
-docker start chat-ppt-mysql
-echo "MySQL container started."
+echo "Starting PostgreSQL container..."
+docker start chatppt-postgres
+echo "PostgreSQL container started."
 echo
 
 # echo "Running Alembic migrations..."
