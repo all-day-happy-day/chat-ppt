@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from pydantic_core import ValidationError as CoreValidationError
 
 from app.auth.infrastructure.adapter.inbound.api import router as auth_api_router
+from app.bible.infrastructure.adapter.api.router import router as bible_api_router
 from app.user.infrastructure.adapter.inbound.api import router as user_api_router
 
 app: FastAPI = FastAPI()
@@ -22,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_api_router, prefix="/auth")
+app.include_router(bible_api_router, prefix="/bible")
 app.include_router(user_api_router, prefix="/user")
 
 

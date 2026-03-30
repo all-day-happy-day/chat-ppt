@@ -1,0 +1,2 @@
+class PhraseNotFound(Exception):
+    pass

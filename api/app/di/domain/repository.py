@@ -1,6 +1,8 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
+from app.bible.domain.repository import BibleRepository
+from app.bible.infrastructure.repository import AlchemyBibleRepository
 from app.user.domain.repository import UserRepository
 from app.user.infrastructure.repository.AlchemyUserRepository import AlchemyUserRepository
 from core.auth.domain.repository import CredentialsRepository, PrincipalRepository
@@ -21,3 +23,8 @@ def get_principal_repository(db: Session = Depends(get_db)) -> PrincipalReposito
 
 def get_credentials_repository(db: Session = Depends(get_db)) -> CredentialsRepository:
     return AlchemyCredentialsRepository(db)
+
+
+# Bible
+def get_bible_repository() -> BibleRepository:
+    return AlchemyBibleRepository()

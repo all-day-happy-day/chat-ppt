@@ -7,6 +7,7 @@ class Config(BaseSettings):
     auth_token_life_day: int = Field(alias="AUTH_TOKEN_LIFE_DAY")
     email_sender_email: EmailStr = Field(alias="EMAIL_SENDER_EMAIL")
     email_sender_password: str = Field(alias="EMAIL_SENDER_PASSWORD")
+    bible_data_path: str = Field(alias="BIBLE_DATA_PATH")
 
     model_config = SettingsConfigDict(env_file=".env")
 

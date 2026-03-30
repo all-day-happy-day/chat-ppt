@@ -8,7 +8,14 @@ from app.auth.application.usecase import (
     VerifyCredentialsUseCase,
     VerifyPasswordUseCase,
 )
-from app.di.domain.repository import get_credentials_repository, get_principal_repository, get_user_repository
+from app.bible.application.usecase import GetBiblePhraseUseCase
+from app.bible.domain.repository import BibleRepository
+from app.di.domain.repository import (
+    get_bible_repository,
+    get_credentials_repository,
+    get_principal_repository,
+    get_user_repository,
+)
 from app.di.domain.service import get_authentication_service, get_password_hasher
 from app.user.application.usecase import (
     CreateUserUseCase,
@@ -98,3 +105,10 @@ def get_refresh_credentials_use_case(
     auth_service: AuthenticationService = Depends(get_authentication_service),
 ) -> RefreshCredentialsUseCase:
     return RefreshCredentialsUseCase(auth_service=auth_service)
+
+
+# Bible
+def get_get_bible_phrase_use_case(
+    bible_repository: BibleRepository = Depends(get_bible_repository),
+) -> GetBiblePhraseUseCase:
+    return GetBiblePhraseUseCase(bible_repository=bible_repository)
