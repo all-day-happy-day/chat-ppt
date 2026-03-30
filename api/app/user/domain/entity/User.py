@@ -7,7 +7,7 @@ from app.user.domain.enum import Role
 
 
 class User(BaseModel):
-    id: ULID = Field(default_factory=ULID)
+    id: ULID = Field(default_factory=lambda: ULID())
     email: EmailStr
     username: str
     password: str
