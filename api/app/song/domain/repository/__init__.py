@@ -1,7 +1,7 @@
 from .LyricsRepository import LyricsRepository
-from .SongRespository import SongRespository
+from .SongRepository import SongRepository
 
 __all__ = [
     "LyricsRepository",
-    "SongRespository",
+    "SongRepository",
 ]

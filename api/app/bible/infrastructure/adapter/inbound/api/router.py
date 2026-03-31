@@ -5,13 +5,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.bible.application.usecase import GetBiblePhraseUseCase
 from app.bible.domain.exception import PhraseNotFound, UnsupportedVersion
 from app.bible.domain.valueobject import BiblePhrase
-from app.bible.infrastructure.adapter.api.message import GetBiblePhraseRequest, GetBiblePhraseResponse
+from app.bible.infrastructure.adapter.inbound.api.message import GetBiblePhraseRequest, GetBiblePhraseResponse
 from app.di.application.usecase import get_get_bible_phrase_use_case
 
 router: APIRouter = APIRouter(tags=["Bible"])
 
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=GetBiblePhraseResponse)
+@router.get("", status_code=status.HTTP_200_OK, response_model=GetBiblePhraseResponse)
 def get_bible_phrase(
     request_model: GetBiblePhraseRequest,
     usecase: Annotated[GetBiblePhraseUseCase, Depends(get_get_bible_phrase_use_case)],

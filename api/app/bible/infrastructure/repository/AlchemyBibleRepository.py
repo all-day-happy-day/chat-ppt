@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from app.bible.application.types import BibleData
+from app.bible.application.types import JSONBibleData
 from app.bible.domain.exception import PhraseNotFound
 from app.bible.domain.repository import BibleRepository
 from app.bible.domain.valueobject import AvailableBibleVersions, BiblePhrase
@@ -13,8 +13,8 @@ class AlchemyBibleRepository(BibleRepository):
         self.bible_data_path: Path = Path(config.bible_data_path)
 
     def get(self, version: AvailableBibleVersions, book: str, chapter: int, verse: int) -> BiblePhrase:
-        with open(file=self.bible_data_path, mode="r") as f:
-            bible_data: dict[str, BibleData] = json.load(fp=f, encoding="utf-8")
+        with open(file=self.bible_data_path, mode="r", encoding="utf-8") as f:
+            bible_data: dict[str, JSONBibleData] = json.load(fp=f)
 
             try:
                 return BiblePhrase(
@@ -22,7 +22,7 @@ class AlchemyBibleRepository(BibleRepository):
                     book=book,
                     chapter=chapter,
                     verse=verse,
-                    phrase=bible_data[version.value][book][chapter][verse],
+                    phrase=bible_data[version.value][book][str(chapter)][str(verse)],
                 )
             except KeyError:
                 raise PhraseNotFound(

@@ -2,16 +2,14 @@ import re
 from abc import ABC, abstractmethod
 from unicodedata import normalize
 
-from app.song.domain.entity import Song
-
 
 class LyricsFetcherService(ABC):
     @abstractmethod
-    def fetch(self, title: str, artist: str | None) -> Song:
+    def fetch(self, title: str, artist: str | None) -> tuple[str, str, str]:
         raise NotImplementedError
 
     @staticmethod
-    def compare_strings(s1: str, s2: str) -> bool:
+    def strings_match(s1: str, s2: str) -> bool:
         # Equal
         if s1 == s2:
             return True

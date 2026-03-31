@@ -1,12 +1,15 @@
 from fastapi import Depends  # type: ignore
 
 from app.di.domain.repository import get_credentials_repository, get_principal_repository, get_user_repository
+from app.song.domain.service import LyricsFetcherService
+from app.song.infrastructure.service import BugsLyricsFetcherService
 from app.user.domain.repository import UserRepository
 from core.auth.domain.repository import CredentialsRepository, PrincipalRepository
 from core.auth.domain.service import AuthenticationService, PasswordHasher
 from core.auth.infrastructure.service import BcryptPasswordHasher, JWTAuthenticationService
 
 
+# Auth
 def get_password_hasher() -> PasswordHasher:
     return BcryptPasswordHasher()
 
@@ -23,3 +26,8 @@ def get_authentication_service(
         credentials_repository=credentials_repository,
         user_repository=user_repository,
     )
+
+
+# Song
+def get_bugs_lyrics_fetcher_service() -> LyricsFetcherService:
+    return BugsLyricsFetcherService()

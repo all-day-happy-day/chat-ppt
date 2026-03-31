@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.bible.domain.repository import BibleRepository
 from app.bible.infrastructure.repository import AlchemyBibleRepository
+from app.song.domain.repository import LyricsRepository, SongRepository
+from app.song.infrastructure.respository.lyrics.AlchemyLyricsRepository import AlchemyLyricsRepository
+from app.song.infrastructure.respository.song.AlchemySongRepository import AlchemySongRepository
 from app.user.domain.repository import UserRepository
 from app.user.infrastructure.repository.AlchemyUserRepository import AlchemyUserRepository
 from core.auth.domain.repository import CredentialsRepository, PrincipalRepository
@@ -28,3 +31,12 @@ def get_credentials_repository(db: Session = Depends(get_db)) -> CredentialsRepo
 # Bible
 def get_bible_repository() -> BibleRepository:
     return AlchemyBibleRepository()
+
+
+# Song
+def get_song_repository(db: Session = Depends(get_db)) -> SongRepository:
+    return AlchemySongRepository(db)
+
+
+def get_lyrics_repository(db: Session = Depends(get_db)) -> LyricsRepository:
+    return AlchemyLyricsRepository(db)

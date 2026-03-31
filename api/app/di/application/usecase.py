@@ -13,10 +13,22 @@ from app.bible.domain.repository import BibleRepository
 from app.di.domain.repository import (
     get_bible_repository,
     get_credentials_repository,
+    get_lyrics_repository,
     get_principal_repository,
+    get_song_repository,
     get_user_repository,
 )
-from app.di.domain.service import get_authentication_service, get_password_hasher
+from app.di.domain.service import get_authentication_service, get_bugs_lyrics_fetcher_service, get_password_hasher
+from app.song.application.usecase import (
+    DeleteSongUseCase,
+    GetLyricsUseCase,
+    GetSongsUseCase,
+    PatchLyricsUseCase,
+    PatchSongUseCase,
+    ScrapLyricsUseCase,
+)
+from app.song.domain.repository import LyricsRepository, SongRepository
+from app.song.domain.service import LyricsFetcherService
 from app.user.application.usecase import (
     CreateUserUseCase,
     DeleteUserUseCase,
@@ -112,3 +124,48 @@ def get_get_bible_phrase_use_case(
     bible_repository: BibleRepository = Depends(get_bible_repository),
 ) -> GetBiblePhraseUseCase:
     return GetBiblePhraseUseCase(bible_repository=bible_repository)
+
+
+# Song
+def get_delete_song_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+) -> DeleteSongUseCase:
+    return DeleteSongUseCase(song_repository=song_repository, lyrics_repository=lyrics_repository)
+
+
+def get_get_lyrics_use_case(
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetLyricsUseCase:
+    return GetLyricsUseCase(lyrics_repository=lyrics_repository, song_repository=song_repository)
+
+
+def get_get_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetSongsUseCase:
+    return GetSongsUseCase(song_repository=song_repository)
+
+
+def get_patch_lyrics_use_case(
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+) -> PatchLyricsUseCase:
+    return PatchLyricsUseCase(lyrics_repository=lyrics_repository)
+
+
+def get_patch_song_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> PatchSongUseCase:
+    return PatchSongUseCase(song_repository=song_repository)
+
+
+def get_scrap_lyrics_use_case(
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+    song_repository: SongRepository = Depends(get_song_repository),
+    lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
+) -> ScrapLyricsUseCase:
+    return ScrapLyricsUseCase(
+        lyrics_repository=lyrics_repository,
+        song_repository=song_repository,
+        lyrics_fetcher_service=lyrics_fetcher_service,
+    )
