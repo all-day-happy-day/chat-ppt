@@ -3,6 +3,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.powerpoint.infrastructure.repository.layout.entity import LayoutAlchemyEntity  # noqa: F401
+from app.powerpoint.infrastructure.repository.shape.entity import ShapeAlchemyEntity  # noqa: F401
+from app.powerpoint.infrastructure.repository.template.entity import TemplateAlchemyEntity  # noqa: F401
+from app.powerpoint.infrastructure.repository.template_file.entity import TemplateFileAlchemyEntity  # noqa: F401
 from app.song.infrastructure.respository.lyrics.entity import LyricsAlchemyEntity  # noqa: F401
 from app.song.infrastructure.respository.song.entity import SongAlchemyEntity  # noqa: F401
 from app.user.infrastructure.repository.entity import UserAlchemyEntity  # noqa: F401

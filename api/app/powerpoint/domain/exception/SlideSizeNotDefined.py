@@ -1,0 +1,2 @@
+class SlideSizeNotDefined(Exception):
+    pass

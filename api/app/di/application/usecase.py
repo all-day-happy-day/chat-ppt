@@ -10,15 +10,32 @@ from app.auth.application.usecase import (
 )
 from app.bible.application.usecase import GetBiblePhraseUseCase
 from app.bible.domain.repository import BibleRepository
+from app.di.domain.port import get_template_file_storage_port
 from app.di.domain.repository import (
     get_bible_repository,
     get_credentials_repository,
     get_lyrics_repository,
     get_principal_repository,
     get_song_repository,
+    get_template_file_repository,
+    get_template_repository,
     get_user_repository,
 )
-from app.di.domain.service import get_authentication_service, get_bugs_lyrics_fetcher_service, get_password_hasher
+from app.di.domain.service import (
+    get_authentication_service,
+    get_bugs_lyrics_fetcher_service,
+    get_password_hasher,
+    get_template_read_service,
+)
+from app.powerpoint.application.usecase import (
+    GetLayoutsUseCase,
+    GetTemplatesByUserIDUseCase,
+    ReadTemplateUseCase,
+    UpdateTemplateUseCase,
+)
+from app.powerpoint.domain.port.outbound import TemplateFileStoragePort
+from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
+from app.powerpoint.domain.service import TemplateReadService
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
@@ -168,4 +185,48 @@ def get_scrap_lyrics_use_case(
         lyrics_repository=lyrics_repository,
         song_repository=song_repository,
         lyrics_fetcher_service=lyrics_fetcher_service,
+    )
+
+
+# Powerpoint
+def get_get_layouts_use_case(
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> GetLayoutsUseCase:
+    return GetLayoutsUseCase(template_repository=template_repository)
+
+
+def get_get_templates_by_user_id_use_case(
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> GetTemplatesByUserIDUseCase:
+    return GetTemplatesByUserIDUseCase(
+        template_file_repository=template_file_repository, template_repository=template_repository
+    )
+
+
+def get_read_template_use_case(
+    template_file_storage_port: TemplateFileStoragePort = Depends(get_template_file_storage_port),
+    template_read_service: TemplateReadService = Depends(get_template_read_service),
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> ReadTemplateUseCase:
+    return ReadTemplateUseCase(
+        template_file_storage_port=template_file_storage_port,
+        template_read_service=template_read_service,
+        template_file_repository=template_file_repository,
+        template_repository=template_repository,
+    )
+
+
+def get_update_template_use_case(
+    template_file_storage_port: TemplateFileStoragePort = Depends(get_template_file_storage_port),
+    template_read_service: TemplateReadService = Depends(get_template_read_service),
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> UpdateTemplateUseCase:
+    return UpdateTemplateUseCase(
+        template_file_storage_port=template_file_storage_port,
+        template_read_service=template_read_service,
+        template_file_repository=template_file_repository,
+        template_repository=template_repository,
     )

@@ -1,6 +1,12 @@
 from fastapi import Depends  # type: ignore
 
-from app.di.domain.repository import get_credentials_repository, get_principal_repository, get_user_repository
+from app.di.domain.repository import (
+    get_credentials_repository,
+    get_principal_repository,
+    get_user_repository,
+)
+from app.powerpoint.domain.service import TemplateReadService
+from app.powerpoint.infrastructure.service import PPTXTemplateReadService
 from app.song.domain.service import LyricsFetcherService
 from app.song.infrastructure.service import BugsLyricsFetcherService
 from app.user.domain.repository import UserRepository
@@ -31,3 +37,8 @@ def get_authentication_service(
 # Song
 def get_bugs_lyrics_fetcher_service() -> LyricsFetcherService:
     return BugsLyricsFetcherService()
+
+
+# Powerpoint
+def get_template_read_service() -> TemplateReadService:
+    return PPTXTemplateReadService()

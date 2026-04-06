@@ -1,0 +1,2 @@
+class FileNotPPTX(Exception):
+    pass

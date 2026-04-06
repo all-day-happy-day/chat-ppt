@@ -1,0 +1,2 @@
+class LayoutNotFound(Exception):
+    pass
