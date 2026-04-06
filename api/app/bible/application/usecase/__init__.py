@@ -1,5 +1,5 @@
-from .GetBiblePhraseUseCase import GetBiblePhraseUseCase
+from .GetBiblePhrasesUseCase import GetBiblePhrasesUseCase
 
 __all__ = [
-    "GetBiblePhraseUseCase",
+    "GetBiblePhrasesUseCase",
 ]
