@@ -8,6 +8,7 @@ class Config(BaseSettings):
     email_sender_email: EmailStr = Field(alias="EMAIL_SENDER_EMAIL")
     email_sender_password: str = Field(alias="EMAIL_SENDER_PASSWORD")
     bible_data_path: str = Field(alias="BIBLE_DATA_PATH")
+    ppt_upload_directory: str = Field(alias="PPT_UPLOAD_DIRECTORY")
 
     model_config = SettingsConfigDict(env_file=".env")
 
