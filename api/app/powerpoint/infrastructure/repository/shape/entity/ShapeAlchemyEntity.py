@@ -11,7 +11,7 @@ class ShapeAlchemyEntity(Base):
     __table_args__ = (UniqueConstraint("layout_id", "shape_id", name="uq_ppt_shape_layout_shape"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, unique=True, default=lambda: str(ULID()))
-    layout_id: Mapped[str] = mapped_column(ForeignKey("ppt-layout.id"), nullable=False, index=True)
+    layout_id: Mapped[str] = mapped_column(ForeignKey("ppt-layout.id", ondelete="CASCADE"), nullable=False, index=True)
     shape_id: Mapped[int] = mapped_column(Integer, nullable=False)
     size: Mapped[str] = mapped_column(JSON, nullable=False)
     position: Mapped[str] = mapped_column(JSON, nullable=False)

@@ -8,7 +8,7 @@ from app.auth.application.usecase import (
     VerifyCredentialsUseCase,
     VerifyPasswordUseCase,
 )
-from app.bible.application.usecase import GetBiblePhraseUseCase
+from app.bible.application.usecase import GetBiblePhrasesUseCase
 from app.bible.domain.repository import BibleRepository
 from app.di.domain.port import get_template_file_storage_port
 from app.di.domain.repository import (
@@ -28,6 +28,8 @@ from app.di.domain.service import (
     get_template_read_service,
 )
 from app.powerpoint.application.usecase import (
+    ChangeTemplateNameUseCase,
+    DeleteTemplateUseCase,
     GetLayoutsUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
@@ -137,10 +139,10 @@ def get_refresh_credentials_use_case(
 
 
 # Bible
-def get_get_bible_phrase_use_case(
+def get_get_bible_phrases_use_case(
     bible_repository: BibleRepository = Depends(get_bible_repository),
-) -> GetBiblePhraseUseCase:
-    return GetBiblePhraseUseCase(bible_repository=bible_repository)
+) -> GetBiblePhrasesUseCase:
+    return GetBiblePhrasesUseCase(bible_repository=bible_repository)
 
 
 # Song
@@ -189,6 +191,27 @@ def get_scrap_lyrics_use_case(
 
 
 # Powerpoint
+def get_change_template_name_use_case(
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> ChangeTemplateNameUseCase:
+    return ChangeTemplateNameUseCase(
+        template_file_repository=template_file_repository, template_repository=template_repository
+    )
+
+
+def get_delete_template_use_case(
+    template_file_storage_port: TemplateFileStoragePort = Depends(get_template_file_storage_port),
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> DeleteTemplateUseCase:
+    return DeleteTemplateUseCase(
+        template_file_storage_port=template_file_storage_port,
+        template_file_repository=template_file_repository,
+        template_repository=template_repository,
+    )
+
+
 def get_get_layouts_use_case(
     template_repository: TemplateRepository = Depends(get_template_repository),
 ) -> GetLayoutsUseCase:

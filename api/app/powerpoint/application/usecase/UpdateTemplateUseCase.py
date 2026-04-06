@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 
 from ulid import ULID
@@ -27,18 +28,17 @@ class UpdateTemplateUseCase:
         filedata: bytes,
         filename: str,
         template_id: ULID,
-        template_name: str | None = None,
     ) -> tuple[TemplateFile, Template]:
         template: Template = self.template_repository.get_by_id(id=template_id)
-        if template_name is None:
-            template_name = template.name
-        assert template_name is not None
 
-        ppt_path: Path = self.template_file_storage_port.save(data=filedata, filename=filename)
-        template_file, template = self.template_read_service.read(
-            user_id=user_id, ppt_path=ppt_path, template_name=template_name, template=template
-        )
+        # Delete old template file
+        template_file: TemplateFile = self.template_file_repository.get_by_template_id(template_id=template_id)
+        self.template_file_storage_port.delete(template_file=template_file)
 
-        self.template_file_repository.save(template_file=template_file)
+        ppt_path: Path = self.template_file_storage_port.save(data=filedata, filename=filename, user_id=user_id)
+        template_file, template = self.template_read_service.read(user_id=user_id, ppt_path=ppt_path, template=template)
+
+        template.updated_at = datetime.now(tz=timezone.utc)
         self.template_repository.save(template=template)
+        self.template_file_repository.save(template_file=template_file)
         return template_file, template

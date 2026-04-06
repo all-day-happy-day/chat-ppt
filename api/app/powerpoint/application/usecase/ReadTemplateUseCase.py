@@ -39,10 +39,10 @@ class ReadTemplateUseCase:
             ) in template_name_list:
                 pass
 
-        ppt_path: Path = self.template_file_storage_port.save(data=filedata, filename=filename)
+        ppt_path: Path = self.template_file_storage_port.save(data=filedata, filename=filename, user_id=user_id)
         template_file, template = self.template_read_service.read(
             user_id=user_id, ppt_path=ppt_path, template_name=template_name, template=None
         )
-        self.template_file_repository.save(template_file=template_file)
         self.template_repository.save(template=template)
+        self.template_file_repository.save(template_file=template_file)
         return template_file, template

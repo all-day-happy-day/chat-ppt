@@ -135,7 +135,7 @@ class PPTXTemplateReadService(TemplateReadService):
                 update={
                     "name": template_name if template_name is not None else template.name,
                     "slide_size": self._get_slide_size(ppt=ppt),
-                    "updated_at": now,
+                    # "updated_at": now,
                     "layouts": layouts,
                 }
             )
@@ -165,9 +165,3 @@ class PPTXTemplateReadService(TemplateReadService):
             size=Path(ppt_path).stat().st_size,
         )
         return template_file, template
-
-
-if __name__ == "__main__":
-    ppt_path: str = "./thepureum-template.pptx"
-    pptx_template_read_service: PPTXTemplateReadService = PPTXTemplateReadService()
-    template_file, template = pptx_template_read_service.read(user_id=ULID(), ppt_path=ppt_path, template_name="test")

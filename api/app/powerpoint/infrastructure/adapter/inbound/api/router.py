@@ -4,20 +4,26 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from ulid import ULID
 
 from app.di.application.usecase import (
+    get_change_template_name_use_case,
+    get_delete_template_use_case,
     get_get_layouts_use_case,
     get_get_templates_by_user_id_use_case,
     get_read_template_use_case,
     get_update_template_use_case,
 )
 from app.powerpoint.application.usecase import (
+    ChangeTemplateNameUseCase,
+    DeleteTemplateUseCase,
     GetLayoutsUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
 )
 from app.powerpoint.domain.entity import Layout
-from app.powerpoint.domain.exception import InvalidFileReadRequest, TemplateNotFound
+from app.powerpoint.domain.exception import FileNotPPTX, InvalidFileReadRequest, TemplateFileNotFound, TemplateNotFound
 from app.powerpoint.infrastructure.adapter.inbound.api.message import (
+    ChangeTemplateNameRequest,
+    ChangeTemplateNameResponse,
     GetLayoutResponse,
     GetTemplateResponse,
     ReadTemplateResponse,
@@ -27,7 +33,6 @@ from app.powerpoint.infrastructure.adapter.inbound.api.message import (
 router: APIRouter = APIRouter(tags=["Powerpoint"])
 
 
-# Template
 @router.post("/template/read", status_code=status.HTTP_200_OK, response_model=ReadTemplateResponse)
 async def read_template(
     usecase: Annotated[ReadTemplateUseCase, Depends(get_read_template_use_case)],
@@ -47,15 +52,16 @@ async def read_template(
         return ReadTemplateResponse.from_domain_entity(template_file=template_file, template=template)
     except InvalidFileReadRequest as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except FileNotPPTX as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.post("/template/update", status_code=status.HTTP_200_OK, response_model=UpdateTemplateResponse)
+@router.patch("/template/update", status_code=status.HTTP_200_OK, response_model=UpdateTemplateResponse)
 async def update_template(
     usecase: Annotated[UpdateTemplateUseCase, Depends(get_update_template_use_case)],
     file: Annotated[UploadFile, File(...)],
     user_id: Annotated[ULID, Form()],
     template_id: Annotated[ULID, Form()],
-    template_name: Annotated[str | None, Form()] = None,
 ):
     try:
         data: bytes = await file.read()
@@ -65,7 +71,6 @@ async def update_template(
             filedata=data,
             filename=file.filename,
             template_id=template_id,
-            template_name=template_name,
         )
         return UpdateTemplateResponse.from_domain_entity(template_file=template_file, template=template)
 
@@ -73,6 +78,32 @@ async def update_template(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except InvalidFileReadRequest as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except FileNotPPTX as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.patch("/template/name", status_code=status.HTTP_200_OK, response_model=ChangeTemplateNameResponse)
+def change_template_name(
+    request_model: ChangeTemplateNameRequest,
+    usecase: Annotated[ChangeTemplateNameUseCase, Depends(get_change_template_name_use_case)],
+):
+    try:
+        template_file, template = usecase(template_id=request_model.template_id, new_name=request_model.new_name)
+        return ChangeTemplateNameResponse.from_domain_entity(template_file=template_file, template=template)
+    except TemplateNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.delete("/template/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_template(
+    template_id: ULID, usecase: Annotated[DeleteTemplateUseCase, Depends(get_delete_template_use_case)]
+):
+    try:
+        usecase(template_id=template_id)
+    except TemplateNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except TemplateFileNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.get("/template/list/{user_id}", status_code=status.HTTP_200_OK, response_model=list[GetTemplateResponse])
@@ -88,5 +119,8 @@ def get_template_list(
 
 @router.get("/template/layouts/{template_id}", status_code=status.HTTP_200_OK, response_model=list[GetLayoutResponse])
 def get_layouts(template_id: ULID, usecase: Annotated[GetLayoutsUseCase, Depends(get_get_layouts_use_case)]):
-    layouts: list[Layout] = usecase(template_id=template_id)
-    return [GetLayoutResponse.from_domain_entity(layout=layout) for layout in layouts]
+    try:
+        layouts: list[Layout] = usecase(template_id=template_id)
+        return [GetLayoutResponse.from_domain_entity(layout=layout) for layout in layouts]
+    except TemplateNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

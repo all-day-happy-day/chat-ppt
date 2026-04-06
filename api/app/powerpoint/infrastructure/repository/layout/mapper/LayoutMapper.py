@@ -25,6 +25,6 @@ class LayoutMapper:
             id=str(domain_entity.id),
             template_id=str(domain_entity.template_id),
             name=domain_entity.name,
-            background_color=domain_entity.background_color.model_dump(),
+            background_color=domain_entity.background_color.model_dump_json(),
             shapes=[ShapeMapper.to_alchemy_entity(domain_entity=shape) for shape in domain_entity.shapes],
         )
