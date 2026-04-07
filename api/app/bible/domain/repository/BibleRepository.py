@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.bible.domain.valueobject import AvailableBibleVersions, BiblePhrase
+from app.bible.domain.valueobject import BiblePhrase
+from core.shared.bible.domain.enum import AvailableBibleVersions
 
 
 class BibleRepository(ABC):

@@ -1,8 +1,7 @@
 from pydantic import BaseModel, model_validator
 
 from app.bible.domain.exception import UnsupportedVersion
-
-from .AvailableBibleVersions import AvailableBibleVersions
+from core.shared.bible.domain.enum import AvailableBibleVersions
 
 
 class BiblePhrase(BaseModel):

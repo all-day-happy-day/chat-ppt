@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.bible.domain.valueobject import AvailableBibleVersions
+from core.shared.bible.domain.enum import AvailableBibleVersions
 
 
 class GetBiblePhraseRequest(BaseModel):
