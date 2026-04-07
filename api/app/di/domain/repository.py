@@ -6,6 +6,9 @@ from app.bible.infrastructure.repository import AlchemyBibleRepository
 from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
 from app.powerpoint.infrastructure.repository.template import AlchemyTemplateRepository
 from app.powerpoint.infrastructure.repository.template_file import AlchemyTemplateFileRepository
+from app.project.domain.repository import ProjectContainerRepository, ProjectRepository
+from app.project.infrastructure.repository.project import AlchemyProjectRepository
+from app.project.infrastructure.repository.project_container import AlchemyProjectContainerRepository
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.infrastructure.respository.lyrics.AlchemyLyricsRepository import AlchemyLyricsRepository
 from app.song.infrastructure.respository.song.AlchemySongRepository import AlchemySongRepository
@@ -52,3 +55,12 @@ def get_template_file_repository(db: Session = Depends(get_db)) -> TemplateFileR
 
 def get_template_repository(db: Session = Depends(get_db)) -> TemplateRepository:
     return AlchemyTemplateRepository(db)
+
+
+# Project
+def get_project_repository(db: Session = Depends(get_db)) -> ProjectRepository:
+    return AlchemyProjectRepository(db)
+
+
+def get_project_container_repository(db: Session = Depends(get_db)) -> ProjectContainerRepository:
+    return AlchemyProjectContainerRepository(db)

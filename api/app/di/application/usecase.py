@@ -16,6 +16,8 @@ from app.di.domain.repository import (
     get_credentials_repository,
     get_lyrics_repository,
     get_principal_repository,
+    get_project_container_repository,
+    get_project_repository,
     get_song_repository,
     get_template_file_repository,
     get_template_repository,
@@ -38,6 +40,17 @@ from app.powerpoint.application.usecase import (
 from app.powerpoint.domain.port.outbound import TemplateFileStoragePort
 from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
 from app.powerpoint.domain.service import TemplateReadService
+from app.project.application.usecase import (
+    CreateProjectContainerUseCase,
+    CreateProjectUseCase,
+    DeleteProjectContainerUseCase,
+    DeleteProjectUseCase,
+    GetProjectContainersUseCase,
+    GetProjectsUseCase,
+    PatchProjectContainerUseCase,
+    PatchProjectUseCase,
+)
+from app.project.domain.repository import ProjectContainerRepository, ProjectRepository
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
@@ -253,3 +266,52 @@ def get_update_template_use_case(
         template_file_repository=template_file_repository,
         template_repository=template_repository,
     )
+
+
+# Project
+def get_create_project_container_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> CreateProjectContainerUseCase:
+    return CreateProjectContainerUseCase(project_container_repository=project_container_repository)
+
+
+def get_create_project_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> CreateProjectUseCase:
+    return CreateProjectUseCase(project_repository=project_repository)
+
+
+def get_delete_project_container_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> DeleteProjectContainerUseCase:
+    return DeleteProjectContainerUseCase(project_container_repository=project_container_repository)
+
+
+def get_delete_project_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> DeleteProjectUseCase:
+    return DeleteProjectUseCase(project_repository=project_repository)
+
+
+def get_get_project_containers_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> GetProjectContainersUseCase:
+    return GetProjectContainersUseCase(project_container_repository=project_container_repository)
+
+
+def get_get_projects_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> GetProjectsUseCase:
+    return GetProjectsUseCase(project_repository=project_repository)
+
+
+def get_patch_project_container_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> PatchProjectContainerUseCase:
+    return PatchProjectContainerUseCase(project_container_repository=project_container_repository)
+
+
+def get_patch_project_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> PatchProjectUseCase:
+    return PatchProjectUseCase(project_repository=project_repository)
