@@ -270,9 +270,13 @@ def get_update_template_use_case(
 
 # Project
 def get_create_project_container_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
     project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
 ) -> CreateProjectContainerUseCase:
-    return CreateProjectContainerUseCase(project_container_repository=project_container_repository)
+    return CreateProjectContainerUseCase(
+        project_repository=project_repository,
+        project_container_repository=project_container_repository,
+    )
 
 
 def get_create_project_use_case(
