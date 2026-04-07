@@ -1,7 +1,7 @@
 from ulid import ULID
 
 from app.song.domain.repository import LyricsRepository
-from app.song.domain.valueobject import Lyrics, LyricsPart
+from core.shared.song.domain.valueobject import Lyrics, LyricsPart
 
 
 class PatchLyricsUseCase:

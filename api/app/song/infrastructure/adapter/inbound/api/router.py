@@ -21,7 +21,6 @@ from app.song.application.usecase import (
 )
 from app.song.domain.entity import Song
 from app.song.domain.exception import DuplicatedSong, FailedToFetch, LyricsNotFound, SongNotFound
-from app.song.domain.valueobject import Lyrics
 from app.song.infrastructure.adapter.inbound.api.message import (
     GetLyricsResponse,
     GetSongsRequest,
@@ -33,6 +32,7 @@ from app.song.infrastructure.adapter.inbound.api.message import (
     ScrapLyricsRequest,
     ScrapLyricsResponse,
 )
+from core.shared.song.domain.valueobject import Lyrics
 
 router: APIRouter = APIRouter(tags=["Lyrics"])
 
