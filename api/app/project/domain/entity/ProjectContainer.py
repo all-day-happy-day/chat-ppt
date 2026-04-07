@@ -6,10 +6,11 @@ from ulid import ULID
 from .PartsMixin import PartsMixin
 
 
-class Project(PartsMixin):
+class ProjectContainer(PartsMixin):
     id: ULID = Field(default_factory=lambda: ULID())
-    template_id: ULID
+    project_id: ULID
     user_id: ULID
-    name: str
+    container_name: str
     created_at: datetime
     updated_at: datetime
+    completed: bool
