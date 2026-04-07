@@ -12,11 +12,11 @@ class ProjectAlchemyEntity(Base):
     __tablename__: str = "project"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, unique=True, default=lambda: str(ULID()))
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
     template_id: Mapped[str] = mapped_column(
         ForeignKey("ppt-template.id", ondelete="CASCADE"), nullable=False, index=True
     )
     user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
