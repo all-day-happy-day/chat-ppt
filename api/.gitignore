@@ -7,8 +7,10 @@ uv.lock
 
 .env*
 
-*.png
-*.pptx
-.DS_Store
 testbed/
 dev_data/
+**/*.png
+**/*.pptx
+**/.DS_Store
+**/test
+tmp/

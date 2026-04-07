@@ -1,0 +1,2 @@
+class PartNotFound(Exception):
+    pass

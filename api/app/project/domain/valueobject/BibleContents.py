@@ -1,0 +1,23 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+from app.project.domain.enum import PartType
+from core.shared.bible.domain.enum import AvailableBibleVersions
+
+
+class BibleContent(BaseModel):
+    version: AvailableBibleVersions
+    book: str
+    chapter: int
+    verse: int
+
+
+class BibleContentRange(BaseModel):
+    start: BibleContent
+    end: BibleContent | None = None
+
+
+class BibleContents(BaseModel):
+    type: Literal[PartType.BIBLE] = Field(default=PartType.BIBLE)
+    contents: list[BibleContentRange]
