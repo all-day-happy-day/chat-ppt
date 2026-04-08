@@ -20,4 +20,11 @@ class ProjectAlchemyEntity(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    parts: Mapped[list[PartAlchemyEntity]] = relationship("PartAlchemyEntity", cascade="all, delete-orphan")
+    parts: Mapped[list[PartAlchemyEntity]] = relationship(
+        "PartAlchemyEntity",
+        cascade="all, delete-orphan",
+        primaryjoin=(
+            "and_(PartAlchemyEntity.project_id == ProjectAlchemyEntity.id, PartAlchemyEntity.container_id.is_(None))"
+        ),
+        foreign_keys=[PartAlchemyEntity.project_id],
+    )

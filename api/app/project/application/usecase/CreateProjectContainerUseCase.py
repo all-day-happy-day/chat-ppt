@@ -16,12 +16,14 @@ class CreateProjectContainerUseCase:
     def __call__(self, project_id: ULID, user_id: ULID, container_name: str) -> ProjectContainer:
         project: Project = self.project_repository.get_by_id(id=project_id)
         now: datetime = datetime.now(timezone.utc)
+        container_id: ULID = ULID()
         project_container: ProjectContainer = ProjectContainer(
+            id=container_id,
             project_id=project_id,
             container_name=container_name,
             created_at=now,
             updated_at=now,
             completed=False,
-            parts=project.parts,
+            parts=[part.model_copy(update={"id": ULID(), "container_id": container_id}) for part in project.parts],
         )
         return self.project_container_repository.save(project_container=project_container)

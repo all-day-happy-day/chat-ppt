@@ -73,6 +73,6 @@ class PartMapper:
             type=domain_entity.type,
             contents=domain_entity.contents.model_dump(),
             additional_data=domain_entity.model_dump(
-                mode="json", exclude={"id", "project_id", "order", "type", "contents"}
+                mode="json", exclude={"id", "project_id", "container_id", "order", "type", "contents"}
             ),
         )
