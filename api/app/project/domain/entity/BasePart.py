@@ -7,4 +7,5 @@ class BasePart(BaseModel):
 
     id: ULID = Field(default_factory=lambda: ULID())
     project_id: ULID
+    container_id: ULID | None = None
     order: int = Field(ge=0, description="Index number starting from 0.")
