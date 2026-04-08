@@ -14,6 +14,9 @@ class PartMapper:
             return BiblePart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
+                container_id=(
+                    ULID.from_str(alchemy_entity.container_id) if alchemy_entity.container_id is not None else None
+                ),
                 order=alchemy_entity.order,
                 contents=BibleContents(**alchemy_entity.contents),
                 phrase_layout_id=ULID.from_str(alchemy_entity.additional_data.get("phrase_layout_id")),
@@ -25,6 +28,9 @@ class PartMapper:
             return LyricsPart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
+                container_id=(
+                    ULID.from_str(alchemy_entity.container_id) if alchemy_entity.container_id is not None else None
+                ),
                 order=alchemy_entity.order,
                 contents=LyricsContents(**alchemy_entity.contents),
                 lyrics_layout_id=ULID.from_str(alchemy_entity.additional_data.get("lyrics_layout_id")),
@@ -36,6 +42,9 @@ class PartMapper:
             return PlainPart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
+                container_id=(
+                    ULID.from_str(alchemy_entity.container_id) if alchemy_entity.container_id is not None else None
+                ),
                 order=alchemy_entity.order,
                 contents=PlainContents(**alchemy_entity.contents),
                 layout_id=ULID.from_str(alchemy_entity.additional_data.get("layout_id")),
@@ -44,6 +53,9 @@ class PartMapper:
             return ValuePart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
+                container_id=(
+                    ULID.from_str(alchemy_entity.container_id) if alchemy_entity.container_id is not None else None
+                ),
                 order=alchemy_entity.order,
                 contents=ValueContents(**alchemy_entity.contents),
                 layout_id=ULID.from_str(alchemy_entity.additional_data.get("layout_id")),
@@ -56,6 +68,7 @@ class PartMapper:
         return PartAlchemyEntity(
             id=str(domain_entity.id),
             project_id=str(domain_entity.project_id),
+            container_id=str(domain_entity.container_id) if domain_entity.container_id is not None else None,
             order=domain_entity.order,
             type=domain_entity.type,
             contents=domain_entity.contents.model_dump(),
