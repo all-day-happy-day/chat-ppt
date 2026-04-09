@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
-from app.project.domain.types import Parts
+from .PartRequest import PartRequest
 
 
 class PatchProjectContainerRequest(BaseModel):
     container_name: str | None = None
     completed: bool | None = None
-    parts: list[Parts] | None = None
+    parts: list[PartRequest] | None = None

@@ -6,6 +6,7 @@ from .ExportPPTRequest import ExportPPTRequest
 from .ExportPPTResponse import ExportPPTResponse
 from .GetProjectContainerResponse import GetProjectContainerResponse
 from .GetProjectResponse import GetProjectResponse
+from .PartRequest import BiblePartRequest, LyricsPartRequest, PartRequest, PlainPartRequest, ValuePartRequest
 from .PatchProjectContainerRequest import PatchProjectContainerRequest
 from .PatchProjectContainerResponse import PatchProjectContainerResponse
 from .PatchProjectRequest import PatchProjectRequest
@@ -20,6 +21,11 @@ __all__ = [
     "ExportPPTResponse",
     "GetProjectContainerResponse",
     "GetProjectResponse",
+    "BiblePartRequest",
+    "LyricsPartRequest",
+    "PartRequest",
+    "PlainPartRequest",
+    "ValuePartRequest",
     "PatchProjectContainerRequest",
     "PatchProjectContainerResponse",
     "PatchProjectRequest",

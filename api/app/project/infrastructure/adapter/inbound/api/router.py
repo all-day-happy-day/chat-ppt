@@ -15,6 +15,7 @@ from app.di.application.usecase import (
     get_patch_project_container_use_case,
     get_patch_project_use_case,
 )
+from app.project.application.command import PatchProjectCommand, PatchProjectContainerCommand
 from app.project.application.usecase import (
     CreateProjectContainerUseCase,
     CreateProjectUseCase,
@@ -71,11 +72,8 @@ def patch_project(
     request_model: PatchProjectRequest,
     usecase: Annotated[PatchProjectUseCase, Depends(get_patch_project_use_case)],
 ):
-    project: Project = usecase(
-        project_id=project_id,
-        name=request_model.name,
-        parts=request_model.parts,
-    )
+    command: PatchProjectCommand = PatchProjectCommand.model_validate(request_model)
+    project: Project = usecase(project_id=project_id, command=command)
     return PatchProjectResponse.from_domain_entity(project)
 
 
@@ -123,12 +121,8 @@ def patch_project_container(
     request_model: PatchProjectContainerRequest,
     usecase: Annotated[PatchProjectContainerUseCase, Depends(get_patch_project_container_use_case)],
 ):
-    project_container: ProjectContainer = usecase(
-        project_container_id=project_container_id,
-        container_name=request_model.container_name,
-        completed=request_model.completed,
-        parts=request_model.parts,
-    )
+    command: PatchProjectContainerCommand = PatchProjectContainerCommand.model_validate(request_model)
+    project_container: ProjectContainer = usecase(project_container_id=project_container_id, command=command)
     return PatchProjectContainerResponse.from_domain_entity(project_container)
 
 
