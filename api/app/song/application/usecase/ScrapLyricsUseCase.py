@@ -1,10 +1,10 @@
 from ulid import ULID
 
+from app.shared.song.domain.valueobject import Lyrics, LyricsPart
 from app.song.domain.entity import Song
 from app.song.domain.exception import DuplicatedSong, SongNotFound
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
-from core.shared.song.domain.valueobject import Lyrics, LyricsPart
 
 
 class ScrapLyricsUseCase:

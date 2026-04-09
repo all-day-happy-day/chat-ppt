@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,6 +9,7 @@ from app.di.application.usecase import (
     get_create_project_use_case,
     get_delete_project_container_use_case,
     get_delete_project_use_case,
+    get_export_ppt_use_case,
     get_get_project_containers_use_case,
     get_get_projects_use_case,
     get_patch_project_container_use_case,
@@ -18,18 +20,21 @@ from app.project.application.usecase import (
     CreateProjectUseCase,
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
+    ExportPPTUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
     PatchProjectContainerUseCase,
     PatchProjectUseCase,
 )
 from app.project.domain.entity import Project, ProjectContainer
-from app.project.domain.exception import ProjectContainerNotFound, ProjectNotFound
+from app.project.domain.exception import ProjectContainerNotCompleted, ProjectContainerNotFound, ProjectNotFound
 from app.project.infrastructure.adapter.inbound.api.message import (
     CreateProjectContainerRequest,
     CreateProjectContainerResponse,
     CreateProjectRequest,
     CreateProjectResponse,
+    ExportPPTRequest,
+    ExportPPTResponse,
     GetProjectContainerResponse,
     GetProjectResponse,
     PatchProjectContainerRequest,
@@ -136,3 +141,24 @@ def delete_project_container(
         usecase(project_container_id=project_container_id)
     except ProjectContainerNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post(
+    "/project/container/export/{project_container_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ExportPPTResponse,
+)
+def export_ppt(
+    project_container_id: ULID,
+    request_model: ExportPPTRequest,
+    usecase: Annotated[ExportPPTUseCase, Depends(get_export_ppt_use_case)],
+):
+    try:
+        path: Path = usecase(project_container_id=project_container_id, save_path=request_model.save_path)
+        return ExportPPTResponse(path=path)
+    except ProjectNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ProjectContainerNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ProjectContainerNotCompleted as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

@@ -1,8 +1,8 @@
 from ulid import ULID
 
+from app.shared.song.domain.valueobject import Lyrics
 from app.song.domain.entity import Song
 from app.song.domain.repository import LyricsRepository, SongRepository
-from core.shared.song.domain.valueobject import Lyrics
 
 
 class GetLyricsUseCase:

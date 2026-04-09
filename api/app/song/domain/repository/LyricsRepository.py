@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from ulid import ULID
 
-from core.shared.song.domain.valueobject import Lyrics
+from app.shared.song.domain.valueobject import Lyrics
 
 
 class LyricsRepository(ABC):

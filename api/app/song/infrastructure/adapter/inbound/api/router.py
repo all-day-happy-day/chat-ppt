@@ -11,6 +11,7 @@ from app.di.application.usecase import (
     get_patch_song_use_case,
     get_scrap_lyrics_use_case,
 )
+from app.shared.song.domain.valueobject import Lyrics
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
@@ -32,7 +33,6 @@ from app.song.infrastructure.adapter.inbound.api.message import (
     ScrapLyricsRequest,
     ScrapLyricsResponse,
 )
-from core.shared.song.domain.valueobject import Lyrics
 
 router: APIRouter = APIRouter(tags=["Lyrics"])
 

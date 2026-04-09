@@ -1,7 +1,7 @@
 from ulid import ULID
 
+from app.shared.song.domain.valueobject import Lyrics, LyricsPart
 from app.song.infrastructure.respository.lyrics.entity import LyricsAlchemyEntity
-from core.shared.song.domain.valueobject import Lyrics, LyricsPart
 
 
 class LyricsMapper:

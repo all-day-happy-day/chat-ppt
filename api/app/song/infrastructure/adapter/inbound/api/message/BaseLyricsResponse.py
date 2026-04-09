@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
+from app.shared.song.domain.valueobject import Lyrics
 from app.song.domain.entity import Song
-from core.shared.song.domain.valueobject import Lyrics
 
 
 class BaseLyricsResponse(BaseModel):

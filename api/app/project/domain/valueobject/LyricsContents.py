@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.project.domain.enum import PartType
-from core.shared.song.domain.valueobject import LyricsPart
+from app.shared.song.domain.valueobject import LyricsPart
 
 
 class LyricsContent(BaseModel):

@@ -2,6 +2,8 @@ from .CreateProjectContainerRequest import CreateProjectContainerRequest
 from .CreateProjectContainerResponse import CreateProjectContainerResponse
 from .CreateProjectRequest import CreateProjectRequest
 from .CreateProjectResponse import CreateProjectResponse
+from .ExportPPTRequest import ExportPPTRequest
+from .ExportPPTResponse import ExportPPTResponse
 from .GetProjectContainerResponse import GetProjectContainerResponse
 from .GetProjectResponse import GetProjectResponse
 from .PatchProjectContainerRequest import PatchProjectContainerRequest
@@ -14,6 +16,8 @@ __all__ = [
     "CreateProjectContainerResponse",
     "CreateProjectRequest",
     "CreateProjectResponse",
+    "ExportPPTRequest",
+    "ExportPPTResponse",
     "GetProjectContainerResponse",
     "GetProjectResponse",
     "PatchProjectContainerRequest",

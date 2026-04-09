@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.project.domain.enum import PartType
-from core.shared.bible.domain.enum import AvailableBibleVersions
+from app.shared.bible.domain.enum import AvailableBibleVersions
 
 
 class BibleContent(BaseModel):

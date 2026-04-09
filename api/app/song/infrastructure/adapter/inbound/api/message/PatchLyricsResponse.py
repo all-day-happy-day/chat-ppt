@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from core.shared.song.domain.valueobject import Lyrics
+from app.shared.song.domain.valueobject import Lyrics
 
 
 class PatchLyricsResponse(BaseModel):

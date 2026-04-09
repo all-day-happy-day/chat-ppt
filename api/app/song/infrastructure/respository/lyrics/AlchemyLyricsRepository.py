@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from ulid import ULID
 
+from app.shared.song.domain.valueobject import Lyrics
 from app.song.domain.exception import LyricsNotFound
 from app.song.domain.repository import LyricsRepository
 from app.song.infrastructure.respository.lyrics.entity import LyricsAlchemyEntity
 from app.song.infrastructure.respository.lyrics.mapper import LyricsMapper
-from core.shared.song.domain.valueobject import Lyrics
 
 
 class AlchemyLyricsRepository(LyricsRepository):

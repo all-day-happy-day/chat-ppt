@@ -1,0 +1,2 @@
+class ProjectContainerNotCompleted(Exception):
+    pass

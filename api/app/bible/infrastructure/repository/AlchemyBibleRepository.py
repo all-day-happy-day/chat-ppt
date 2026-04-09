@@ -6,7 +6,7 @@ from app.bible.domain.exception import PhraseNotFound
 from app.bible.domain.repository import BibleRepository
 from app.bible.domain.valueobject import BiblePhrase
 from app.config import config
-from core.shared.bible.domain.enum import AvailableBibleVersions
+from app.shared.bible.domain.enum import AvailableBibleVersions
 
 
 class AlchemyBibleRepository(BibleRepository):
