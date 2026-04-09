@@ -4,20 +4,19 @@ from pathlib import Path
 from ulid import ULID
 
 from app.powerpoint.domain.entity import Template, TemplateFile
-from app.powerpoint.domain.port.outbound import TemplateFileStoragePort
 from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
-from app.powerpoint.domain.service import TemplateReadService
+from app.powerpoint.domain.service import TemplateFileStorageService, TemplateReadService
 
 
 class UpdateTemplateUseCase:
     def __init__(
         self,
-        template_file_storage_port: TemplateFileStoragePort,
+        template_file_storage_service: TemplateFileStorageService,
         template_read_service: TemplateReadService,
         template_file_repository: TemplateFileRepository,
         template_repository: TemplateRepository,
     ) -> None:
-        self.template_file_storage_port: TemplateFileStoragePort = template_file_storage_port
+        self.template_file_storage_service: TemplateFileStorageService = template_file_storage_service
         self.template_read_service: TemplateReadService = template_read_service
         self.template_file_repository: TemplateFileRepository = template_file_repository
         self.template_repository: TemplateRepository = template_repository
@@ -33,9 +32,9 @@ class UpdateTemplateUseCase:
 
         # Delete old template file
         template_file: TemplateFile = self.template_file_repository.get_by_template_id(template_id=template_id)
-        self.template_file_storage_port.delete(template_file=template_file)
+        self.template_file_storage_service.delete(template_file=template_file)
 
-        ppt_path: Path = self.template_file_storage_port.save(data=filedata, filename=filename, user_id=user_id)
+        ppt_path: Path = self.template_file_storage_service.save(data=filedata, filename=filename, user_id=user_id)
         template_file, template = self.template_read_service.read(user_id=user_id, ppt_path=ppt_path, template=template)
 
         template.updated_at = datetime.now(tz=timezone.utc)

@@ -6,10 +6,10 @@ from ulid import ULID
 from app.config import config
 from app.powerpoint.domain.entity import TemplateFile
 from app.powerpoint.domain.exception import FileNotPPTX
-from app.powerpoint.domain.port.outbound import TemplateFileStoragePort
+from app.powerpoint.domain.service import TemplateFileStorageService
 
 
-class LocalDiskTemplateFileStorage(TemplateFileStoragePort):
+class LocalDiskTemplateFileService(TemplateFileStorageService):
     def __init__(self) -> None:
         self.upload_directory: Path = Path(config.ppt_upload_directory)
 

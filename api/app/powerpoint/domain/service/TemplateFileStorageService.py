@@ -6,7 +6,7 @@ from ulid import ULID
 from app.powerpoint.domain.entity import TemplateFile
 
 
-class TemplateFileStoragePort(ABC):
+class TemplateFileStorageService(ABC):
     @abstractmethod
     def save(self, data: bytes, filename: str, user_id: ULID) -> Path:
         raise NotImplementedError
