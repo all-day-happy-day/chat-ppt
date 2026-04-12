@@ -7,7 +7,7 @@ from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
 
 
-class ScrapLyricsUseCase:
+class ScrapeLyricsUseCase:
     def __init__(
         self,
         lyrics_repository: LyricsRepository,

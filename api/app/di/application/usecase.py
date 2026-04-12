@@ -59,7 +59,7 @@ from app.song.application.usecase import (
     GetSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
-    ScrapLyricsUseCase,
+    ScrapeLyricsUseCase,
 )
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
@@ -193,12 +193,12 @@ def get_patch_song_use_case(
     return PatchSongUseCase(song_repository=song_repository)
 
 
-def get_scrap_lyrics_use_case(
+def get_scrape_lyrics_use_case(
     lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
     song_repository: SongRepository = Depends(get_song_repository),
     lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
-) -> ScrapLyricsUseCase:
-    return ScrapLyricsUseCase(
+) -> ScrapeLyricsUseCase:
+    return ScrapeLyricsUseCase(
         lyrics_repository=lyrics_repository,
         song_repository=song_repository,
         lyrics_fetcher_service=lyrics_fetcher_service,

@@ -48,13 +48,13 @@ router: APIRouter = APIRouter(tags=["Project"])
 
 
 # Project
-@router.get("/project/{user_id}", status_code=status.HTTP_200_OK, response_model=list[GetProjectResponse])
+@router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=list[GetProjectResponse])
 def get_projects(user_id: ULID, usecase: Annotated[GetProjectsUseCase, Depends(get_get_projects_use_case)]):
     projects: list[Project] = usecase(user_id=user_id)
     return [GetProjectResponse.from_domain_entity(project) for project in projects]
 
 
-@router.post("/project", status_code=status.HTTP_201_CREATED, response_model=CreateProjectResponse)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=CreateProjectResponse)
 def create_project(
     request_model: CreateProjectRequest, usecase: Annotated[CreateProjectUseCase, Depends(get_create_project_use_case)]
 ):
@@ -66,7 +66,7 @@ def create_project(
     return CreateProjectResponse.from_domain_entity(project)
 
 
-@router.patch("/project/{project_id}", status_code=status.HTTP_200_OK, response_model=PatchProjectResponse)
+@router.patch("/{project_id}", status_code=status.HTTP_200_OK, response_model=PatchProjectResponse)
 def patch_project(
     project_id: ULID,
     request_model: PatchProjectRequest,
@@ -77,7 +77,7 @@ def patch_project(
     return PatchProjectResponse.from_domain_entity(project)
 
 
-@router.delete("/project/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(project_id: ULID, usecase: Annotated[DeleteProjectUseCase, Depends(get_delete_project_use_case)]):
     try:
         usecase(project_id=project_id)
@@ -86,9 +86,7 @@ def delete_project(project_id: ULID, usecase: Annotated[DeleteProjectUseCase, De
 
 
 # Project Container
-@router.get(
-    "/project/container/{project_id}", status_code=status.HTTP_200_OK, response_model=list[GetProjectContainerResponse]
-)
+@router.get("/container/{project_id}", status_code=status.HTTP_200_OK, response_model=list[GetProjectContainerResponse])
 def get_project_containers(
     project_id: ULID, usecase: Annotated[GetProjectContainersUseCase, Depends(get_get_project_containers_use_case)]
 ):
@@ -98,7 +96,7 @@ def get_project_containers(
     ]
 
 
-@router.post("/project/container", status_code=status.HTTP_201_CREATED, response_model=CreateProjectContainerResponse)
+@router.post("/container", status_code=status.HTTP_201_CREATED, response_model=CreateProjectContainerResponse)
 def create_project_container(
     request_model: CreateProjectContainerRequest,
     usecase: Annotated[CreateProjectContainerUseCase, Depends(get_create_project_container_use_case)],
@@ -112,9 +110,7 @@ def create_project_container(
 
 
 @router.patch(
-    "/project/container/{project_container_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=PatchProjectContainerResponse,
+    "/container/{project_container_id}", status_code=status.HTTP_200_OK, response_model=PatchProjectContainerResponse
 )
 def patch_project_container(
     project_container_id: ULID,
@@ -126,7 +122,7 @@ def patch_project_container(
     return PatchProjectContainerResponse.from_domain_entity(project_container)
 
 
-@router.delete("/project/container/{project_container_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/container/{project_container_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project_container(
     project_container_id: ULID,
     usecase: Annotated[DeleteProjectContainerUseCase, Depends(get_delete_project_container_use_case)],
@@ -138,9 +134,7 @@ def delete_project_container(
 
 
 @router.post(
-    "/project/container/export/{project_container_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=ExportPPTResponse,
+    "/container/export/{project_container_id}", status_code=status.HTTP_200_OK, response_model=ExportPPTResponse
 )
 def export_ppt(
     project_container_id: ULID,

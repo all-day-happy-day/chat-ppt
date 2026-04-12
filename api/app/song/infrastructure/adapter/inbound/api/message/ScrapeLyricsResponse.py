@@ -1,5 +1,5 @@
 from .BaseLyricsResponse import BaseLyricsResponse
 
 
-class ScrapLyricsResponse(BaseLyricsResponse):
+class ScrapeLyricsResponse(BaseLyricsResponse):
     pass

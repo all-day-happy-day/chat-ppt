@@ -180,7 +180,7 @@ def verify_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
 
-@router.post("/password", status_code=status.HTTP_200_OK)
+@router.post("/verify-password", status_code=status.HTTP_200_OK)
 def verify_password(
     request_model: VerifyPasswordRequest,
     usecase: Annotated[VerifyPasswordUseCase, Depends(get_verify_password_use_case)],

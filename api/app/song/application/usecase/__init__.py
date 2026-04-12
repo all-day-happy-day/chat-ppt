@@ -3,7 +3,7 @@ from .GetLyricsUseCase import GetLyricsUseCase
 from .GetSongsUseCase import GetSongsUseCase
 from .PatchLyricsUseCase import PatchLyricsUseCase
 from .PatchSongUseCase import PatchSongUseCase
-from .ScrapLyricsUseCase import ScrapLyricsUseCase
+from .ScrapeLyricsUseCase import ScrapeLyricsUseCase
 
 __all__ = [
     "DeleteSongUseCase",
@@ -11,5 +11,5 @@ __all__ = [
     "GetSongsUseCase",
     "PatchLyricsUseCase",
     "PatchSongUseCase",
-    "ScrapLyricsUseCase",
+    "ScrapeLyricsUseCase",
 ]

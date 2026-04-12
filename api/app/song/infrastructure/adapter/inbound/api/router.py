@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from ulid import ULID
 
 from app.di.application.usecase import (
@@ -9,7 +9,7 @@ from app.di.application.usecase import (
     get_get_songs_use_case,
     get_patch_lyrics_use_case,
     get_patch_song_use_case,
-    get_scrap_lyrics_use_case,
+    get_scrape_lyrics_use_case,
 )
 from app.shared.song.domain.valueobject import Lyrics
 from app.song.application.usecase import (
@@ -18,41 +18,42 @@ from app.song.application.usecase import (
     GetSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
-    ScrapLyricsUseCase,
+    ScrapeLyricsUseCase,
 )
 from app.song.domain.entity import Song
 from app.song.domain.exception import DuplicatedSong, FailedToFetch, LyricsNotFound, SongNotFound
 from app.song.infrastructure.adapter.inbound.api.message import (
     GetLyricsResponse,
-    GetSongsRequest,
     GetSongsResponse,
     PatchLyricsRequest,
     PatchLyricsResponse,
     PatchSongRequest,
     PatchSongResponse,
-    ScrapLyricsRequest,
-    ScrapLyricsResponse,
+    ScrapeLyricsResponse,
 )
 
 router: APIRouter = APIRouter(tags=["Lyrics"])
 
 
 @router.get("/list-songs", status_code=status.HTTP_200_OK, response_model=GetSongsResponse)
-def list_songs(request_model: GetSongsRequest, usecase: Annotated[GetSongsUseCase, Depends(get_get_songs_use_case)]):
-    songs: list[Song] = usecase(title=request_model.title) or []
+def list_songs(
+    title: Annotated[str, Query(...)],
+    usecase: Annotated[GetSongsUseCase, Depends(get_get_songs_use_case)],
+):
+    songs: list[Song] = usecase(title=title) or []
     return GetSongsResponse(songs=songs)
 
 
-@router.get("/lyrics/scrap", status_code=status.HTTP_200_OK, response_model=ScrapLyricsResponse)
-def scrap_lyrics(
-    request_model: ScrapLyricsRequest,
-    usecase: Annotated[ScrapLyricsUseCase, Depends(get_scrap_lyrics_use_case)],
+@router.get("/lyrics/scrape", status_code=status.HTTP_200_OK, response_model=ScrapeLyricsResponse)
+def scrape_lyrics(
+    usecase: Annotated[ScrapeLyricsUseCase, Depends(get_scrape_lyrics_use_case)],
+    title: Annotated[str, Query(...)],
+    artist: Annotated[str | None, Query(...)] = None,
+    overwrite: Annotated[bool, Query(...)] = False,
 ):
     try:
-        song, lyrics = usecase(
-            title=request_model.title, artist=request_model.artist, overwrite=request_model.overwrite
-        )
-        return ScrapLyricsResponse(song=song, lyrics=lyrics)
+        song, lyrics = usecase(title=title, artist=artist, overwrite=overwrite)
+        return ScrapeLyricsResponse(song=song, lyrics=lyrics)
     except FailedToFetch as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except DuplicatedSong as e:
@@ -68,7 +69,7 @@ def get_lyrics(song_id: ULID, usecase: Annotated[GetLyricsUseCase, Depends(get_g
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@router.patch("/song/{song_id}", status_code=status.HTTP_200_OK, response_model=PatchSongResponse)
+@router.patch("/{song_id}", status_code=status.HTTP_200_OK, response_model=PatchSongResponse)
 def patch_song(
     song_id: ULID,
     request_model: PatchSongRequest,
