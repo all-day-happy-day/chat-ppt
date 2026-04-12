@@ -1,0 +1,4082 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "FastAPI",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/auth/signin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Signin",
+                "operationId": "signin_auth_signin_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignInResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Signout",
+                "operationId": "signout_auth_signout_post",
+                "parameters": [
+                    {
+                        "name": "access_token",
+                        "in": "cookie",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Access Token"
+                        }
+                    },
+                    {
+                        "name": "refresh_token",
+                        "in": "cookie",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Refresh Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignOutResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Signup",
+                "operationId": "signup_auth_signup_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignUpRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignUpResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify Token",
+                "operationId": "verify_token_auth_verify_get",
+                "parameters": [
+                    {
+                        "name": "access_token",
+                        "in": "cookie",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Access Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify Password",
+                "operationId": "verify_password_auth_verify_password_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyPasswordRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reissue Tokens",
+                "operationId": "reissue_tokens_auth_refresh_post",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "cookie",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Refresh Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/bible": {
+            "get": {
+                "tags": [
+                    "Bible"
+                ],
+                "summary": "Get Bible Phrases",
+                "operationId": "get_bible_phrases_bible_get",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/GetBiblePhraseRequest"
+                                },
+                                "type": "array",
+                                "title": "Request Model"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetBiblePhraseResponse"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Get Bible Phrases Bible Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/read": {
+            "post": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Read Template",
+                "operationId": "read_template_powerpoint_template_read_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_read_template_powerpoint_template_read_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReadTemplateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/update": {
+            "patch": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Update Template",
+                "operationId": "update_template_powerpoint_template_update_patch",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_update_template_powerpoint_template_update_patch"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateTemplateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/name": {
+            "patch": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Change Template Name",
+                "operationId": "change_template_name_powerpoint_template_name_patch",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeTemplateNameRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangeTemplateNameResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/{template_id}": {
+            "delete": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Delete Template",
+                "operationId": "delete_template_powerpoint_template__template_id__delete",
+                "parameters": [
+                    {
+                        "name": "template_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Template Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/list/{user_id}": {
+            "get": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Get Template List",
+                "operationId": "get_template_list_powerpoint_template_list__user_id__get",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetTemplateResponse"
+                                    },
+                                    "title": "Response Get Template List Powerpoint Template List  User Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/powerpoint/template/layouts/{template_id}": {
+            "get": {
+                "tags": [
+                    "Powerpoint"
+                ],
+                "summary": "Get Layouts",
+                "operationId": "get_layouts_powerpoint_template_layouts__template_id__get",
+                "parameters": [
+                    {
+                        "name": "template_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Template Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetLayoutResponse"
+                                    },
+                                    "title": "Response Get Layouts Powerpoint Template Layouts  Template Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{user_id}": {
+            "get": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get Projects",
+                "operationId": "get_projects_project__user_id__get",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetProjectResponse"
+                                    },
+                                    "title": "Response Get Projects Project  User Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project": {
+            "post": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create Project",
+                "operationId": "create_project_project_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateProjectRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateProjectResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{project_id}": {
+            "patch": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Patch Project",
+                "operationId": "patch_project_project__project_id__patch",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchProjectRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PatchProjectResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Delete Project",
+                "operationId": "delete_project_project__project_id__delete",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/container/{project_id}": {
+            "get": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get Project Containers",
+                "operationId": "get_project_containers_project_container__project_id__get",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetProjectContainerResponse"
+                                    },
+                                    "title": "Response Get Project Containers Project Container  Project Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/container": {
+            "post": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create Project Container",
+                "operationId": "create_project_container_project_container_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateProjectContainerRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateProjectContainerResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/container/{project_container_id}": {
+            "patch": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Patch Project Container",
+                "operationId": "patch_project_container_project_container__project_container_id__patch",
+                "parameters": [
+                    {
+                        "name": "project_container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Container Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchProjectContainerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PatchProjectContainerResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Delete Project Container",
+                "operationId": "delete_project_container_project_container__project_container_id__delete",
+                "parameters": [
+                    {
+                        "name": "project_container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Container Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project/container/export/{project_container_id}": {
+            "post": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Export Ppt",
+                "operationId": "export_ppt_project_container_export__project_container_id__post",
+                "parameters": [
+                    {
+                        "name": "project_container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Project Container Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExportPPTRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExportPPTResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/song/list-songs": {
+            "get": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "List Songs",
+                "operationId": "list_songs_song_list_songs_get",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Title"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetSongsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/song/lyrics/scrape": {
+            "get": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "Scrape Lyrics",
+                "operationId": "scrape_lyrics_song_lyrics_scrape_get",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Title"
+                        }
+                    },
+                    {
+                        "name": "artist",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Artist"
+                        }
+                    },
+                    {
+                        "name": "overwrite",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "Overwrite"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScrapeLyricsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/song/lyrics/get/{song_id}": {
+            "get": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "Get Lyrics",
+                "operationId": "get_lyrics_song_lyrics_get__song_id__get",
+                "parameters": [
+                    {
+                        "name": "song_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Song Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetLyricsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/song/{song_id}": {
+            "patch": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "Patch Song",
+                "operationId": "patch_song_song__song_id__patch",
+                "parameters": [
+                    {
+                        "name": "song_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Song Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchSongRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PatchSongResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "Delete Song",
+                "operationId": "delete_song_song__song_id__delete",
+                "parameters": [
+                    {
+                        "name": "song_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Song Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/song/lyrics/{song_id}": {
+            "patch": {
+                "tags": [
+                    "Lyrics"
+                ],
+                "summary": "Patch Lyrics",
+                "operationId": "patch_lyrics_song_lyrics__song_id__patch",
+                "parameters": [
+                    {
+                        "name": "song_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "Song Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchLyricsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PatchLyricsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Users",
+                "operationId": "get_users_user__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/GetUserResponse"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Get Users User  Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create User",
+                "operationId": "create_user_user__post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateUserResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{user_id}": {
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete User",
+                "operationId": "delete_user_user__user_id__delete",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User",
+                "operationId": "get_user_user__user_id__get",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUserResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Patch User",
+                "operationId": "patch_user_user__user_id__patch",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 26,
+                                    "maxLength": 26,
+                                    "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                                },
+                                {
+                                    "type": "string",
+                                    "contentMediaType": "application/octet-stream",
+                                    "minLength": 16,
+                                    "maxLength": 16
+                                }
+                            ],
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateUserResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AvailableBibleVersions": {
+                "type": "string",
+                "enum": [
+                    "ESV",
+                    "KJV",
+                    "NIV",
+                    "NLT",
+                    "개역개정",
+                    "개역한글",
+                    "새번역",
+                    "공동번역",
+                    "현대인의 성경"
+                ],
+                "title": "AvailableBibleVersions"
+            },
+            "BibleContent": {
+                "properties": {
+                    "version": {
+                        "$ref": "#/components/schemas/AvailableBibleVersions"
+                    },
+                    "book": {
+                        "type": "string",
+                        "title": "Book"
+                    },
+                    "chapter": {
+                        "type": "integer",
+                        "title": "Chapter"
+                    },
+                    "verse": {
+                        "type": "integer",
+                        "title": "Verse"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "version",
+                    "book",
+                    "chapter",
+                    "verse"
+                ],
+                "title": "BibleContent"
+            },
+            "BibleContentRange-Input": {
+                "properties": {
+                    "start": {
+                        "$ref": "#/components/schemas/BibleContent"
+                    },
+                    "end": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/BibleContent"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "start"
+                ],
+                "title": "BibleContentRange"
+            },
+            "BibleContentRange-Output": {
+                "properties": {
+                    "start": {
+                        "$ref": "#/components/schemas/BibleContent"
+                    },
+                    "end": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/BibleContent"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "start"
+                ],
+                "title": "BibleContentRange"
+            },
+            "BibleContents-Input": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "BIBLE",
+                        "title": "Type",
+                        "default": "BIBLE"
+                    },
+                    "contents": {
+                        "items": {
+                            "$ref": "#/components/schemas/BibleContentRange-Input"
+                        },
+                        "type": "array",
+                        "title": "Contents"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "contents"
+                ],
+                "title": "BibleContents"
+            },
+            "BibleContents-Output": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "BIBLE",
+                        "title": "Type",
+                        "default": "BIBLE"
+                    },
+                    "contents": {
+                        "items": {
+                            "$ref": "#/components/schemas/BibleContentRange-Output"
+                        },
+                        "type": "array",
+                        "title": "Contents"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "contents"
+                ],
+                "title": "BibleContents"
+            },
+            "BiblePart": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Container Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order",
+                        "description": "Index number starting from 0."
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "BIBLE",
+                        "title": "Type",
+                        "default": "BIBLE"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/BibleContents-Output"
+                    },
+                    "phrase_layout_id": {
+                        "type": "string",
+                        "title": "Phrase Layout Id"
+                    },
+                    "title_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "project_id",
+                    "order",
+                    "contents",
+                    "phrase_layout_id"
+                ],
+                "title": "BiblePart"
+            },
+            "BiblePartRequest": {
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order"
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "BIBLE",
+                        "title": "Type",
+                        "default": "BIBLE"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/BibleContents-Input"
+                    },
+                    "phrase_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Phrase Layout Id"
+                    },
+                    "title_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "order",
+                    "contents",
+                    "phrase_layout_id"
+                ],
+                "title": "BiblePartRequest"
+            },
+            "Body_read_template_powerpoint_template_read_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File"
+                    },
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "template_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Template Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file",
+                    "user_id"
+                ],
+                "title": "Body_read_template_powerpoint_template_read_post"
+            },
+            "Body_update_template_powerpoint_template_update_patch": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File"
+                    },
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "template_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Template Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file",
+                    "user_id",
+                    "template_id"
+                ],
+                "title": "Body_update_template_powerpoint_template_update_patch"
+            },
+            "ChangeTemplateNameRequest": {
+                "properties": {
+                    "template_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Template Id"
+                    },
+                    "new_name": {
+                        "type": "string",
+                        "title": "New Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "new_name"
+                ],
+                "title": "ChangeTemplateNameRequest"
+            },
+            "ChangeTemplateNameResponse": {
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "ChangeTemplateNameResponse"
+            },
+            "ColorConfig": {
+                "properties": {
+                    "color_type": {
+                        "type": "string",
+                        "enum": [
+                            "solid",
+                            "none"
+                        ],
+                        "title": "Color Type"
+                    },
+                    "color": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Color"
+                    },
+                    "alpha": {
+                        "anyOf": [
+                            {
+                                "type": "number",
+                                "maximum": 1,
+                                "minimum": 0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Alpha"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "color_type",
+                    "color",
+                    "alpha"
+                ],
+                "title": "ColorConfig"
+            },
+            "CreateProjectContainerRequest": {
+                "properties": {
+                    "project_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Project Id"
+                    },
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "container_name": {
+                        "type": "string",
+                        "title": "Container Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "project_id",
+                    "user_id",
+                    "container_name"
+                ],
+                "title": "CreateProjectContainerRequest"
+            },
+            "CreateProjectContainerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_name": {
+                        "type": "string",
+                        "title": "Container Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "title": "Completed"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "project_id",
+                    "container_name",
+                    "created_at",
+                    "updated_at",
+                    "completed",
+                    "parts"
+                ],
+                "title": "CreateProjectContainerResponse"
+            },
+            "CreateProjectRequest": {
+                "properties": {
+                    "template_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "user_id",
+                    "name"
+                ],
+                "title": "CreateProjectRequest"
+            },
+            "CreateProjectResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at",
+                    "parts"
+                ],
+                "title": "CreateProjectResponse"
+            },
+            "CreateUserRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/Role"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "username",
+                    "password",
+                    "role"
+                ],
+                "title": "CreateUserRequest"
+            },
+            "CreateUserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "username"
+                ],
+                "title": "CreateUserResponse"
+            },
+            "ExportPPTRequest": {
+                "properties": {
+                    "save_path": {
+                        "type": "string",
+                        "title": "Save Path"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "save_path"
+                ],
+                "title": "ExportPPTRequest"
+            },
+            "ExportPPTResponse": {
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "format": "path",
+                        "title": "Path"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "path"
+                ],
+                "title": "ExportPPTResponse"
+            },
+            "GetBiblePhraseRequest": {
+                "properties": {
+                    "version": {
+                        "$ref": "#/components/schemas/AvailableBibleVersions"
+                    },
+                    "book": {
+                        "type": "string",
+                        "title": "Book"
+                    },
+                    "chapter": {
+                        "type": "integer",
+                        "title": "Chapter"
+                    },
+                    "verse": {
+                        "type": "integer",
+                        "title": "Verse"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "version",
+                    "book",
+                    "chapter",
+                    "verse"
+                ],
+                "title": "GetBiblePhraseRequest"
+            },
+            "GetBiblePhraseResponse": {
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "title": "Version"
+                    },
+                    "book": {
+                        "type": "string",
+                        "title": "Book"
+                    },
+                    "chapter": {
+                        "type": "integer",
+                        "title": "Chapter"
+                    },
+                    "verse": {
+                        "type": "integer",
+                        "title": "Verse"
+                    },
+                    "phrase": {
+                        "type": "string",
+                        "title": "Phrase"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "version",
+                    "book",
+                    "chapter",
+                    "verse",
+                    "phrase"
+                ],
+                "title": "GetBiblePhraseResponse"
+            },
+            "GetLayoutResponse": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "shapes": {
+                        "items": {
+                            "$ref": "#/components/schemas/Shape"
+                        },
+                        "type": "array",
+                        "title": "Shapes"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "shapes"
+                ],
+                "title": "GetLayoutResponse"
+            },
+            "GetLyricsResponse": {
+                "properties": {
+                    "song": {
+                        "$ref": "#/components/schemas/Song"
+                    },
+                    "lyrics": {
+                        "$ref": "#/components/schemas/Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "song",
+                    "lyrics"
+                ],
+                "title": "GetLyricsResponse"
+            },
+            "GetProjectContainerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_name": {
+                        "type": "string",
+                        "title": "Container Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "title": "Completed"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "project_id",
+                    "container_name",
+                    "created_at",
+                    "updated_at",
+                    "completed",
+                    "parts"
+                ],
+                "title": "GetProjectContainerResponse"
+            },
+            "GetProjectResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at",
+                    "parts"
+                ],
+                "title": "GetProjectResponse"
+            },
+            "GetSongsResponse": {
+                "properties": {
+                    "songs": {
+                        "items": {
+                            "$ref": "#/components/schemas/Song"
+                        },
+                        "type": "array",
+                        "title": "Songs"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "songs"
+                ],
+                "title": "GetSongsResponse"
+            },
+            "GetTemplateResponse": {
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "GetTemplateResponse"
+            },
+            "GetUserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "username"
+                ],
+                "title": "GetUserResponse"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "Lyrics": {
+                "properties": {
+                    "song_id": {
+                        "type": "string",
+                        "title": "Song Id"
+                    },
+                    "lyrics": {
+                        "items": {
+                            "$ref": "#/components/schemas/app__shared__song__domain__valueobject__LyricsPart__LyricsPart"
+                        },
+                        "type": "array",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "song_id",
+                    "lyrics"
+                ],
+                "title": "Lyrics"
+            },
+            "LyricsContent-Input": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "lyrics": {
+                        "items": {
+                            "$ref": "#/components/schemas/LyricsPart-Input"
+                        },
+                        "type": "array",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title",
+                    "lyrics"
+                ],
+                "title": "LyricsContent"
+            },
+            "LyricsContent-Output": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "lyrics": {
+                        "items": {
+                            "$ref": "#/components/schemas/app__shared__song__domain__valueobject__LyricsPart__LyricsPart"
+                        },
+                        "type": "array",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title",
+                    "lyrics"
+                ],
+                "title": "LyricsContent"
+            },
+            "LyricsContents-Input": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "LYRICS",
+                        "title": "Type",
+                        "default": "LYRICS"
+                    },
+                    "contents": {
+                        "items": {
+                            "$ref": "#/components/schemas/LyricsContent-Input"
+                        },
+                        "type": "array",
+                        "title": "Contents"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "contents"
+                ],
+                "title": "LyricsContents"
+            },
+            "LyricsContents-Output": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "LYRICS",
+                        "title": "Type",
+                        "default": "LYRICS"
+                    },
+                    "contents": {
+                        "items": {
+                            "$ref": "#/components/schemas/LyricsContent-Output"
+                        },
+                        "type": "array",
+                        "title": "Contents"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "contents"
+                ],
+                "title": "LyricsContents"
+            },
+            "LyricsPart-Input": {
+                "properties": {
+                    "part": {
+                        "type": "string",
+                        "title": "Part"
+                    },
+                    "lyrics": {
+                        "type": "string",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "part",
+                    "lyrics"
+                ],
+                "title": "LyricsPart"
+            },
+            "LyricsPartRequest": {
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order"
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "LYRICS",
+                        "title": "Type",
+                        "default": "LYRICS"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/LyricsContents-Input"
+                    },
+                    "lyrics_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Lyrics Layout Id"
+                    },
+                    "title_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "order",
+                    "contents",
+                    "lyrics_layout_id"
+                ],
+                "title": "LyricsPartRequest"
+            },
+            "PatchLyricsRequest": {
+                "properties": {
+                    "lyrics": {
+                        "items": {
+                            "$ref": "#/components/schemas/LyricsPart-Input"
+                        },
+                        "type": "array",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "lyrics"
+                ],
+                "title": "PatchLyricsRequest"
+            },
+            "PatchLyricsResponse": {
+                "properties": {
+                    "lyrics": {
+                        "$ref": "#/components/schemas/Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "lyrics"
+                ],
+                "title": "PatchLyricsResponse"
+            },
+            "PatchProjectContainerRequest": {
+                "properties": {
+                    "container_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Container Name"
+                    },
+                    "completed": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed"
+                    },
+                    "parts": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BiblePartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LyricsPartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/PlainPartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ValuePartRequest"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "type",
+                                        "mapping": {
+                                            "BIBLE": "#/components/schemas/BiblePartRequest",
+                                            "LYRICS": "#/components/schemas/LyricsPartRequest",
+                                            "PLAIN": "#/components/schemas/PlainPartRequest",
+                                            "VALUE": "#/components/schemas/ValuePartRequest"
+                                        }
+                                    }
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "title": "PatchProjectContainerRequest"
+            },
+            "PatchProjectContainerResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_name": {
+                        "type": "string",
+                        "title": "Container Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "title": "Completed"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "project_id",
+                    "container_name",
+                    "created_at",
+                    "updated_at",
+                    "completed",
+                    "parts"
+                ],
+                "title": "PatchProjectContainerResponse"
+            },
+            "PatchProjectRequest": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "parts": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BiblePartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LyricsPartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/PlainPartRequest"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ValuePartRequest"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "type",
+                                        "mapping": {
+                                            "BIBLE": "#/components/schemas/BiblePartRequest",
+                                            "LYRICS": "#/components/schemas/LyricsPartRequest",
+                                            "PLAIN": "#/components/schemas/PlainPartRequest",
+                                            "VALUE": "#/components/schemas/ValuePartRequest"
+                                        }
+                                    }
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "title": "PatchProjectRequest"
+            },
+            "PatchProjectResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "parts": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BiblePart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/app__project__domain__entity__LyricsPart__LyricsPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlainPart"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/ValuePart"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Parts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at",
+                    "parts"
+                ],
+                "title": "PatchProjectResponse"
+            },
+            "PatchSongRequest": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "artist": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Artist"
+                    }
+                },
+                "type": "object",
+                "title": "PatchSongRequest"
+            },
+            "PatchSongResponse": {
+                "properties": {
+                    "song": {
+                        "$ref": "#/components/schemas/Song"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "song"
+                ],
+                "title": "PatchSongResponse"
+            },
+            "PlainContents": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "PLAIN",
+                        "title": "Type",
+                        "default": "PLAIN"
+                    }
+                },
+                "type": "object",
+                "title": "PlainContents"
+            },
+            "PlainPart": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Container Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order",
+                        "description": "Index number starting from 0."
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "PLAIN",
+                        "title": "Type",
+                        "default": "PLAIN"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/PlainContents"
+                    },
+                    "layout_id": {
+                        "type": "string",
+                        "title": "Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "project_id",
+                    "order",
+                    "contents",
+                    "layout_id"
+                ],
+                "title": "PlainPart"
+            },
+            "PlainPartRequest": {
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order"
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "PLAIN",
+                        "title": "Type",
+                        "default": "PLAIN"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/PlainContents"
+                    },
+                    "layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "order",
+                    "contents",
+                    "layout_id"
+                ],
+                "title": "PlainPartRequest"
+            },
+            "Position": {
+                "properties": {
+                    "x": {
+                        "type": "integer",
+                        "title": "X"
+                    },
+                    "y": {
+                        "type": "integer",
+                        "title": "Y"
+                    },
+                    "rotation": {
+                        "type": "number",
+                        "title": "Rotation"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "x",
+                    "y",
+                    "rotation"
+                ],
+                "title": "Position"
+            },
+            "ReadTemplateResponse": {
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "ReadTemplateResponse"
+            },
+            "Role": {
+                "type": "string",
+                "enum": [
+                    "ADMIN",
+                    "USER"
+                ],
+                "title": "Role"
+            },
+            "ScrapeLyricsResponse": {
+                "properties": {
+                    "song": {
+                        "$ref": "#/components/schemas/Song"
+                    },
+                    "lyrics": {
+                        "$ref": "#/components/schemas/Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "song",
+                    "lyrics"
+                ],
+                "title": "ScrapeLyricsResponse"
+            },
+            "Shape": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "layout_id": {
+                        "type": "string",
+                        "title": "Layout Id"
+                    },
+                    "shape_id": {
+                        "type": "integer",
+                        "title": "Shape Id"
+                    },
+                    "size": {
+                        "$ref": "#/components/schemas/Size"
+                    },
+                    "position": {
+                        "$ref": "#/components/schemas/Position"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "text": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Text"
+                    },
+                    "placeholder": {
+                        "type": "boolean",
+                        "title": "Placeholder"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/ShapeType"
+                    },
+                    "fill_color": {
+                        "$ref": "#/components/schemas/ColorConfig"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "layout_id",
+                    "shape_id",
+                    "size",
+                    "position",
+                    "name",
+                    "text",
+                    "placeholder",
+                    "type",
+                    "fill_color"
+                ],
+                "title": "Shape"
+            },
+            "ShapeType": {
+                "type": "string",
+                "enum": [
+                    "TEXT",
+                    "IMAGE",
+                    "SHAPE",
+                    "TABLE",
+                    "OTHER"
+                ],
+                "title": "ShapeType"
+            },
+            "SignInRequest": {
+                "properties": {
+                    "principal": {
+                        "type": "string",
+                        "title": "Principal"
+                    },
+                    "secret": {
+                        "type": "string",
+                        "title": "Secret"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "principal",
+                    "secret"
+                ],
+                "title": "SignInRequest"
+            },
+            "SignInResponse": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username"
+                ],
+                "title": "SignInResponse"
+            },
+            "SignOutResponse": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username"
+                ],
+                "title": "SignOutResponse"
+            },
+            "SignUpRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/Role",
+                        "default": "USER"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "username",
+                    "password"
+                ],
+                "title": "SignUpRequest"
+            },
+            "SignUpResponse": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username"
+                ],
+                "title": "SignUpResponse"
+            },
+            "Size": {
+                "properties": {
+                    "width": {
+                        "type": "integer",
+                        "title": "Width"
+                    },
+                    "height": {
+                        "type": "integer",
+                        "title": "Height"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "width",
+                    "height"
+                ],
+                "title": "Size"
+            },
+            "Song": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "artist": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Artist"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title"
+                ],
+                "title": "Song"
+            },
+            "UpdateTemplateResponse": {
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "title": "Template Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "template_id",
+                    "user_id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "UpdateTemplateResponse"
+            },
+            "UpdateUserRequest": {
+                "properties": {
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "username": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Username"
+                    },
+                    "password": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Password"
+                    },
+                    "role": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Role"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "title": "UpdateUserRequest"
+            },
+            "UpdateUserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "username"
+                ],
+                "title": "UpdateUserResponse"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    },
+                    "input": {
+                        "title": "Input"
+                    },
+                    "ctx": {
+                        "type": "object",
+                        "title": "Context"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "ValueContent": {
+                "properties": {
+                    "placeholder_name": {
+                        "type": "string",
+                        "title": "Placeholder Name"
+                    },
+                    "value": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "placeholder_name"
+                ],
+                "title": "ValueContent"
+            },
+            "ValueContents": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "VALUE",
+                        "title": "Type",
+                        "default": "VALUE"
+                    },
+                    "contents": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValueContent"
+                        },
+                        "type": "array",
+                        "title": "Contents"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "contents"
+                ],
+                "title": "ValueContents"
+            },
+            "ValuePart": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Container Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order",
+                        "description": "Index number starting from 0."
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "VALUE",
+                        "title": "Type",
+                        "default": "VALUE"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/ValueContents"
+                    },
+                    "layout_id": {
+                        "type": "string",
+                        "title": "Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "project_id",
+                    "order",
+                    "contents",
+                    "layout_id"
+                ],
+                "title": "ValuePart"
+            },
+            "ValuePartRequest": {
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order"
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "VALUE",
+                        "title": "Type",
+                        "default": "VALUE"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/ValueContents"
+                    },
+                    "layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 26,
+                                "minLength": 26,
+                                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 16,
+                                "minLength": 16,
+                                "contentMediaType": "application/octet-stream"
+                            }
+                        ],
+                        "title": "Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "order",
+                    "contents",
+                    "layout_id"
+                ],
+                "title": "ValuePartRequest"
+            },
+            "VerifyPasswordRequest": {
+                "properties": {
+                    "principal": {
+                        "type": "string",
+                        "title": "Principal"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "principal",
+                    "password"
+                ],
+                "title": "VerifyPasswordRequest"
+            },
+            "VerifyTokenResponse": {
+                "properties": {
+                    "principal": {
+                        "type": "string",
+                        "title": "Principal"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "const": "bearer",
+                        "title": "Token Type",
+                        "default": "bearer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "principal"
+                ],
+                "title": "VerifyTokenResponse"
+            },
+            "app__project__domain__entity__LyricsPart__LyricsPart": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "title": "Project Id"
+                    },
+                    "container_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Container Id"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Order",
+                        "description": "Index number starting from 0."
+                    },
+                    "type": {
+                        "type": "string",
+                        "const": "LYRICS",
+                        "title": "Type",
+                        "default": "LYRICS"
+                    },
+                    "contents": {
+                        "$ref": "#/components/schemas/LyricsContents-Output"
+                    },
+                    "lyrics_layout_id": {
+                        "type": "string",
+                        "title": "Lyrics Layout Id"
+                    },
+                    "title_layout_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title Layout Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "project_id",
+                    "order",
+                    "contents",
+                    "lyrics_layout_id"
+                ],
+                "title": "LyricsPart"
+            },
+            "app__shared__song__domain__valueobject__LyricsPart__LyricsPart": {
+                "properties": {
+                    "part": {
+                        "type": "string",
+                        "title": "Part"
+                    },
+                    "lyrics": {
+                        "type": "string",
+                        "title": "Lyrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "part",
+                    "lyrics"
+                ],
+                "title": "LyricsPart"
+            }
+        }
+    }
+}
