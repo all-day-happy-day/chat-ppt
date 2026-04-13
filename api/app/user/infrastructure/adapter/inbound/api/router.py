@@ -8,6 +8,7 @@ from app.di.application.usecase import (
     get_delete_user_use_case,
     get_get_user_use_case,
     get_get_users_use_case,
+    get_update_user_role_use_case,
     get_update_user_use_case,
 )
 from app.user.application.usecase import (
@@ -15,9 +16,11 @@ from app.user.application.usecase import (
     DeleteUserUseCase,
     GetUsersUseCase,
     GetUserUseCase,
+    UpdateUserRoleUseCase,
     UpdateUserUseCase,
 )
 from app.user.domain.entity import User
+from app.user.domain.exception import UnauthorizedRequest
 from app.user.infrastructure.adapter.inbound.api.deps import get_current_user
 from app.user.infrastructure.adapter.inbound.api.message import (
     CreateUserRequest,
@@ -25,6 +28,8 @@ from app.user.infrastructure.adapter.inbound.api.message import (
     GetUserResponse,
     UpdateUserRequest,
     UpdateUserResponse,
+    UpdateUserRoleRequest,
+    UpdateUserRoleResponse,
 )
 
 router: APIRouter = APIRouter(tags=["User"])
@@ -93,3 +98,17 @@ def patch_user(
         return UpdateUserResponse.from_domain_entity(user)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/role/{user_id}", status_code=status.HTTP_200_OK, response_model=UpdateUserRoleResponse)
+def patch_user_role(
+    user_id: ULID,
+    request_model: UpdateUserRoleRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    usecase: Annotated[UpdateUserRoleUseCase, Depends(get_update_user_role_use_case)],
+):
+    try:
+        user: User = usecase(user_id=user_id, role=request_model.role, current_user=current_user)
+        return UpdateUserRoleResponse.from_domain_entity(user)
+    except UnauthorizedRequest as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

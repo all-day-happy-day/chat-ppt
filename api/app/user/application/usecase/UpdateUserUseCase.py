@@ -4,6 +4,7 @@ from typing import Any
 from ulid import ULID
 
 from app.user.domain.entity import User
+from app.user.domain.exception import UnauthorizedRequest
 from app.user.domain.repository import UserRepository
 from core.auth.domain.service import PasswordHasher
 
@@ -16,6 +17,8 @@ class UpdateUserUseCase:
     def __call__(self, user_id: ULID, update_fields: dict[str, Any]) -> User:
         user_entity: User = self.user_repository.get_by_id(user_id)
         prepared: dict[str, Any] = dict(update_fields)
+        if "role" in prepared:
+            raise UnauthorizedRequest("Cannot update role of another user.")
         if "password" in prepared:
             raw_password: str = prepared["password"]
             prepared["password"] = self.password_hasher.hash(raw_password)

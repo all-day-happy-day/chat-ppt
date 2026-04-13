@@ -1,0 +1,2 @@
+class UnauthorizedRequest(Exception):
+    pass

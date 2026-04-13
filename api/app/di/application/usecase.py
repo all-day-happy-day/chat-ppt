@@ -68,6 +68,7 @@ from app.user.application.usecase import (
     DeleteUserUseCase,
     GetUsersUseCase,
     GetUserUseCase,
+    UpdateUserRoleUseCase,
     UpdateUserUseCase,
 )
 from app.user.domain.repository import UserRepository
@@ -105,6 +106,12 @@ def get_update_user_use_case(
     password_hasher: PasswordHasher = Depends(get_password_hasher),
 ) -> UpdateUserUseCase:
     return UpdateUserUseCase(user_repository=user_repository, password_hasher=password_hasher)
+
+
+def get_update_user_role_use_case(
+    user_repository: UserRepository = Depends(get_user_repository),
+) -> UpdateUserRoleUseCase:
+    return UpdateUserRoleUseCase(user_repository=user_repository)
 
 
 # Auth
