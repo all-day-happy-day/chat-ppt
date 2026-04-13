@@ -18,6 +18,7 @@ from app.user.application.usecase import (
     UpdateUserUseCase,
 )
 from app.user.domain.entity import User
+from app.user.infrastructure.adapter.inbound.api.deps import get_current_user
 from app.user.infrastructure.adapter.inbound.api.message import (
     CreateUserRequest,
     CreateUserResponse,
@@ -51,7 +52,16 @@ def delete_user(user_id: ULID, usecase: Annotated[DeleteUserUseCase, Depends(get
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=GetUserResponse)
-def get_user(user_id: ULID, usecase: Annotated[GetUserUseCase, Depends(get_get_user_use_case)]):
+def get_user(
+    user_id: ULID,
+    usecase: Annotated[GetUserUseCase, Depends(get_get_user_use_case)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if str(current_user.id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot access another user's profile.",
+        )
     try:
         user: User = usecase(user_id=user_id)
         return GetUserResponse.from_domain_entity(user)
@@ -70,7 +80,13 @@ def patch_user(
     user_id: ULID,
     request_model: UpdateUserRequest,
     usecase: Annotated[UpdateUserUseCase, Depends(get_update_user_use_case)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
+    if str(current_user.id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot update another user's profile.",
+        )
     try:
         update_fields: dict[str, Any] = {k: v for k, v in request_model.model_dump().items() if v is not None}
         user: User = usecase(user_id=user_id, update_fields=update_fields)
