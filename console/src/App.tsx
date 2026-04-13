@@ -1,15 +1,16 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
-import { SignUpPage } from "./pages/SignUpPage";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AppRoot } from "./AppRoot";
+import { CreateProjectPage } from "./pages/CreateProjectPage";
+import { UserSettingsPage } from "./pages/UserSettingsPage";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signin" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/projects/new" element={<CreateProjectPage />} />
+        <Route path="/settings" element={<UserSettingsPage />} />
+        <Route path="/" element={<AppRoot />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

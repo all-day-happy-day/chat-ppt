@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { Link } from "react-router-dom";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
@@ -12,7 +11,13 @@ const PRIMARY_BUTTON_CLASS =
 const SECONDARY_BUTTON_CLASS =
   "flex h-11 w-full max-w-[280px] items-center justify-center rounded-xl border border-neutral-300 bg-transparent text-[17px] font-medium text-neutral-900 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10" as const;
 
-export const HomePage = () => {
+export type HomePageProps = {
+  onGoHome: () => void;
+  onSignIn: () => void;
+  onSignUp: () => void;
+};
+
+export const HomePage = ({ onGoHome, onSignIn, onSignUp }: HomePageProps) => {
   const [theme, setTheme] = useState<ThemePreference>(() => readAppliedThemeFromDocument());
 
   const handleToggleTheme = useCallback(() => {
@@ -22,35 +27,33 @@ export const HomePage = () => {
   return (
     <div className="relative flex min-h-dvh flex-col">
       <header className="flex items-center justify-between px-6 py-5">
-        <Link to="/" className="text-[17px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
+        <button
+          type="button"
+          className="text-left text-[17px] font-semibold tracking-tight text-neutral-900 outline-none transition hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:text-neutral-50 dark:focus-visible:ring-[#0a84ff]"
+          aria-label={`${APP_DISPLAY_NAME} home`}
+          onClick={onGoHome}
+        >
           {APP_DISPLAY_NAME}
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link to="/signin" className="text-[15px] font-medium text-[#0071e3] hover:underline dark:text-[#0a84ff]">
-            Sign in
-          </Link>
-          <ThemeToggle theme={theme} onToggle={handleToggleTheme} />
-        </div>
+        </button>
+        <ThemeToggle theme={theme} onToggle={handleToggleTheme} />
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center px-6 pb-20 pt-8">
-        <p className="mb-3 text-center text-[13px] font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-          Presentations
-        </p>
+        <p className="mb-3 text-center text-[13px] font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400"></p>
         <h1 className="max-w-[560px] text-center text-[40px] font-semibold leading-tight tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-[48px]">
           {`Welcome to ${APP_DISPLAY_NAME}`}
         </h1>
         <p className="mt-5 max-w-[460px] text-center text-[17px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-          Sign in to work with your projects and templates, or create an account to get started.
+          Easier way to make presentations for your Sunday service.
         </p>
 
         <nav className="mt-12 flex w-full max-w-[320px] flex-col items-center gap-3" aria-label="Account">
-          <Link to="/signin" className={PRIMARY_BUTTON_CLASS}>
+          <button type="button" className={PRIMARY_BUTTON_CLASS} onClick={onSignIn}>
             Sign in
-          </Link>
-          <Link to="/signup" className={SECONDARY_BUTTON_CLASS}>
+          </button>
+          <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={onSignUp}>
             Create account
-          </Link>
+          </button>
         </nav>
       </main>
     </div>

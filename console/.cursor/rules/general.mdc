@@ -23,7 +23,7 @@ alwaysApply: true
 - Never use `any` type — ever
 - Use `type` over `interface`
 - Use `unknown` for truly unknown types, then narrow with type guards
-- Use `.prettierrc` file for formatting rule
+- Use `.prettierrc` file for formatting rule, so run `npx prettier --write ./` every time you finish
 
 ## Code Style
 
