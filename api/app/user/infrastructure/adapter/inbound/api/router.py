@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ulid import ULID
 
 from app.di.application.usecase import (
-    get_create_user_use_case,
     get_delete_user_use_case,
     get_get_user_use_case,
     get_get_users_use_case,
@@ -12,7 +11,6 @@ from app.di.application.usecase import (
     get_update_user_use_case,
 )
 from app.user.application.usecase import (
-    CreateUserUseCase,
     DeleteUserUseCase,
     GetUsersUseCase,
     GetUserUseCase,
@@ -23,8 +21,6 @@ from app.user.domain.entity import User
 from app.user.domain.exception import UnauthorizedRequest
 from app.user.infrastructure.adapter.inbound.api.deps import get_current_user
 from app.user.infrastructure.adapter.inbound.api.message import (
-    CreateUserRequest,
-    CreateUserResponse,
     GetUserResponse,
     UpdateUserRequest,
     UpdateUserResponse,
@@ -33,19 +29,6 @@ from app.user.infrastructure.adapter.inbound.api.message import (
 )
 
 router: APIRouter = APIRouter(tags=["User"])
-
-
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=CreateUserResponse)
-def create_user(
-    request_model: CreateUserRequest, usecase: Annotated[CreateUserUseCase, Depends(get_create_user_use_case)]
-):
-    user: User = usecase(
-        email=request_model.email,
-        username=request_model.username,
-        password=request_model.password,
-        role=request_model.role,
-    )
-    return CreateUserResponse.from_domain_entity(user)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

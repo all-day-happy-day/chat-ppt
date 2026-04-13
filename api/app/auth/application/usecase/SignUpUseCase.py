@@ -1,7 +1,8 @@
+from datetime import datetime, timezone
+
 from pydantic import EmailStr
 from ulid import ULID
 
-from app.user.application.usecase import CreateUserUseCase
 from app.user.domain.entity import User
 from app.user.domain.enum import Role
 from app.user.domain.repository import UserRepository
@@ -22,13 +23,23 @@ class SignUpUseCase:
         self.auth_service: AuthenticationService = auth_service
         self.principal_repository: PrincipalRepository = principal_repository
         self.user_repository: UserRepository = user_repository
-        self.create_user_use_case: CreateUserUseCase = CreateUserUseCase(user_repository=user_repository)
+        self.password_hasher: PasswordHasher = password_hasher
 
     def __call__(
         self, email: EmailStr, username: str, password: str, role: Role
     ) -> tuple[User, Credentials, Credentials]:
         # Create user
-        user: User = self.create_user_use_case(email=email, username=username, password=password, role=role)
+        user: User = User(
+            id=ULID(),
+            email=email,
+            username=username,
+            password=self.password_hasher.hash(password),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+            last_sign_in=None,
+            role=role,
+        )
+        self.user_repository.save(user=user)
 
         # Create principal
         principal: Principal = Principal(id=ULID(), user_id=user.id, principal=username, password_hashed=user.password)

@@ -64,7 +64,6 @@ from app.song.application.usecase import (
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
 from app.user.application.usecase import (
-    CreateUserUseCase,
     DeleteUserUseCase,
     GetUsersUseCase,
     GetUserUseCase,
@@ -77,10 +76,6 @@ from core.auth.domain.service import AuthenticationService, PasswordHasher
 
 
 # User
-def get_create_user_use_case(user_repository: UserRepository = Depends(get_user_repository)) -> CreateUserUseCase:
-    return CreateUserUseCase(user_repository=user_repository)
-
-
 def get_delete_user_use_case(
     user_repository: UserRepository = Depends(get_user_repository),
     credentials_repository: CredentialsRepository = Depends(get_credentials_repository),
