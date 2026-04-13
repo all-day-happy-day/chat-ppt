@@ -100,8 +100,11 @@ def get_get_user_use_case(user_repository: UserRepository = Depends(get_user_rep
     return GetUserUseCase(user_repository=user_repository)
 
 
-def get_update_user_use_case(user_repository: UserRepository = Depends(get_user_repository)) -> UpdateUserUseCase:
-    return UpdateUserUseCase(user_repository=user_repository)
+def get_update_user_use_case(
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_hasher: PasswordHasher = Depends(get_password_hasher),
+) -> UpdateUserUseCase:
+    return UpdateUserUseCase(user_repository=user_repository, password_hasher=password_hasher)
 
 
 # Auth

@@ -5,15 +5,21 @@ from ulid import ULID
 
 from app.user.domain.entity import User
 from app.user.domain.repository import UserRepository
+from core.auth.domain.service import PasswordHasher
 
 
 class UpdateUserUseCase:
-    def __init__(self, user_repository: UserRepository) -> None:
+    def __init__(self, user_repository: UserRepository, password_hasher: PasswordHasher) -> None:
         self.user_repository: UserRepository = user_repository
+        self.password_hasher: PasswordHasher = password_hasher
 
     def __call__(self, user_id: ULID, update_fields: dict[str, Any]) -> User:
         user_entity: User = self.user_repository.get_by_id(user_id)
-        user: User = user_entity.model_copy(update=update_fields)
+        prepared: dict[str, Any] = dict(update_fields)
+        if "password" in prepared:
+            raw_password: str = prepared["password"]
+            prepared["password"] = self.password_hasher.hash(raw_password)
+        user: User = user_entity.model_copy(update=prepared)
 
         has_change: bool = False
         for key, value in user_entity.model_dump().items():
