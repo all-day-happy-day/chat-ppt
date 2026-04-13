@@ -44,10 +44,6 @@ export const UserSettingsPage = () => {
     navigate("/", { replace: true });
   }, [navigate]);
 
-  const handleBackToProjects = useCallback((): void => {
-    navigate("/", { replace: true });
-  }, [navigate]);
-
   const handleGoHome = useCallback((): void => {
     void (async (): Promise<void> => {
       try {
@@ -184,16 +180,6 @@ export const UserSettingsPage = () => {
         </div>
         <ThemeToggle theme={theme} onToggle={handleToggleTheme} />
       </header>
-
-      <nav className="bg-neutral-50/90 px-6 py-3 dark:bg-white/[0.04]" aria-label="Back to projects">
-        <button
-          type="button"
-          className="text-[15px] font-medium text-[#0071e3] outline-none transition hover:underline focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:text-[#0a84ff] dark:focus-visible:ring-[#0a84ff]"
-          onClick={handleBackToProjects}
-        >
-          ‹ Projects
-        </button>
-      </nav>
 
       <main className="flex min-h-0 flex-1 flex-col px-6 py-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">

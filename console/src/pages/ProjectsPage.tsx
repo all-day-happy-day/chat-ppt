@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signOut, verifySession } from "../api/auth";
 import { listProjectsByUserId } from "../api/project";
 import { listUsers } from "../api/user";
@@ -47,6 +47,7 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
+  const [isSessionAdmin, setIsSessionAdmin] = useState<boolean>(false);
 
   const handleToggleTheme = useCallback(() => {
     setTheme((prev: ThemePreference) => toggleStoredTheme(prev));
@@ -55,6 +56,7 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
   const loadWorkspace = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setLoadError(null);
+    setIsSessionAdmin(false);
     try {
       const session = await verifySession();
       setPrincipal(session.principal);
@@ -67,6 +69,8 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
         setLoadError("We could not match your signed-in user to an account in this workspace.");
         return;
       }
+      const self: GetUserResponse | undefined = users.find((row: GetUserResponse) => row.id === resolvedId);
+      setIsSessionAdmin(self?.role === "ADMIN");
       setUserId(resolvedId);
       const projectList: GetProjectResponse[] = await listProjectsByUserId(resolvedId);
       setProjects(projectList);
@@ -80,6 +84,7 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
       setUserId(null);
       setProjects([]);
       setWorkspaceUsers([]);
+      setIsSessionAdmin(false);
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +126,13 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
           {principal !== null ? (
             <AccountMenu
               principal={principal}
+              isAdmin={isSessionAdmin}
               isSigningOut={isSigningOut}
               onUserSettings={() => {
                 navigate("/settings");
+              }}
+              onManageUsers={() => {
+                navigate("/users");
               }}
               onSignOut={handleSignOutClick}
             />
@@ -172,20 +181,27 @@ export const ProjectsPage = ({ onGoHome, onSessionExpired, onSignOut }: Projects
               const updatedAtLabel: string = DATE_FORMATTER.format(new Date(project.updated_at));
               return (
                 <li key={project.id}>
-                  <article className="rounded-2xl border border-black/[0.06] bg-white px-5 py-4 shadow-sm dark:border-white/[0.08] dark:bg-[#1c1c1e]">
-                    <h2 className="text-[17px] font-semibold text-neutral-900 dark:text-neutral-50">{project.name}</h2>
-                    <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12px] leading-relaxed text-neutral-500 dark:text-neutral-400">
-                      <span>{`Created by ${createdByUsername}`}</span>
-                      <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
-                        ·
-                      </span>
-                      <span>{`Created at ${createdAtLabel}`}</span>
-                      <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
-                        ·
-                      </span>
-                      <span>{`Updated at ${updatedAtLabel}`}</span>
-                    </div>
-                  </article>
+                  <Link
+                    to={`/projects/${project.id}`}
+                    className="block rounded-2xl border border-black/[0.06] bg-white px-5 py-4 shadow-sm outline-none transition hover:border-black/[0.1] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:border-white/[0.08] dark:bg-[#1c1c1e] dark:hover:border-white/[0.12] dark:focus-visible:ring-[#0a84ff]"
+                  >
+                    <article>
+                      <h2 className="text-[17px] font-semibold text-neutral-900 dark:text-neutral-50">
+                        {project.name}
+                      </h2>
+                      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        <span>{`Created by ${createdByUsername}`}</span>
+                        <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
+                          ·
+                        </span>
+                        <span>{`Created at ${createdAtLabel}`}</span>
+                        <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
+                          ·
+                        </span>
+                        <span>{`Updated at ${updatedAtLabel}`}</span>
+                      </div>
+                    </article>
+                  </Link>
                 </li>
               );
             })}

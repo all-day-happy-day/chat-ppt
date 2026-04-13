@@ -20,7 +20,17 @@ const isGetUserResponse = (value: unknown): value is GetUserResponse => {
   const username: unknown = value.username;
   const email: unknown = value.email;
   const role: unknown = value.role;
-  return typeof id === "string" && typeof username === "string" && typeof email === "string" && isUserRole(role);
+  const createdAt: unknown = value.created_at;
+  const lastSignIn: unknown = value.last_sign_in;
+  const lastSignInOk: boolean = lastSignIn === null || typeof lastSignIn === "string";
+  return (
+    typeof id === "string" &&
+    typeof username === "string" &&
+    typeof email === "string" &&
+    isUserRole(role) &&
+    typeof createdAt === "string" &&
+    lastSignInOk
+  );
 };
 
 const isGetUserResponseList = (value: unknown): value is GetUserResponse[] => {
@@ -102,6 +112,38 @@ export const patchUserById = async (userId: string, body: PatchUserRequest): Pro
       throw new Error(SIGN_IN_REQUIRED_MESSAGE);
     }
     const message: string = await readFetchErrorMessage(response, "Could not save your settings.");
+    throw new Error(message);
+  }
+  const text: string = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch {
+    throw new Error("Invalid response from server.");
+  }
+  if (!isGetUserResponse(parsed)) {
+    throw new Error("Invalid response from server.");
+  }
+  return parsed;
+};
+
+export const patchUserRoleById = async (userId: string, role: UserRole): Promise<GetUserResponse> => {
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(userId);
+  const url: string = `${baseUrl}/user/role/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ role }),
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not update the user's role.");
     throw new Error(message);
   }
   const text: string = await response.text();

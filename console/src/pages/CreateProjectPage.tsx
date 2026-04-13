@@ -225,12 +225,12 @@ export const CreateProjectPage = () => {
       }
       setIsSubmitting(true);
       try {
-        await createProject({
+        const created = await createProject({
           name: trimmedName,
           user_id: resolvedUserId,
           template_id: templateId,
         });
-        navigate("/", { replace: true });
+        navigate(`/projects/${created.id}`, { replace: true });
       } catch (error: unknown) {
         if (isSignInRequiredError(error)) {
           handleSessionExpiredNavigation();

@@ -3,6 +3,25 @@ import { getPrincipalDisplayInitial } from "../lib/principal-display-initial";
 
 const MENU_WIDTH_CLASS: string = "w-[min(100vw-2.5rem,248px)]";
 
+const UsersIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const GearIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
@@ -57,12 +76,21 @@ const SignOutIcon = () => (
 
 export type AccountMenuProps = {
   principal: string;
+  isAdmin: boolean;
   isSigningOut: boolean;
   onUserSettings: () => void;
+  onManageUsers: () => void;
   onSignOut: () => void;
 };
 
-export const AccountMenu = ({ principal, isSigningOut, onUserSettings, onSignOut }: AccountMenuProps) => {
+export const AccountMenu = ({
+  principal,
+  isAdmin,
+  isSigningOut,
+  onUserSettings,
+  onManageUsers,
+  onSignOut,
+}: AccountMenuProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuId: string = useId();
@@ -116,6 +144,11 @@ export const AccountMenu = ({ principal, isSigningOut, onUserSettings, onSignOut
     onSignOut();
   }, [closeMenu, onSignOut]);
 
+  const handleManageUsersClick = useCallback((): void => {
+    closeMenu();
+    onManageUsers();
+  }, [closeMenu, onManageUsers]);
+
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -141,9 +174,9 @@ export const AccountMenu = ({ principal, isSigningOut, onUserSettings, onSignOut
           id={menuId}
           role="menu"
           aria-label="Account"
-          className={`absolute right-0 z-50 mt-1.5 ${MENU_WIDTH_CLASS} overflow-hidden rounded-xl border border-black/[0.08] bg-white py-0.5 shadow-[0_6px_24px_rgba(0,0,0,0.1)] dark:border-white/[0.1] dark:bg-[#2c2c2e] dark:shadow-[0_10px_36px_rgba(0,0,0,0.5)]`}
+          className={`absolute right-0 z-50 mt-1.5 ${MENU_WIDTH_CLASS} overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-[0_6px_24px_rgba(0,0,0,0.1)] dark:border-white/[0.1] dark:bg-[#2c2c2e] dark:shadow-[0_10px_36px_rgba(0,0,0,0.5)]`}
         >
-          <div className="border-b border-black/[0.06] bg-neutral-100 px-3 py-2 dark:border-white/[0.08] dark:bg-[#3a3a3c]">
+          <div className="rounded-t-xl border-b border-black/[0.06] bg-neutral-100 px-3 py-2 dark:border-white/[0.08] dark:bg-[#3a3a3c]">
             <p className="truncate text-[14px] font-semibold text-neutral-900 dark:text-white">{headline}</p>
             {subline !== null ? (
               <p className="mt-0.5 truncate text-[12px] text-neutral-500 dark:text-neutral-400">{subline}</p>
@@ -164,6 +197,19 @@ export const AccountMenu = ({ principal, isSigningOut, onUserSettings, onSignOut
               </span>
               User settings
             </button>
+            {isAdmin ? (
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] font-normal text-[#0071e3] transition hover:bg-neutral-100 dark:text-[#0a84ff] dark:hover:bg-white/[0.06]"
+                onClick={handleManageUsersClick}
+              >
+                <span className="text-[#0071e3] dark:text-[#0a84ff]">
+                  <UsersIcon />
+                </span>
+                Manage users
+              </button>
+            ) : null}
           </div>
 
           <div className="border-t border-black/[0.06] dark:border-white/[0.08]" />

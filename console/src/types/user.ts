@@ -7,6 +7,8 @@ export type GetUserResponse = {
   username: string;
   email: string;
   role: UserRole;
+  created_at: string;
+  last_sign_in: string | null;
 };
 
 export type PatchUserRequest = {
