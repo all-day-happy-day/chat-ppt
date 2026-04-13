@@ -1,6 +1,6 @@
 import { useCallback, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { signIn } from "../api/auth";
+import { signUp } from "../api/auth";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { AUTH_FIELD_CLASS, AUTH_LINK_CLASS } from "../lib/auth-screen-classes";
@@ -8,12 +8,13 @@ import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
 
-export const LoginPage = () => {
-  const [principal, setPrincipal] = useState<string>("");
-  const [secret, setSecret] = useState<string>("");
+export const SignUpPage = () => {
+  const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [signedInUsername, setSignedInUsername] = useState<string | null>(null);
+  const [createdUsername, setCreatedUsername] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>(() => readAppliedThemeFromDocument());
 
   const handleToggleTheme = useCallback(() => {
@@ -26,12 +27,12 @@ export const LoginPage = () => {
       setErrorMessage(null);
       setIsSubmitting(true);
       try {
-        const trimmedPrincipal: string = principal.trim();
-        const response = await signIn({
-          principal: trimmedPrincipal,
-          secret,
+        const response = await signUp({
+          email: email.trim(),
+          username: username.trim(),
+          password,
         });
-        setSignedInUsername(response.username);
+        setCreatedUsername(response.username);
       } catch (error: unknown) {
         const message: string = error instanceof Error ? error.message : "Something went wrong.";
         setErrorMessage(message);
@@ -39,10 +40,10 @@ export const LoginPage = () => {
         setIsSubmitting(false);
       }
     },
-    [principal, secret]
+    [email, username, password]
   );
 
-  if (signedInUsername !== null) {
+  if (createdUsername !== null) {
     return (
       <div className="relative flex min-h-dvh flex-col items-center justify-center px-6 py-16">
         <div className="absolute right-6 top-6">
@@ -53,10 +54,11 @@ export const LoginPage = () => {
             <CheckIcon />
           </div>
           <h1 className="text-[28px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
-            You are signed in
+            Account created
           </h1>
           <p className="mt-3 text-[15px] leading-snug text-neutral-500 dark:text-neutral-400">
-            Signed in as <span className="font-medium text-neutral-800 dark:text-neutral-200">{signedInUsername}</span>.
+            You are signed in as{" "}
+            <span className="font-medium text-neutral-800 dark:text-neutral-200">{createdUsername}</span>.
           </p>
         </div>
       </div>
@@ -78,30 +80,30 @@ export const LoginPage = () => {
           {APP_DISPLAY_NAME}
         </Link>
         <h1 className="text-center text-[32px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
-          Sign in
+          Create your account
         </h1>
         <p className="mt-2 max-w-[320px] text-center text-[15px] leading-snug text-neutral-500 dark:text-neutral-400">
-          {`Use your account to continue to ${APP_DISPLAY_NAME}.`}
+          {`Join ${APP_DISPLAY_NAME} with your email, username, and password.`}
         </p>
       </div>
 
       <div className="w-full max-w-[420px] rounded-3xl border border-black/[0.06] bg-white px-8 py-9 shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:border-white/[0.08] dark:bg-[#1c1c1e] dark:shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
         <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="principal">
-              Account
+            <label className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="signup-email">
+              Email
             </label>
             <input
-              id="principal"
-              name="principal"
-              type="text"
-              autoComplete="username"
+              id="signup-email"
+              name="email"
+              type="email"
+              autoComplete="email"
               spellCheck={false}
               className={AUTH_FIELD_CLASS}
-              placeholder="Email or username"
-              value={principal}
+              placeholder="name@example.com"
+              value={email}
               onChange={(e) => {
-                setPrincipal(e.target.value);
+                setEmail(e.target.value);
               }}
               disabled={isSubmitting}
               aria-invalid={errorMessage !== null}
@@ -109,24 +111,40 @@ export const LoginPage = () => {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-2">
-              <label className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="secret">
-                Password
-              </label>
-              <button type="button" className={`text-[13px] ${AUTH_LINK_CLASS}`} disabled={isSubmitting}>
-                Forgot password?
-              </button>
-            </div>
+            <label className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="signup-username">
+              Username
+            </label>
             <input
-              id="secret"
-              name="secret"
+              id="signup-username"
+              name="username"
+              type="text"
+              autoComplete="username"
+              spellCheck={false}
+              className={AUTH_FIELD_CLASS}
+              placeholder="Username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
+              disabled={isSubmitting}
+              aria-invalid={errorMessage !== null}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="signup-password">
+              Password
+            </label>
+            <input
+              id="signup-password"
+              name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               className={AUTH_FIELD_CLASS}
               placeholder="Password"
-              value={secret}
+              value={password}
               onChange={(e) => {
-                setSecret(e.target.value);
+                setPassword(e.target.value);
               }}
               disabled={isSubmitting}
               aria-invalid={errorMessage !== null}
@@ -147,14 +165,14 @@ export const LoginPage = () => {
             className="mt-1 flex h-11 w-full items-center justify-center rounded-xl bg-[#0071e3] text-[17px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Signing in…" : "Sign in"}
+            {isSubmitting ? "Creating account…" : "Sign up"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-[15px] text-neutral-600 dark:text-neutral-400">
-          Don&apos;t have an account?{" "}
-          <Link to="/signup" className={AUTH_LINK_CLASS}>
-            Sign up
+          Already have an account?{" "}
+          <Link to="/signin" className={AUTH_LINK_CLASS}>
+            Sign in
           </Link>
         </p>
 

@@ -4,12 +4,10 @@ type ValidationErrorDetail = {
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
-const isValidationErrorDetail = (
-  value: unknown,
-): value is ValidationErrorDetail => {
+const isValidationErrorDetail = (value: unknown): value is ValidationErrorDetail => {
   return isRecord(value);
 };
 
@@ -23,25 +21,22 @@ const formatValidationDetails = (details: unknown): string | null => {
       continue;
     }
     const msg: unknown = item.msg;
-    if (typeof msg === 'string' && msg.length > 0) {
+    if (typeof msg === "string" && msg.length > 0) {
       parts.push(msg);
     }
   }
   if (parts.length === 0) {
     return null;
   }
-  return parts.join(' ');
+  return parts.join(" ");
 };
 
-export const parseApiErrorBody = (
-  data: unknown,
-  fallback: string,
-): string => {
+export const parseApiErrorBody = (data: unknown, fallback: string): string => {
   if (!isRecord(data)) {
     return fallback;
   }
   const detail: unknown = data.detail;
-  if (typeof detail === 'string' && detail.length > 0) {
+  if (typeof detail === "string" && detail.length > 0) {
     return detail;
   }
   const fromArray: string | null = formatValidationDetails(detail);
@@ -51,9 +46,7 @@ export const parseApiErrorBody = (
   return fallback;
 };
 
-export const parseApiErrorMessage = async (
-  response: Response,
-): Promise<string> => {
+export const parseApiErrorMessage = async (response: Response): Promise<string> => {
   const text: string = await response.text();
   const fallback: string = `Request failed (${String(response.status)})`;
   if (text.length === 0) {

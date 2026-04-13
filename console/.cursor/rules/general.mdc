@@ -7,21 +7,26 @@ alwaysApply: true
 # General Rules
 
 ## Communication
+
 - Explain reasoning when making architectural decisions
 
 ## Tech Stack
+
 - React + TypeScript (strict mode)
 - Tailwind CSS + shadcn/ui
 - React Router for navigation
 - Vite as build tool
 
 ## TypeScript
+
 - Always use explicit type annotations on every variable, parameter, and return type
 - Never use `any` type — ever
 - Use `type` over `interface`
 - Use `unknown` for truly unknown types, then narrow with type guards
+- Use `.prettierrc` file for formatting rule
 
 ## Code Style
+
 - Use arrow functions over function declarations
 - Always use `const` unless reassignment is necessary
 - Destructure props and objects wherever possible
@@ -29,6 +34,7 @@ alwaysApply: true
 - No magic numbers — use named constants
 
 ## Naming Conventions
+
 - Components: PascalCase (UserCard.tsx)
 - Functions/variables: camelCase (fetchUser)
 - Types: PascalCase (UserCardProps)
@@ -40,6 +46,7 @@ alwaysApply: true
   - implementations: handleDelete, handleClick, handleChange
 
 ## File & Folder Structure
+
 - pages/       → route-level components
 - components/  → reusable UI components
 - hooks/       → custom hooks
@@ -48,6 +55,7 @@ alwaysApply: true
 - lib/         → utility functions
 
 ## Google TypeScript Style Guide
+
 - Never use `enum` — use `const` object with `as const` instead
   - ❌ enum Direction { Up = "up", Down = "down" }
   - ✅ const DIRECTION = { UP: "up", DOWN: "down" } as const
@@ -61,8 +69,8 @@ alwaysApply: true
 - Use `import type` for type-only imports
   - ✅ import type { User } from "./types"
 - Array type: use `Foo[]` over `Array<Foo>`
-  - ✅ const users: User[]
-  - ❌ const users: Array<User>
+  - ✅ const users: `User[]`
+  - ❌ const users: `Array<User>`
 - Semicolons required at end of every statement
 - Single quotes for strings (double quotes only in JSX attributes)
 - 2 spaces for indentation — no tabs
@@ -70,12 +78,13 @@ alwaysApply: true
 - Blank lines at start or end of function body not allowed
 
 ## Google HTML/CSS Style Guide (applied to JSX + Tailwind)
+
 - All HTML attributes lowercase
-- Always include alt attributes on <img>
+- Always include alt attributes on `<img>`
 - Never use inline styles — keep structure and presentation separate
 - Never use `!important` in CSS
 - Avoid overly specific selectors — keep selector specificity low
 - Semantic HTML over generic divs wherever possible
-  - ✅ <button>, <nav>, <main>, <section>, <article>
-  - ❌ <div onClick={...}> instead of <button>
+  - ✅ `<button>`, `<nav>`, `<main>`, `<section>`, `<article>`
+  - ❌ `<div onClick={...}>` instead of `<button>`
 - Always use HTTPS for external resources

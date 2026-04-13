@@ -1,4 +1,4 @@
-import type { ThemePreference } from '../lib/theme';
+import type { ThemePreference } from "../lib/theme";
 
 export type ThemeToggleProps = {
   theme: ThemePreference;
@@ -6,8 +6,7 @@ export type ThemeToggleProps = {
 };
 
 export const ThemeToggle = ({ theme, onToggle }: ThemeToggleProps) => {
-  const label: string =
-    theme === 'dark' ? 'Switch to light appearance' : 'Switch to dark appearance';
+  const label: string = theme === "dark" ? "Switch to light appearance" : "Switch to dark appearance";
   return (
     <button
       type="button"
@@ -15,7 +14,7 @@ export const ThemeToggle = ({ theme, onToggle }: ThemeToggleProps) => {
       aria-label={label}
       onClick={onToggle}
     >
-      {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+      {theme === "dark" ? <SunIcon /> : <MoonIcon />}
     </button>
   );
 };

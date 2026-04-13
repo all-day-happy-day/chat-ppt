@@ -6,3 +6,13 @@ export type SignInRequest = {
 export type SignInResponse = {
   username: string;
 };
+
+export type SignUpRequest = {
+  email: string;
+  username: string;
+  password: string;
+};
+
+export type SignUpResponse = {
+  username: string;
+};

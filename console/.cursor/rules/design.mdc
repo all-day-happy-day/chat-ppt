@@ -7,6 +7,7 @@ alwaysApply: false
 # Design Rules (Apple-inspired)
 
 ## Core Principles
+
 - Clean and minimal — remove anything that doesn't serve a purpose
 - Generous whitespace — when in doubt, add more padding
 - Subtle over dramatic — light borders, soft shadows, gentle transitions
@@ -14,17 +15,20 @@ alwaysApply: false
 - Typography-first hierarchy — use weight and size, not color, to create hierarchy
 
 ## Tailwind Usage
+
 - Use CSS variables from index.css over raw colors
   - ✅ bg-background, text-foreground, border-border
   - ❌ bg-white, text-black, border-gray-200
 
 ## Spacing Scale
+
 - Tight spacing: gap-2, p-2 (8px)
 - Default spacing: gap-4, p-4 (16px)
 - Loose spacing: gap-6, p-6 (24px)
 - Section spacing: gap-8, p-8 (32px)
 
 ## Common Patterns
+
 ```tsx
 // Card
 <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -43,10 +47,12 @@ alwaysApply: false
 ```
 
 ## Animation
+
 - Use transition-* for hover/focus states
 - Duration: 150ms for micro, 300ms for layout
 - Easing: ease-out for entrances, ease-in for exits
 
 ## Responsive
+
 - Mobile-first: base styles for mobile, md: for tablet, lg: for desktop
 - Always test at 375px (iPhone SE) and 1280px (desktop)
