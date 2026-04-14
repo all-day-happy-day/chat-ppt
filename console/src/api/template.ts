@@ -1,7 +1,7 @@
 import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
 import { readFetchErrorMessage } from "../lib/read-fetch-error";
-import type { GetLayoutResponse } from "../types/template-layout";
+import type { GetLayoutResponse, TemplateSlideSizeEmu } from "../types/template-layout";
 import type { GetTemplateResponse } from "../types/template";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -41,13 +41,30 @@ const isLayoutShapeWithLayoutId = (value: unknown): value is { layout_id: string
   return typeof layoutId === "string" && layoutId.length > 0;
 };
 
+const isTemplateSlideSizeEmu = (value: unknown): value is TemplateSlideSizeEmu => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const width: unknown = value.width;
+  const height: unknown = value.height;
+  return (
+    typeof width === "number" &&
+    typeof height === "number" &&
+    Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    width > 0 &&
+    height > 0
+  );
+};
+
 const isGetLayoutResponse = (value: unknown): value is GetLayoutResponse => {
   if (!isRecord(value)) {
     return false;
   }
   const name: unknown = value.name;
   const shapes: unknown = value.shapes;
-  if (typeof name !== "string" || !Array.isArray(shapes)) {
+  const slideSize: unknown = value.slide_size;
+  if (typeof name !== "string" || !Array.isArray(shapes) || !isTemplateSlideSizeEmu(slideSize)) {
     return false;
   }
   return shapes.every((shape: unknown) => isLayoutShapeWithLayoutId(shape));
