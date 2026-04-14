@@ -1,6 +1,7 @@
 import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
 import { readFetchErrorMessage } from "../lib/read-fetch-error";
+import type { GetLayoutResponse } from "../types/template-layout";
 import type { GetTemplateResponse } from "../types/template";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -32,6 +33,33 @@ const isGetTemplateResponseList = (value: unknown): value is GetTemplateResponse
   return value.every((item: unknown) => isGetTemplateResponse(item));
 };
 
+const isLayoutShapeWithLayoutId = (value: unknown): value is { layout_id: string } => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const layoutId: unknown = value.layout_id;
+  return typeof layoutId === "string" && layoutId.length > 0;
+};
+
+const isGetLayoutResponse = (value: unknown): value is GetLayoutResponse => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const name: unknown = value.name;
+  const shapes: unknown = value.shapes;
+  if (typeof name !== "string" || !Array.isArray(shapes)) {
+    return false;
+  }
+  return shapes.every((shape: unknown) => isLayoutShapeWithLayoutId(shape));
+};
+
+const isGetLayoutResponseList = (value: unknown): value is GetLayoutResponse[] => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.every((item: unknown) => isGetLayoutResponse(item));
+};
+
 export const listTemplatesByUserId = async (userId: string): Promise<GetTemplateResponse[]> => {
   const baseUrl: string = getApiBaseUrl();
   const encodedId: string = encodeURIComponent(userId);
@@ -55,6 +83,34 @@ export const listTemplatesByUserId = async (userId: string): Promise<GetTemplate
     throw new Error("Invalid response from server.");
   }
   if (!isGetTemplateResponseList(parsed)) {
+    throw new Error("Invalid response from server.");
+  }
+  return parsed;
+};
+
+export const listTemplateLayoutsByTemplateId = async (templateId: string): Promise<GetLayoutResponse[]> => {
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(templateId);
+  const url: string = `${baseUrl}/powerpoint/template/layouts/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not load template layouts.");
+    throw new Error(message);
+  }
+  const text: string = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch {
+    throw new Error("Invalid response from server.");
+  }
+  if (!isGetLayoutResponseList(parsed)) {
     throw new Error("Invalid response from server.");
   }
   return parsed;

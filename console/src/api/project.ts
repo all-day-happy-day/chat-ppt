@@ -98,3 +98,38 @@ export const createProject = async (body: CreateProjectRequest): Promise<CreateP
   }
   return parsed;
 };
+
+export const patchProjectById = async (
+  projectId: string,
+  body: Record<string, unknown>
+): Promise<GetProjectResponse> => {
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(projectId);
+  const url: string = `${baseUrl}/project/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not update the project.");
+    throw new Error(message);
+  }
+  const text: string = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch {
+    throw new Error("Invalid response from server.");
+  }
+  if (!isGetProjectResponse(parsed)) {
+    throw new Error("Invalid response from server.");
+  }
+  return parsed;
+};
