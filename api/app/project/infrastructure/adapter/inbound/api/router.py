@@ -72,7 +72,7 @@ def patch_project(
     request_model: PatchProjectRequest,
     usecase: Annotated[PatchProjectUseCase, Depends(get_patch_project_use_case)],
 ):
-    command: PatchProjectCommand = PatchProjectCommand.model_validate(request_model)
+    command: PatchProjectCommand = PatchProjectCommand.model_validate(request_model.model_dump(mode="json"))
     project: Project = usecase(project_id=project_id, command=command)
     return PatchProjectResponse.from_domain_entity(project)
 
@@ -117,7 +117,9 @@ def patch_project_container(
     request_model: PatchProjectContainerRequest,
     usecase: Annotated[PatchProjectContainerUseCase, Depends(get_patch_project_container_use_case)],
 ):
-    command: PatchProjectContainerCommand = PatchProjectContainerCommand.model_validate(request_model)
+    command: PatchProjectContainerCommand = PatchProjectContainerCommand.model_validate(
+        request_model.model_dump(mode="json")
+    )
     project_container: ProjectContainer = usecase(project_container_id=project_container_id, command=command)
     return PatchProjectContainerResponse.from_domain_entity(project_container)
 

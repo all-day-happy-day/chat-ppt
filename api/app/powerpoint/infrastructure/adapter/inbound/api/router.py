@@ -19,7 +19,7 @@ from app.powerpoint.application.usecase import (
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
 )
-from app.powerpoint.domain.entity import Layout
+from app.powerpoint.domain.entity import Template
 from app.powerpoint.domain.exception import FileNotPPTX, InvalidFileReadRequest, TemplateFileNotFound, TemplateNotFound
 from app.powerpoint.infrastructure.adapter.inbound.api.message import (
     ChangeTemplateNameRequest,
@@ -120,7 +120,10 @@ def get_template_list(
 @router.get("/template/layouts/{template_id}", status_code=status.HTTP_200_OK, response_model=list[GetLayoutResponse])
 def get_layouts(template_id: ULID, usecase: Annotated[GetLayoutsUseCase, Depends(get_get_layouts_use_case)]):
     try:
-        layouts: list[Layout] = usecase(template_id=template_id)
-        return [GetLayoutResponse.from_domain_entity(layout=layout) for layout in layouts]
+        template: Template = usecase(template_id=template_id)
+        return [
+            GetLayoutResponse.from_domain_entity(layout=layout, slide_size=template.slide_size)
+            for layout in template.layouts
+        ]
     except TemplateNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
