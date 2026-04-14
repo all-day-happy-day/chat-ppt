@@ -2353,10 +2353,14 @@
             },
             "type": "array",
             "title": "Shapes"
+          },
+          "slide_size": {
+            "$ref": "#/components/schemas/Size",
+            "title": "Slide Size"
           }
         },
         "type": "object",
-        "required": ["name", "shapes"],
+        "required": ["name", "shapes", "slide_size"],
         "title": "GetLayoutResponse"
       },
       "GetLyricsResponse": {
