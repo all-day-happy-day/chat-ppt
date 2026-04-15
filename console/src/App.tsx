@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppRoot } from "./AppRoot";
 import { CreateProjectPage } from "./pages/CreateProjectPage";
 import { ManageUsersPage } from "./pages/ManageUsersPage";
+import { ProjectSettingsPage } from "./pages/ProjectSettingsPage";
 import { ProjectWorkspacePage } from "./pages/ProjectWorkspacePage";
 import { UserSettingsPage } from "./pages/UserSettingsPage";
 
@@ -10,6 +11,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/projects/new" element={<CreateProjectPage />} />
+        <Route path="/projects/:projectId/settings" element={<ProjectSettingsPage />} />
         <Route path="/projects/:projectId" element={<ProjectWorkspacePage />} />
         <Route path="/settings" element={<UserSettingsPage />} />
         <Route path="/users" element={<ManageUsersPage />} />

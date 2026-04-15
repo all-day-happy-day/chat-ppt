@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { TemplateLayoutChoice } from "../lib/project-parts-for-patch";
 import { TemplateLayoutThumbnail } from "./TemplateLayoutThumbnail";
@@ -29,15 +22,14 @@ const PART_EDIT_LAYOUT_NONE_TITLE: string = "No layout selected";
 
 const PART_EDIT_LAYOUT_NONE_HINT: string = "Choose a slide layout from your template gallery.";
 
-const PART_EDIT_LAYOUT_UNKNOWN_HINT: string =
-  "This layout is not in the gallery list. Pick another layout below.";
+const PART_EDIT_LAYOUT_UNKNOWN_HINT: string = "This layout is not in the gallery list. Pick another layout below.";
 
 const PART_EDIT_ORPHAN_LAYOUT_TITLE: string = "Layout unavailable";
 
 const LAYOUT_PREVIEW_TRIGGER_CLASS: string =
   "flex w-full flex-col gap-2 rounded-xl border border-black/[0.1] bg-neutral-50/80 p-2.5 text-left outline-none transition hover:border-black/[0.18] hover:bg-white focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:border-white/[0.12] dark:bg-white/[0.04] dark:hover:border-white/[0.2] dark:hover:bg-white/[0.06] dark:focus-visible:ring-[#0a84ff]";
 
-const NONE_TILE_LABEL: string = "No title layout";
+const DEFAULT_NONE_CHOICE_TILE_LABEL: string = "No slide layout";
 
 type LayoutPaletteAnchor = {
   topPx: number;
@@ -54,6 +46,8 @@ export type TemplateLayoutGalleryPickerProps = {
   onSelectLayout: (layoutId: string | null) => void;
   /** When true, gallery lists a first tile that clears the selection (null). */
   showNoneChoiceInGallery: boolean;
+  /** Label on the empty-selection tile inside the gallery popover. */
+  noneChoiceTileLabel?: string;
 };
 
 export const TemplateLayoutGalleryPicker = ({
@@ -63,6 +57,7 @@ export const TemplateLayoutGalleryPicker = ({
   selectedLayoutId,
   onSelectLayout,
   showNoneChoiceInGallery,
+  noneChoiceTileLabel = DEFAULT_NONE_CHOICE_TILE_LABEL,
 }: TemplateLayoutGalleryPickerProps): ReactNode => {
   const [isLayoutPaletteOpen, setIsLayoutPaletteOpen] = useState<boolean>(false);
   const [layoutPaletteAnchor, setLayoutPaletteAnchor] = useState<LayoutPaletteAnchor | null>(null);
@@ -90,8 +85,7 @@ export const TemplateLayoutGalleryPicker = ({
     const paletteEl: HTMLElement | null = document.getElementById(menuId);
     const measuredHeight: number =
       paletteEl !== null ? paletteEl.getBoundingClientRect().height : LAYOUT_PALETTE_MENU_FALLBACK_HEIGHT_PX;
-    const effectiveHeight: number =
-      measuredHeight > 0 ? measuredHeight : LAYOUT_PALETTE_MENU_FALLBACK_HEIGHT_PX;
+    const effectiveHeight: number = measuredHeight > 0 ? measuredHeight : LAYOUT_PALETTE_MENU_FALLBACK_HEIGHT_PX;
     const viewportBottom: number = window.innerHeight - gutter;
     let topPx: number = rect.bottom + gutter;
     if (topPx + effectiveHeight > viewportBottom) {
@@ -102,10 +96,7 @@ export const TemplateLayoutGalleryPicker = ({
         topPx = gutter;
       }
     }
-    const maxHeightPx: number = Math.max(
-      LAYOUT_PALETTE_MENU_MIN_SCROLL_HEIGHT_PX,
-      Math.floor(viewportBottom - topPx)
-    );
+    const maxHeightPx: number = Math.max(LAYOUT_PALETTE_MENU_MIN_SCROLL_HEIGHT_PX, Math.floor(viewportBottom - topPx));
     setLayoutPaletteAnchor({ topPx, leftPx, widthPx, maxHeightPx });
   }, [isLayoutPaletteOpen, menuId]);
 
@@ -234,7 +225,7 @@ export const TemplateLayoutGalleryPicker = ({
                 >
                   <div className="flex aspect-video w-full max-w-full items-center justify-center overflow-hidden rounded-[2px] border border-dashed border-black/[0.14] bg-neutral-100/90 dark:border-white/[0.14] dark:bg-neutral-900/80">
                     <span className="px-2 text-center text-[10px] font-medium text-neutral-600 dark:text-neutral-300">
-                      {NONE_TILE_LABEL}
+                      {noneChoiceTileLabel}
                     </span>
                   </div>
                 </button>

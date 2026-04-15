@@ -57,6 +57,28 @@ const isTemplateSlideSizeEmu = (value: unknown): value is TemplateSlideSizeEmu =
   );
 };
 
+const isLayoutColorConfigJson = (value: unknown): value is GetLayoutResponse["background_color"] => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const colorType: unknown = value.color_type;
+  if (colorType !== "solid" && colorType !== "none") {
+    return false;
+  }
+  const color: unknown = value.color;
+  const alpha: unknown = value.alpha;
+  const colorOk: boolean = color === null || (typeof color === "string" && color.length > 0);
+  const alphaOk: boolean =
+    alpha === null || (typeof alpha === "number" && Number.isFinite(alpha) && alpha >= 0 && alpha <= 1);
+  if (!colorOk || !alphaOk) {
+    return false;
+  }
+  if (colorType === "solid") {
+    return typeof color === "string" && color.length > 0 && typeof alpha === "number";
+  }
+  return true;
+};
+
 const isGetLayoutResponse = (value: unknown): value is GetLayoutResponse => {
   if (!isRecord(value)) {
     return false;
@@ -64,7 +86,13 @@ const isGetLayoutResponse = (value: unknown): value is GetLayoutResponse => {
   const name: unknown = value.name;
   const shapes: unknown = value.shapes;
   const slideSize: unknown = value.slide_size;
-  if (typeof name !== "string" || !Array.isArray(shapes) || !isTemplateSlideSizeEmu(slideSize)) {
+  const backgroundColor: unknown = value.background_color;
+  if (
+    typeof name !== "string" ||
+    !Array.isArray(shapes) ||
+    !isTemplateSlideSizeEmu(slideSize) ||
+    !isLayoutColorConfigJson(backgroundColor)
+  ) {
     return false;
   }
   return shapes.every((shape: unknown) => isLayoutShapeWithLayoutId(shape));

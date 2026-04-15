@@ -133,3 +133,20 @@ export const patchProjectById = async (
   }
   return parsed;
 };
+
+export const deleteProjectById = async (projectId: string): Promise<void> => {
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(projectId);
+  const url: string = `${baseUrl}/project/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not delete the project.");
+    throw new Error(message);
+  }
+};

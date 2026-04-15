@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
-import { listLayoutThumbnailShapeRects, type LayoutThumbnailShapeRect } from '../lib/project-parts-for-patch';
-import type { GetLayoutResponse } from '../types/template-layout';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import {
+  listLayoutThumbnailShapeRects,
+  readSlideBackgroundSolidFillFromLayoutEntry,
+  type LayoutThumbnailShapeRect,
+} from "../lib/project-parts-for-patch";
+import type { GetLayoutResponse } from "../types/template-layout";
 
 const FALLBACK_VIEWBOX_WIDTH: number = 16;
 
@@ -50,9 +54,9 @@ const computeRectRotateTransform = (r: LayoutThumbnailShapeRect): string | undef
 };
 
 const buildPlaceholderLabelForChrome = (r: LayoutThumbnailShapeRect): string => {
-  const raw: string = (r.placeholderTagLabel ?? r.placeholderLabel ?? '').trim();
+  const raw: string = (r.placeholderTagLabel ?? r.placeholderLabel ?? "").trim();
   if (raw.length === 0) {
-    return 'PLACEHOLDER';
+    return "PLACEHOLDER";
   }
   return raw.toUpperCase();
 };
@@ -100,6 +104,12 @@ export const TemplateLayoutThumbnail = ({
   const model: ThumbnailModel | null = useMemo((): ThumbnailModel | null => {
     return listLayoutThumbnailShapeRects(entry);
   }, [entry]);
+  const slideBackgroundFill: { cssColor: string; opacity: number } | null = useMemo((): {
+    cssColor: string;
+    opacity: number;
+  } | null => {
+    return readSlideBackgroundSolidFillFromLayoutEntry(entry);
+  }, [entry]);
   if (model === null) {
     return (
       <svg
@@ -131,7 +141,15 @@ export const TemplateLayoutThumbnail = ({
       aria-hidden
       onPointerLeave={chromeActive ? handleSvgPointerLeave : undefined}
     >
-      <rect x={0} y={0} width={sw} height={sh} fill="#f1f5f9" className="dark:fill-neutral-900" />
+      <rect
+        x={0}
+        y={0}
+        width={sw}
+        height={sh}
+        fill={slideBackgroundFill !== null ? slideBackgroundFill.cssColor : "#f1f5f9"}
+        fillOpacity={slideBackgroundFill !== null ? slideBackgroundFill.opacity : undefined}
+        className={slideBackgroundFill !== null ? undefined : "dark:fill-neutral-900"}
+      />
       {rects.map((r: LayoutThumbnailShapeRect) => {
         const fillInfo = r.solidFill;
         const useImageFallback: boolean = r.imageLike && fillInfo === null;
@@ -152,8 +170,7 @@ export const TemplateLayoutThumbnail = ({
           highlightedShapeKey.length > 0 &&
           highlightedShapeKey === r.key &&
           r.placeholder;
-        const isHoverHighlight: boolean =
-          chromeActive && r.placeholder && hoveredPlaceholderShapeKey === r.key;
+        const isHoverHighlight: boolean = chromeActive && r.placeholder && hoveredPlaceholderShapeKey === r.key;
         const isAccentStroke: boolean = isFieldHighlight || isHoverHighlight;
         const stroke: string = isAccentStroke
           ? PLACEHOLDER_HIGHLIGHT_STROKE
@@ -175,7 +192,7 @@ export const TemplateLayoutThumbnail = ({
             stroke={stroke}
             strokeWidth={strokeWidthForShape}
             strokeOpacity={isAccentStroke ? PLACEHOLDER_HIGHLIGHT_STROKE_OPACITY : 1}
-            className={useImageFallback ? 'dark:fill-[#64748b]' : undefined}
+            className={useImageFallback ? "dark:fill-[#64748b]" : undefined}
           />
         );
         if (!r.placeholder) {

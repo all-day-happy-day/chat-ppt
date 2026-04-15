@@ -53,9 +53,7 @@ const readLyricsSongLines = (raw: unknown): LyricsSongLine[] => {
     const lyricsText: string = typeof lyricsValue === "string" ? lyricsValue : "";
     return { part, lyrics: lyricsText };
   });
-  const filtered: LyricsSongLine[] = mapped.filter(
-    (row: LyricsSongLine | null): row is LyricsSongLine => row !== null
-  );
+  const filtered: LyricsSongLine[] = mapped.filter((row: LyricsSongLine | null): row is LyricsSongLine => row !== null);
   return filtered.length > 0 ? filtered : defaultLyricLines();
 };
 
@@ -83,11 +81,7 @@ export const readLyricsSongRowsFromPart = (part: unknown): LyricsSongRow[] => {
     const artistValue: unknown = item.artist;
     const title: string = typeof titleValue === "string" ? titleValue : "";
     const artist: string =
-      typeof artistValue === "string"
-        ? artistValue
-        : artistValue === null || artistValue === undefined
-          ? ""
-          : "";
+      typeof artistValue === "string" ? artistValue : artistValue === null || artistValue === undefined ? "" : "";
     return { title, artist };
   });
   return rows.length > 0 ? rows : [{ title: "", artist: "" }];

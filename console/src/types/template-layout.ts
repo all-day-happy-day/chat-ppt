@@ -8,8 +8,16 @@ export type TemplateSlideSizeEmu = {
   height: number;
 };
 
+/** Same JSON shape as shape `fill_color` / Pydantic `ColorConfig`. */
+export type LayoutColorConfigJson = {
+  color_type: "solid" | "none";
+  color: string | null;
+  alpha: number | null;
+};
+
 export type GetLayoutResponse = {
   name: string;
   shapes: TemplateLayoutShape[];
   slide_size: TemplateSlideSizeEmu;
+  background_color: LayoutColorConfigJson;
 };

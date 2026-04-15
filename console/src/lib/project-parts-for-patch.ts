@@ -60,6 +60,16 @@ export const removePartByIdForPatch = (parts: unknown[], idToRemove: string): un
   return normalizePartsForPatchRequest(remaining);
 };
 
+const normalizeOptionalLayoutIdForPatch = (raw: unknown): string | null => {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  if (typeof raw === "string") {
+    return raw.length > 0 ? raw : null;
+  }
+  throw new Error(INVALID_PART_MESSAGE);
+};
+
 export const normalizePartsForPatchRequest = (parts: unknown[]): unknown[] => {
   return parts.map((part: unknown, index: number): unknown => {
     if (!isRecord(part)) {
@@ -72,10 +82,7 @@ export const normalizePartsForPatchRequest = (parts: unknown[]): unknown[] => {
     }
     const order: number = index;
     if (typeValue === "PLAIN") {
-      const layoutId: unknown = part.layout_id;
-      if (typeof layoutId !== "string") {
-        throw new Error(INVALID_PART_MESSAGE);
-      }
+      const layoutId: string | null = normalizeOptionalLayoutIdForPatch(part.layout_id);
       return {
         id,
         order,
@@ -85,32 +92,37 @@ export const normalizePartsForPatchRequest = (parts: unknown[]): unknown[] => {
       };
     }
     if (typeValue === "LYRICS") {
+      const lyricsLayoutId: string | null = normalizeOptionalLayoutIdForPatch(part.lyrics_layout_id);
+      const titleLayoutId: string | null = normalizeOptionalLayoutIdForPatch(part.title_layout_id);
       return {
         id,
         order,
         type: "LYRICS",
         contents: part.contents,
-        lyrics_layout_id: part.lyrics_layout_id,
-        title_layout_id: part.title_layout_id ?? null,
+        lyrics_layout_id: lyricsLayoutId,
+        title_layout_id: titleLayoutId,
       };
     }
     if (typeValue === "BIBLE") {
+      const phraseLayoutId: string | null = normalizeOptionalLayoutIdForPatch(part.phrase_layout_id);
+      const titleLayoutIdBible: string | null = normalizeOptionalLayoutIdForPatch(part.title_layout_id);
       return {
         id,
         order,
         type: "BIBLE",
         contents: part.contents,
-        phrase_layout_id: part.phrase_layout_id,
-        title_layout_id: part.title_layout_id ?? null,
+        phrase_layout_id: phraseLayoutId,
+        title_layout_id: titleLayoutIdBible,
       };
     }
     if (typeValue === "VALUE") {
+      const layoutId: string | null = normalizeOptionalLayoutIdForPatch(part.layout_id);
       return {
         id,
         order,
         type: "VALUE",
         contents: part.contents,
-        layout_id: part.layout_id,
+        layout_id: layoutId,
       };
     }
     throw new Error(INVALID_PART_MESSAGE);
@@ -193,8 +205,7 @@ const readShapeLayoutGeometry = (shape: unknown): ShapeLayoutGeometry | null => 
   ) {
     return null;
   }
-  const rotationDeg: number =
-    typeof rotationRaw === "number" && Number.isFinite(rotationRaw) ? rotationRaw : 0;
+  const rotationDeg: number = typeof rotationRaw === "number" && Number.isFinite(rotationRaw) ? rotationRaw : 0;
   return {
     layoutId,
     left: x,
@@ -329,9 +340,7 @@ export type SlideBoundsWithOrigin = {
  * Slide bounds for one layout entry: union of every shape that exposes geometry,
  * in the same coordinate space used for thumbnails and previews.
  */
-export const computeSlideBoundsWithOriginForLayoutEntry = (
-  entry: GetLayoutResponse
-): SlideBoundsWithOrigin | null => {
+export const computeSlideBoundsWithOriginForLayoutEntry = (entry: GetLayoutResponse): SlideBoundsWithOrigin | null => {
   let minLeft: number = Number.POSITIVE_INFINITY;
   let minTop: number = Number.POSITIVE_INFINITY;
   let maxRight: number = Number.NEGATIVE_INFINITY;
@@ -363,11 +372,7 @@ export const computeSlideBoundsWithOriginForLayoutEntry = (
   return { minLeft, minTop, widthPx, heightPx };
 };
 
-const readSolidFillFromShape = (shape: unknown): { cssColor: string; opacity: number } | null => {
-  if (!isRecord(shape)) {
-    return null;
-  }
-  const fillColor: unknown = shape.fill_color;
+const readSolidFillFromColorConfigUnknown = (fillColor: unknown): { cssColor: string; opacity: number } | null => {
   if (!isRecord(fillColor)) {
     return null;
   }
@@ -379,14 +384,25 @@ const readSolidFillFromShape = (shape: unknown): { cssColor: string; opacity: nu
   if (typeof color !== "string" || color.length === 0) {
     return null;
   }
-  const cssColor: string =
-    color.startsWith("#") || color.startsWith("rgb") ? color : `#${color}`;
+  const cssColor: string = color.startsWith("#") || color.startsWith("rgb") ? color : `#${color}`;
   const alphaRaw: unknown = fillColor.alpha;
   const opacity: number =
-    typeof alphaRaw === "number" && Number.isFinite(alphaRaw)
-      ? Math.min(1, Math.max(0, alphaRaw))
-      : 1;
+    typeof alphaRaw === "number" && Number.isFinite(alphaRaw) ? Math.min(1, Math.max(0, alphaRaw)) : 1;
   return { cssColor, opacity };
+};
+
+const readSolidFillFromShape = (shape: unknown): { cssColor: string; opacity: number } | null => {
+  if (!isRecord(shape)) {
+    return null;
+  }
+  return readSolidFillFromColorConfigUnknown(shape.fill_color);
+};
+
+/** Slide / layout background as a solid RGB fill for thumbnails (matches PPT slide background when solid). */
+export const readSlideBackgroundSolidFillFromLayoutEntry = (
+  entry: GetLayoutResponse
+): { cssColor: string; opacity: number } | null => {
+  return readSolidFillFromColorConfigUnknown(entry.background_color);
 };
 
 const readShapePlaceholderFlag = (shape: unknown): boolean => {
@@ -425,9 +441,7 @@ export type PlaceholderLabelRow = {
 };
 
 /** When several placeholders share the same base name, suffixes (1), (2), … keep labels distinct. */
-export const buildDisambiguatedPlaceholderLabelsByShapeKey = (
-  rows: PlaceholderLabelRow[]
-): Map<string, string> => {
+export const buildDisambiguatedPlaceholderLabelsByShapeKey = (rows: PlaceholderLabelRow[]): Map<string, string> => {
   const counts: Map<string, number> = new Map();
   for (const row of rows) {
     const prev: number = counts.get(row.baseLabel) ?? 0;
@@ -555,7 +569,9 @@ export const buildValuePartPlaceholderEditRows = (
     )
   );
   return descriptors.map(
-    (d: LayoutPlaceholderDescriptor): {
+    (
+      d: LayoutPlaceholderDescriptor
+    ): {
       shapeKey: string;
       placeholderName: string;
       displayLabel: string;
@@ -890,7 +906,7 @@ export const replacePartKindAtSortedIndex = (
   parts: unknown[],
   sortedIndex: number,
   kind: PartKindForCreate,
-  primaryLayoutId: string
+  primaryLayoutId: string | null
 ): { parts: unknown[]; infoNotice: string | null } => {
   const sorted: unknown[] = sortProjectPartsForDisplay(parts);
   const part: unknown | undefined = sorted[sortedIndex];
@@ -928,13 +944,15 @@ export const replacePartKindAtSortedIndex = (
     };
     return { parts: normalizePartsForPatchRequest(next), infoNotice: null };
   }
+  const lyricsOrBiblePrimaryLayoutId: string | null =
+    primaryLayoutId !== null && primaryLayoutId.length > 0 ? primaryLayoutId : null;
   if (kind === PART_KIND_FOR_CREATE.LYRICS) {
     const next: unknown[] = [...sorted];
     next[sortedIndex] = {
       id: idValue,
       type: "LYRICS",
       contents: createDefaultLyricsPartContentsPayload(),
-      lyrics_layout_id: primaryLayoutId,
+      lyrics_layout_id: lyricsOrBiblePrimaryLayoutId,
       title_layout_id: null,
     };
     return { parts: normalizePartsForPatchRequest(next), infoNotice: null };
@@ -952,13 +970,17 @@ export const replacePartKindAtSortedIndex = (
         },
       ],
     },
-    phrase_layout_id: primaryLayoutId,
+    phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
     title_layout_id: null,
   };
   return { parts: normalizePartsForPatchRequest(next), infoNotice: null };
 };
 
-export const appendNewPartForPatch = (parts: unknown[], kind: PartKindForCreate, layoutId: string): unknown[] => {
+export const appendNewPartForPatch = (
+  parts: unknown[],
+  kind: PartKindForCreate,
+  primaryLayoutId: string | null
+): unknown[] => {
   const normalized: unknown[] = normalizePartsForPatchRequest(parts);
   const order: number = normalized.length;
   const id: string = generateUlid();
@@ -968,7 +990,7 @@ export const appendNewPartForPatch = (parts: unknown[], kind: PartKindForCreate,
       order,
       type: "PLAIN",
       contents: { type: "PLAIN" },
-      layout_id: layoutId,
+      layout_id: primaryLayoutId,
     });
     return normalized;
   }
@@ -981,17 +1003,19 @@ export const appendNewPartForPatch = (parts: unknown[], kind: PartKindForCreate,
         type: "VALUE",
         contents: [{ placeholder_name: "value", value: null }],
       },
-      layout_id: layoutId,
+      layout_id: primaryLayoutId,
     });
     return normalized;
   }
+  const lyricsOrBiblePrimaryLayoutId: string | null =
+    primaryLayoutId !== null && primaryLayoutId.length > 0 ? primaryLayoutId : null;
   if (kind === PART_KIND_FOR_CREATE.LYRICS) {
     normalized.push({
       id,
       order,
       type: "LYRICS",
       contents: createDefaultLyricsPartContentsPayload(),
-      lyrics_layout_id: layoutId,
+      lyrics_layout_id: lyricsOrBiblePrimaryLayoutId,
       title_layout_id: null,
     });
     return normalized;
@@ -1009,7 +1033,7 @@ export const appendNewPartForPatch = (parts: unknown[], kind: PartKindForCreate,
         },
       ],
     },
-    phrase_layout_id: layoutId,
+    phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
     title_layout_id: null,
   });
   return normalized;
@@ -1029,9 +1053,7 @@ const pickRepresentativeLayoutIdFromEntry = (entry: GetLayoutResponse): string |
   return null;
 };
 
-export const listTemplateLayoutChoices = (
-  layouts: GetLayoutResponse[]
-): TemplateLayoutChoice[] => {
+export const listTemplateLayoutChoices = (layouts: GetLayoutResponse[]): TemplateLayoutChoice[] => {
   const choices: TemplateLayoutChoice[] = [];
   for (const entry of layouts) {
     const layoutId: string | null = pickRepresentativeLayoutIdFromEntry(entry);
@@ -1064,15 +1086,11 @@ export const getPrimaryLayoutIdFromPart = (part: unknown): string | null => {
   }
   if (typeValue === "LYRICS") {
     const lyricsLayoutId: unknown = part.lyrics_layout_id;
-    return typeof lyricsLayoutId === "string" && lyricsLayoutId.length > 0
-      ? lyricsLayoutId
-      : null;
+    return typeof lyricsLayoutId === "string" && lyricsLayoutId.length > 0 ? lyricsLayoutId : null;
   }
   if (typeValue === "BIBLE") {
     const phraseLayoutId: unknown = part.phrase_layout_id;
-    return typeof phraseLayoutId === "string" && phraseLayoutId.length > 0
-      ? phraseLayoutId
-      : null;
+    return typeof phraseLayoutId === "string" && phraseLayoutId.length > 0 ? phraseLayoutId : null;
   }
   return null;
 };
@@ -1082,12 +1100,7 @@ export const partSupportsPrimaryTemplateLayoutEdit = (part: unknown): boolean =>
     return false;
   }
   const typeValue: unknown = part.type;
-  return (
-    typeValue === "PLAIN" ||
-    typeValue === "VALUE" ||
-    typeValue === "LYRICS" ||
-    typeValue === "BIBLE"
-  );
+  return typeValue === "PLAIN" || typeValue === "VALUE" || typeValue === "LYRICS" || typeValue === "BIBLE";
 };
 
 export const getPrimaryTemplateLayoutFieldLabel = (part: unknown): string => {
@@ -1100,6 +1113,12 @@ export const getPrimaryTemplateLayoutFieldLabel = (part: unknown): string => {
   }
   if (typeValue === "BIBLE") {
     return "Phrase slide layout";
+  }
+  if (typeValue === "VALUE") {
+    return "Slide layout (value placeholders)";
+  }
+  if (typeValue === "PLAIN") {
+    return "Slide layout (fixed content)";
   }
   return "Slide layout";
 };

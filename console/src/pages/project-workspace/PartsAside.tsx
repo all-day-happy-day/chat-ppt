@@ -1,0 +1,249 @@
+import { createPortal } from 'react-dom';
+import type { MouseEvent, ReactElement, RefObject } from 'react';
+import { TemplateLayoutThumbnail } from '../../components/TemplateLayoutThumbnail';
+import {
+  findTemplateLayoutEntryByLayoutId,
+  getPartTypeLabel,
+  getPrimaryLayoutIdFromPart,
+  getProjectPartId,
+  getProjectPartStableKey,
+  PART_KIND_FOR_CREATE,
+} from '../../lib/project-parts-for-patch';
+import type { GetLayoutResponse } from '../../types/template-layout';
+import {
+  ADD_PART_KIND_MENU_ID,
+  ADD_PART_KIND_OPTION_CLASS,
+  ADD_PART_KIND_OPTIONS,
+  type AddPartKindOption,
+  CANVAS_PREVIEW_LYRICS_PART_LABEL,
+  PART_KIND_CHANGE_MENU_ID,
+} from './constants';
+import type { AddPartMenuAnchor } from './types';
+import { PartDeleteIcon } from './icons';
+import { readProjectPartType } from './utils';
+
+export type PartsAsideProps = {
+  projectPartsAsideRef: RefObject<HTMLElement | null>;
+  partsListThumbViewportRef: RefObject<HTMLDivElement | null>;
+  partsListMeasureRef: RefObject<HTMLDivElement | null>;
+  partsScrollSpacerRef: RefObject<HTMLDivElement | null>;
+  partsListScrollerRef: RefObject<HTMLDivElement | null>;
+  addPartTileRef: RefObject<HTMLButtonElement | null>;
+  partTypeMenuTriggerRef: RefObject<HTMLButtonElement | null>;
+  sortedParts: unknown[];
+  selectedPartIndex: number;
+  onSelectPartIndex: (index: number) => void;
+  templateLayouts: GetLayoutResponse[];
+  plainValueLayoutPreviewSuppressedPartIds: string[];
+  isPatchingParts: boolean;
+  isAddPartMenuOpen: boolean;
+  onToggleAddPartMenu: () => void;
+  addPartMenuAnchor: AddPartMenuAnchor | null;
+  partTypeMenuOpenIndex: number | null;
+  onPartTypeMenuButtonClick: (event: MouseEvent<HTMLButtonElement>, index: number) => void;
+  onDeletePartAtIndex: (index: number) => void;
+  onAddPartOfKind: (kind: AddPartKindOption['kind']) => void;
+  onPartsListRailScroll: () => void;
+};
+
+export const PartsAside = ({
+  projectPartsAsideRef,
+  partsListThumbViewportRef,
+  partsListMeasureRef,
+  partsScrollSpacerRef,
+  partsListScrollerRef,
+  addPartTileRef,
+  partTypeMenuTriggerRef,
+  sortedParts,
+  selectedPartIndex,
+  onSelectPartIndex,
+  templateLayouts,
+  plainValueLayoutPreviewSuppressedPartIds,
+  isPatchingParts,
+  isAddPartMenuOpen,
+  onToggleAddPartMenu,
+  addPartMenuAnchor,
+  partTypeMenuOpenIndex,
+  onPartTypeMenuButtonClick,
+  onDeletePartAtIndex,
+  onAddPartOfKind,
+  onPartsListRailScroll,
+}: PartsAsideProps): ReactElement => {
+  return (
+    <aside
+      ref={projectPartsAsideRef}
+      className="relative z-30 min-h-0 w-full shrink-0 overflow-hidden pb-3 sm:flex sm:h-full sm:max-h-full sm:w-auto sm:flex-row sm:items-stretch sm:gap-2 sm:self-stretch sm:pb-0"
+      aria-label="Project parts"
+    >
+      <div
+        ref={partsListThumbViewportRef}
+        className="flex min-h-0 min-w-0 w-full flex-1 flex-row gap-2 overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] sm:h-full sm:max-h-full sm:min-h-0 sm:w-48 sm:max-w-[12rem] sm:flex-col sm:overflow-hidden sm:overflow-x-hidden"
+      >
+        <div
+          ref={partsListMeasureRef}
+          className="flex w-max min-w-0 shrink-0 flex-row gap-2 sm:w-full sm:flex-col sm:gap-2"
+        >
+          {sortedParts.map((part: unknown, index: number) => {
+            const isSelected: boolean = index === selectedPartIndex;
+            const primaryLayoutId: string | null = getPrimaryLayoutIdFromPart(part);
+            const partTypeForThumb: string = readProjectPartType(part);
+            const isPlainOrValuePart: boolean =
+              partTypeForThumb === PART_KIND_FOR_CREATE.PLAIN || partTypeForThumb === PART_KIND_FOR_CREATE.VALUE;
+            const isLyricsPartForThumb: boolean = partTypeForThumb === PART_KIND_FOR_CREATE.LYRICS;
+            const partIdForThumb: string | null = getProjectPartId(part);
+            const suppressThumb: boolean =
+              partIdForThumb !== null &&
+              plainValueLayoutPreviewSuppressedPartIds.includes(partIdForThumb) &&
+              isPlainOrValuePart;
+            const effectivePrimaryLayoutId: string | null =
+              isLyricsPartForThumb || suppressThumb ? null : primaryLayoutId;
+            const thumbLayoutEntry: GetLayoutResponse | null =
+              effectivePrimaryLayoutId !== null
+                ? findTemplateLayoutEntryByLayoutId(templateLayouts, effectivePrimaryLayoutId)
+                : null;
+            const partTypeLabel: string = getPartTypeLabel(part);
+            return (
+              <div
+                key={getProjectPartStableKey(part, index)}
+                className={`relative shrink-0 rounded-lg sm:w-full ${
+                  isSelected ? 'ring-2 ring-[#0071e3]/35 dark:ring-[#0a84ff]/40' : ''
+                }`}
+              >
+                <div
+                  className={`flex w-full flex-col rounded-lg border text-left transition ${
+                    isSelected
+                      ? 'border-[#0071e3] bg-white shadow-sm dark:border-[#0a84ff] dark:bg-[#2c2c2e]'
+                      : 'border-black/[0.08] bg-white/90 hover:border-black/[0.14] dark:border-white/[0.1] dark:bg-[#1c1c1e]/90 dark:hover:border-white/[0.16]'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className="flex w-full flex-col gap-1 rounded-t-lg p-2 pb-1 text-left outline-none transition hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                    onClick={() => {
+                      onSelectPartIndex(index);
+                    }}
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden rounded-md bg-neutral-200/90 dark:bg-neutral-800/90">
+                      {isLyricsPartForThumb ? (
+                        <div className="flex h-full w-full items-center justify-center px-1" role="status">
+                          <span className="text-center text-[10px] font-medium leading-tight text-neutral-500 dark:text-neutral-400">
+                            {CANVAS_PREVIEW_LYRICS_PART_LABEL}
+                          </span>
+                        </div>
+                      ) : thumbLayoutEntry !== null ? (
+                        <TemplateLayoutThumbnail
+                          key={`part-thumb-${getProjectPartId(part) ?? `idx-${String(index)}`}-${effectivePrimaryLayoutId ?? 'nolayout'}`}
+                          entry={thumbLayoutEntry}
+                          className="block h-full w-full"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-neutral-600 dark:text-neutral-300">
+                          {index + 1}
+                        </div>
+                      )}
+                      <span
+                        className="pointer-events-none absolute left-1 top-1 rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold text-white"
+                        aria-hidden
+                      >
+                        {index + 1}
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    ref={partTypeMenuOpenIndex === index ? partTypeMenuTriggerRef : undefined}
+                    className="w-full truncate rounded-b-lg px-2 pb-2 pt-0 text-left text-[11px] font-medium uppercase tracking-wide text-neutral-500 outline-none transition hover:bg-black/[0.02] hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-white/[0.03] dark:hover:text-neutral-200 dark:focus-visible:ring-[#0a84ff]"
+                    aria-haspopup="menu"
+                    aria-expanded={partTypeMenuOpenIndex === index}
+                    aria-controls={PART_KIND_CHANGE_MENU_ID}
+                    disabled={isPatchingParts}
+                    onClick={(event: MouseEvent<HTMLButtonElement>): void => {
+                      onPartTypeMenuButtonClick(event, index);
+                    }}
+                  >
+                    {partTypeLabel}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-md border border-black/[0.06] bg-white/95 text-neutral-500 shadow-sm outline-none transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:opacity-40 dark:border-white/[0.1] dark:bg-[#2c2c2e]/95 dark:text-neutral-400 dark:hover:border-red-500/40 dark:hover:bg-red-500/15 dark:hover:text-red-400 dark:focus-visible:ring-[#0a84ff]"
+                  aria-label={`Delete part ${String(index + 1)}`}
+                  disabled={isPatchingParts}
+                  onClick={(event: MouseEvent<HTMLButtonElement>): void => {
+                    event.stopPropagation();
+                    onDeletePartAtIndex(index);
+                  }}
+                >
+                  <PartDeleteIcon />
+                </button>
+              </div>
+            );
+          })}
+          <div className="relative z-40 shrink-0 sm:w-full">
+            <button
+              ref={addPartTileRef}
+              type="button"
+              className="flex w-full flex-col gap-1 rounded-lg border border-dashed border-neutral-300 bg-white/70 p-2 text-left outline-none transition hover:border-neutral-400 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-[#1c1c1e]/70 dark:hover:border-neutral-500 dark:hover:bg-[#2c2c2e]"
+              aria-expanded={isAddPartMenuOpen}
+              aria-controls={ADD_PART_KIND_MENU_ID}
+              aria-haspopup="menu"
+              aria-label="Add part"
+              disabled={isPatchingParts}
+              onClick={onToggleAddPartMenu}
+            >
+              <div className="flex aspect-video w-full items-center justify-center rounded-md bg-neutral-100/90 dark:bg-neutral-800/60">
+                {isPatchingParts ? (
+                  <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">…</span>
+                ) : (
+                  <span className="text-[26px] font-light leading-none text-[#0071e3] dark:text-[#0a84ff]">+</span>
+                )}
+              </div>
+              <span className="pointer-events-none block min-h-[14px]" aria-hidden />
+            </button>
+            {isAddPartMenuOpen && addPartMenuAnchor !== null
+              ? createPortal(
+                  <div
+                    id={ADD_PART_KIND_MENU_ID}
+                    role="menu"
+                    aria-label="Part type"
+                    className="fixed z-[500] rounded-xl border border-black/[0.1] bg-white py-1 shadow-[0_12px_40px_rgba(0,0,0,0.22)] dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)]"
+                    style={{
+                      top: addPartMenuAnchor.topPx,
+                      left: addPartMenuAnchor.leftPx,
+                      width: addPartMenuAnchor.widthPx,
+                      maxHeight: `${addPartMenuAnchor.maxHeightPx}px`,
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {ADD_PART_KIND_OPTIONS.map((row: AddPartKindOption) => (
+                      <button
+                        key={row.kind}
+                        type="button"
+                        role="menuitem"
+                        className={ADD_PART_KIND_OPTION_CLASS}
+                        disabled={isPatchingParts}
+                        onClick={() => {
+                          onAddPartOfKind(row.kind);
+                        }}
+                      >
+                        <span className="font-medium text-neutral-900 dark:text-neutral-50">{row.label}</span>
+                      </button>
+                    ))}
+                  </div>,
+                  document.body
+                )
+              : null}
+          </div>
+        </div>
+      </div>
+      <div
+        ref={partsListScrollerRef}
+        className="hidden min-h-0 w-3 shrink-0 touch-pan-y overflow-y-auto overflow-x-hidden sm:block"
+        aria-label="Scroll project parts"
+        onScroll={onPartsListRailScroll}
+      >
+        <div ref={partsScrollSpacerRef} className="pointer-events-none w-px shrink-0" />
+      </div>
+    </aside>
+  );
+};

@@ -1,9 +1,6 @@
 import { forwardRef, useCallback, type ChangeEvent } from "react";
 import type { TemplateLayoutChoice } from "../lib/project-parts-for-patch";
-import {
-  PART_EDIT_LAYOUT_PALETTE_MENU_ID,
-  TemplateLayoutGalleryPicker,
-} from "./TemplateLayoutGalleryPicker";
+import { PART_EDIT_LAYOUT_PALETTE_MENU_ID, TemplateLayoutGalleryPicker } from "./TemplateLayoutGalleryPicker";
 
 export { PART_EDIT_LAYOUT_PALETTE_MENU_ID } from "./TemplateLayoutGalleryPicker";
 
@@ -31,7 +28,7 @@ export type PartEditPanelProps = {
   layoutFieldLabel: string;
   layoutChoices: TemplateLayoutChoice[];
   selectedLayoutId: string | null;
-  onSelectLayoutId: (layoutId: string) => void;
+  onSelectLayoutId: (layoutId: string | null) => void;
   isSaveDisabled: boolean;
   isSaving: boolean;
   onSave: () => void;
@@ -70,9 +67,7 @@ export const PartEditPanel = forwardRef<HTMLElement, PartEditPanelProps>(functio
 ) {
   const handleSelectLayoutFromGallery = useCallback(
     (layoutId: string | null): void => {
-      if (layoutId !== null) {
-        onSelectLayoutId(layoutId);
-      }
+      onSelectLayoutId(layoutId);
     },
     [onSelectLayoutId]
   );
@@ -128,7 +123,10 @@ export const PartEditPanel = forwardRef<HTMLElement, PartEditPanelProps>(functio
                 <ul className="mt-2 space-y-3">
                   {valuePlaceholderRows.map((row: ValuePlaceholderEditorRow) => (
                     <li key={row.shapeKey}>
-                      <label htmlFor={row.inputId} className="block text-[11px] font-medium text-neutral-700 dark:text-neutral-200">
+                      <label
+                        htmlFor={row.inputId}
+                        className="block text-[11px] font-medium text-neutral-700 dark:text-neutral-200"
+                      >
                         {row.fieldLabel}
                       </label>
                       <input
@@ -157,7 +155,7 @@ export const PartEditPanel = forwardRef<HTMLElement, PartEditPanelProps>(functio
               layoutChoices={layoutChoices}
               selectedLayoutId={selectedLayoutId}
               onSelectLayout={handleSelectLayoutFromGallery}
-              showNoneChoiceInGallery={false}
+              showNoneChoiceInGallery={true}
             />
             {showClearLayoutSelectionControl && onClearLayoutSelection !== undefined ? (
               <button

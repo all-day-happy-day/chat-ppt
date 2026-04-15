@@ -65,8 +65,8 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
 ) {
   const handleSongTitleChange = useCallback(
     (index: number, value: string): void => {
-      const next: LyricsSongRow[] = songs.map((row: LyricsSongRow, i: number): LyricsSongRow =>
-        i === index ? { ...row, title: value } : row
+      const next: LyricsSongRow[] = songs.map(
+        (row: LyricsSongRow, i: number): LyricsSongRow => (i === index ? { ...row, title: value } : row)
       );
       onSongsChange(next);
     },
@@ -75,8 +75,8 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
 
   const handleSongArtistChange = useCallback(
     (index: number, value: string): void => {
-      const next: LyricsSongRow[] = songs.map((row: LyricsSongRow, i: number): LyricsSongRow =>
-        i === index ? { ...row, artist: value } : row
+      const next: LyricsSongRow[] = songs.map(
+        (row: LyricsSongRow, i: number): LyricsSongRow => (i === index ? { ...row, artist: value } : row)
       );
       onSongsChange(next);
     },
@@ -85,8 +85,9 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
 
   const handleSongPickFromLibrary = useCallback(
     (index: number, pickedTitle: string, pickedArtist: string): void => {
-      const next: LyricsSongRow[] = songs.map((row: LyricsSongRow, i: number): LyricsSongRow =>
-        i === index ? { title: pickedTitle, artist: pickedArtist } : row
+      const next: LyricsSongRow[] = songs.map(
+        (row: LyricsSongRow, i: number): LyricsSongRow =>
+          i === index ? { title: pickedTitle, artist: pickedArtist } : row
       );
       onSongsChange(next);
     },
@@ -170,6 +171,7 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
               selectedLayoutId={titleLayoutId}
               onSelectLayout={handleTitleLayoutFromGallery}
               showNoneChoiceInGallery
+              noneChoiceTileLabel="No title layout"
             />
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">

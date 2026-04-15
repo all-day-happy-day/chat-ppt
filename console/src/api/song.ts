@@ -19,8 +19,7 @@ const readSongListItem = (value: unknown): SongListItem | null => {
     return null;
   }
   const id: string = typeof idValue === "string" && idValue.length > 0 ? idValue : title;
-  const artist: string | null =
-    typeof artistValue === "string" && artistValue.length > 0 ? artistValue : null;
+  const artist: string | null = typeof artistValue === "string" && artistValue.length > 0 ? artistValue : null;
   return { id, title, artist };
 };
 
