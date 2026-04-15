@@ -11,6 +11,7 @@ from app.di.application.usecase import (
     get_patch_song_use_case,
     get_scrape_lyrics_use_case,
 )
+from app.shared.song.domain.exception import DuplicatedPartName
 from app.shared.song.domain.valueobject import Lyrics
 from app.song.application.usecase import (
     DeleteSongUseCase,
@@ -93,6 +94,8 @@ def patch_lyrics(
         return PatchLyricsResponse(lyrics=lyrics)
     except LyricsNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except DuplicatedPartName as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.delete("/{song_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -1,0 +1,2 @@
+class DuplicatedPartName(Exception):
+    pass
