@@ -48,6 +48,7 @@ from app.project.application.usecase import (
     ExportPPTUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
+    InsertPartUseCase,
     PatchProjectContainerUseCase,
     PatchProjectUseCase,
 )
@@ -340,3 +341,9 @@ def get_export_ppt_use_case(
         template_file_repository=template_file_repository,
         presentation_service=presentation_service,
     )
+
+
+def get_insert_part_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> InsertPartUseCase:
+    return InsertPartUseCase(project_repository=project_repository)
