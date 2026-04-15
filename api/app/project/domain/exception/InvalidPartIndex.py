@@ -1,0 +1,2 @@
+class InvalidPartIndex(Exception):
+    pass
