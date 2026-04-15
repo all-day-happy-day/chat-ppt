@@ -5,6 +5,9 @@ export const WORKSPACE_LOAD_NETWORK_FALLBACK: string =
 
 export const ADD_PART_KIND_MENU_ID: string = 'project-add-part-kind-menu';
 
+/** Marks controls that open the add-part menu (gaps + end tile) for outside-click handling. */
+export const ADD_PART_MENU_ANCHOR_SELECTOR: string = '[data-project-add-part-menu-anchor]';
+
 export const PART_KIND_CHANGE_MENU_ID: string = 'project-part-kind-change-menu';
 
 export const CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS: string = 'min-h-32';

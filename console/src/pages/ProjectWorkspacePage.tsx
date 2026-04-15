@@ -13,6 +13,7 @@ import { isSignInRequiredError } from "../lib/auth-errors";
 import {
   appendNewPartForPatch,
   applyPlainValueLayoutReconcileToNormalizedParts,
+  moveSortedPartToSortedIndex,
   buildValuePartContentsPayloadFromFieldRows,
   buildValuePartPlaceholderEditRows,
   computeSlideBoundsPxForLayoutIds,
@@ -46,6 +47,7 @@ import type { GetProjectResponse } from "../types/project";
 import type { GetUserResponse } from "../types/user";
 import {
   ADD_PART_KIND_MENU_ID,
+  ADD_PART_MENU_ANCHOR_SELECTOR,
   ADD_PART_MENU_FALLBACK_HEIGHT_PX,
   ADD_PART_MENU_MAX_WIDTH_PX,
   ADD_PART_MENU_MIN_SCROLL_HEIGHT_PX,
@@ -113,6 +115,8 @@ export const ProjectWorkspacePage = () => {
   const [isAddPartMenuOpen, setIsAddPartMenuOpen] = useState<boolean>(false);
   const [addPartMenuAnchor, setAddPartMenuAnchor] = useState<AddPartMenuAnchor | null>(null);
   const addPartTileRef = useRef<HTMLButtonElement | null>(null);
+  const addPartMenuTriggerRef = useRef<HTMLElement | null>(null);
+  const addPartInsertBeforeRef = useRef<number>(0);
   const partsListThumbViewportRef = useRef<HTMLDivElement | null>(null);
   const partsListMeasureRef = useRef<HTMLDivElement | null>(null);
   const partsScrollSpacerRef = useRef<HTMLDivElement | null>(null);
@@ -509,11 +513,11 @@ export const ProjectWorkspacePage = () => {
   }, []);
 
   const updateAddPartMenuAnchor = useCallback((): void => {
-    const tile: HTMLButtonElement | null = addPartTileRef.current;
-    if (tile === null) {
+    const anchor: HTMLElement | null = addPartMenuTriggerRef.current;
+    if (anchor === null) {
       return;
     }
-    const rect: DOMRect = tile.getBoundingClientRect();
+    const rect: DOMRect = anchor.getBoundingClientRect();
     const gutter: number = ADD_PART_MENU_VIEWPORT_GUTTER_PX;
     const widthPx: number = Math.min(ADD_PART_MENU_MAX_WIDTH_PX, window.innerWidth - gutter * 2);
     let leftPx: number = rect.left;
@@ -673,6 +677,7 @@ export const ProjectWorkspacePage = () => {
 
   useLayoutEffect(() => {
     if (!isAddPartMenuOpen) {
+      addPartMenuTriggerRef.current = null;
       setAddPartMenuAnchor(null);
       return;
     }
@@ -698,9 +703,9 @@ export const ProjectWorkspacePage = () => {
       resizeObserver = new ResizeObserver(() => {
         updateAddPartMenuAnchor();
       });
-      const tileNode: HTMLButtonElement | null = addPartTileRef.current;
-      if (tileNode !== null) {
-        resizeObserver.observe(tileNode);
+      const anchorNode: HTMLElement | null = addPartMenuTriggerRef.current;
+      if (anchorNode !== null) {
+        resizeObserver.observe(anchorNode);
       }
       if (scroller !== null) {
         resizeObserver.observe(scroller);
@@ -735,14 +740,14 @@ export const ProjectWorkspacePage = () => {
       if (!(event.target instanceof Node)) {
         return;
       }
-      const tile: HTMLButtonElement | null = addPartTileRef.current;
-      const menuEl: HTMLElement | null = document.getElementById(ADD_PART_KIND_MENU_ID);
-      if (tile !== null && tile.contains(event.target)) {
+      if (event.target instanceof Element && event.target.closest(ADD_PART_MENU_ANCHOR_SELECTOR) !== null) {
         return;
       }
+      const menuEl: HTMLElement | null = document.getElementById(ADD_PART_KIND_MENU_ID);
       if (menuEl !== null && menuEl.contains(event.target)) {
         return;
       }
+      addPartMenuTriggerRef.current = null;
       setIsAddPartMenuOpen(false);
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
@@ -758,6 +763,7 @@ export const ProjectWorkspacePage = () => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
         event.preventDefault();
+        addPartMenuTriggerRef.current = null;
         setIsAddPartMenuOpen(false);
       }
     };
@@ -786,6 +792,69 @@ export const ProjectWorkspacePage = () => {
     }
     return sortProjectPartsForDisplay(project.parts);
   }, [project]);
+
+  const openAddPartMenu = useCallback((anchor: HTMLElement, insertBeforeSortedIndex: number): void => {
+    setPartTypeMenuOpenIndex(null);
+    addPartMenuTriggerRef.current = anchor;
+    addPartInsertBeforeRef.current = insertBeforeSortedIndex;
+    setIsAddPartMenuOpen(true);
+  }, []);
+
+  const toggleAddPartMenuAtEnd = useCallback((): void => {
+    setPartTypeMenuOpenIndex(null);
+    const tile: HTMLButtonElement | null = addPartTileRef.current;
+    if (tile === null) {
+      return;
+    }
+    const endIndex: number = sortedParts.length;
+    if (isAddPartMenuOpen && addPartMenuTriggerRef.current === tile && addPartInsertBeforeRef.current === endIndex) {
+      addPartMenuTriggerRef.current = null;
+      setIsAddPartMenuOpen(false);
+      return;
+    }
+    addPartMenuTriggerRef.current = tile;
+    addPartInsertBeforeRef.current = endIndex;
+    setIsAddPartMenuOpen(true);
+  }, [isAddPartMenuOpen, sortedParts.length]);
+
+  const handleReorderSortedParts = useCallback(
+    (fromSortedIndex: number, toSortedIndex: number): void => {
+      if (project === null || fromSortedIndex === toSortedIndex) {
+        return;
+      }
+      const ordered: unknown[] = sortProjectPartsForDisplay(project.parts);
+      const movedPart: unknown | undefined = ordered[fromSortedIndex];
+      const movedId: string | null = movedPart !== undefined ? getProjectPartId(movedPart) : null;
+      void (async (): Promise<void> => {
+        setPartActionError(null);
+        setPartPlainValueNotice(null);
+        setIsPatchingParts(true);
+        try {
+          const partsPayload: unknown[] = moveSortedPartToSortedIndex(project.parts, fromSortedIndex, toSortedIndex);
+          const updated: GetProjectResponse = await patchProjectById(project.id, {
+            parts: partsPayload,
+          });
+          setProject(updated);
+          if (movedId !== null) {
+            const nextSorted: unknown[] = sortProjectPartsForDisplay(updated.parts);
+            const nextIndex: number = nextSorted.findIndex((p: unknown): boolean => getProjectPartId(p) === movedId);
+            setSelectedPartIndex(nextIndex >= 0 ? nextIndex : 0);
+          }
+        } catch (error: unknown) {
+          if (isSignInRequiredError(error)) {
+            handleSessionExpiredNavigation();
+            return;
+          }
+          const message: string =
+            error instanceof Error ? error.message : "Could not reorder parts. Try again after refreshing.";
+          setPartActionError(message);
+        } finally {
+          setIsPatchingParts(false);
+        }
+      })();
+    },
+    [project, handleSessionExpiredNavigation]
+  );
 
   const templateLayoutChoices: TemplateLayoutChoice[] = useMemo((): TemplateLayoutChoice[] => {
     return listTemplateLayoutChoices(templateLayouts);
@@ -897,18 +966,26 @@ export const ProjectWorkspacePage = () => {
       if (project === null) {
         return;
       }
+      const insertBeforeSortedIndex: number = addPartInsertBeforeRef.current;
       setIsAddPartMenuOpen(false);
+      addPartMenuTriggerRef.current = null;
       void (async (): Promise<void> => {
         setPartActionError(null);
         setPartPlainValueNotice(null);
         setIsPatchingParts(true);
         try {
-          const partsPayload: unknown[] = appendNewPartForPatch(project.parts, kind, null);
+          const partsPayload: unknown[] = appendNewPartForPatch(
+            project.parts,
+            kind,
+            null,
+            insertBeforeSortedIndex
+          );
           const updated: GetProjectResponse = await patchProjectById(project.id, {
             parts: partsPayload,
           });
           setProject(updated);
-          setSelectedPartIndex(partsPayload.length - 1);
+          const selectIdx: number = Math.max(0, Math.min(insertBeforeSortedIndex, partsPayload.length - 1));
+          setSelectedPartIndex(selectIdx);
         } catch (error: unknown) {
           if (isSignInRequiredError(error)) {
             handleSessionExpiredNavigation();
@@ -975,13 +1052,9 @@ export const ProjectWorkspacePage = () => {
     [project, handleSessionExpiredNavigation]
   );
 
-  const handleToggleAddPartMenu = useCallback((): void => {
-    setPartTypeMenuOpenIndex(null);
-    setIsAddPartMenuOpen((open: boolean): boolean => !open);
-  }, []);
-
   const handlePartTypeMenuButtonClick = useCallback((event: MouseEvent<HTMLButtonElement>, index: number): void => {
     event.stopPropagation();
+    addPartMenuTriggerRef.current = null;
     setIsAddPartMenuOpen(false);
     setSelectedPartIndex(index);
     setPartTypeMenuOpenIndex((open: number | null): number | null => (open === index ? null : index));
@@ -1558,7 +1631,7 @@ export const ProjectWorkspacePage = () => {
         return;
       }
       const layoutId: string | null = getPrimaryLayoutIdFromPart(part);
-      const resolvedLayoutId: string | null = layoutId ?? defaultLayoutId;
+      const resolvedLayoutId: string | null = layoutId;
       setPartTypeMenuOpenIndex(null);
       if (isPlainValuePartKindCrossover(currentType, kind)) {
         const nextPending: PendingPartKindChangeConfirm = {
@@ -1584,7 +1657,7 @@ export const ProjectWorkspacePage = () => {
       }
       applyPartKindChange(openIndex, kind, resolvedLayoutId);
     },
-    [project, partTypeMenuOpenIndex, sortedParts, defaultLayoutId, applyPartKindChange]
+    [project, partTypeMenuOpenIndex, sortedParts, applyPartKindChange]
   );
 
   useEffect(() => {
@@ -1889,12 +1962,14 @@ export const ProjectWorkspacePage = () => {
               plainValueLayoutPreviewSuppressedPartIds={plainValueLayoutPreviewSuppressedPartIds}
               isPatchingParts={isPatchingParts}
               isAddPartMenuOpen={isAddPartMenuOpen}
-              onToggleAddPartMenu={handleToggleAddPartMenu}
+              onOpenAddPartMenu={openAddPartMenu}
+              onToggleAddPartMenuAtEnd={toggleAddPartMenuAtEnd}
               addPartMenuAnchor={addPartMenuAnchor}
               partTypeMenuOpenIndex={partTypeMenuOpenIndex}
               onPartTypeMenuButtonClick={handlePartTypeMenuButtonClick}
               onDeletePartAtIndex={handleDeletePartAtIndex}
               onAddPartOfKind={handleAddPartOfKind}
+              onReorderSortedParts={handleReorderSortedParts}
               onPartsListRailScroll={handlePartsListRailScroll}
             />
             <WorkspaceCanvasEditorColumn

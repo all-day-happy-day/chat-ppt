@@ -976,67 +976,92 @@ export const replacePartKindAtSortedIndex = (
   return { parts: normalizePartsForPatchRequest(next), infoNotice: null };
 };
 
+export const moveSortedPartToSortedIndex = (
+  parts: unknown[],
+  fromSortedIndex: number,
+  toSortedIndex: number
+): unknown[] => {
+  const sorted: unknown[] = sortProjectPartsForDisplay(parts);
+  const len: number = sorted.length;
+  if (len === 0) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  if (fromSortedIndex < 0 || fromSortedIndex >= len) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  const clampedTo: number = Math.max(0, Math.min(Math.floor(toSortedIndex), len - 1));
+  if (fromSortedIndex === clampedTo) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  const next: unknown[] = [...sorted];
+  const removedSlice: unknown[] = next.splice(fromSortedIndex, 1);
+  const moved: unknown | undefined = removedSlice[0];
+  if (moved === undefined) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  next.splice(clampedTo, 0, moved);
+  return normalizePartsForPatchRequest(next);
+};
+
 export const appendNewPartForPatch = (
   parts: unknown[],
   kind: PartKindForCreate,
-  primaryLayoutId: string | null
+  primaryLayoutId: string | null,
+  insertBeforeSortedIndex?: number
 ): unknown[] => {
-  const normalized: unknown[] = normalizePartsForPatchRequest(parts);
-  const order: number = normalized.length;
+  const sorted: unknown[] = sortProjectPartsForDisplay(parts);
+  const maxInsert: number = sorted.length;
+  const rawInsert: number = insertBeforeSortedIndex === undefined ? maxInsert : insertBeforeSortedIndex;
+  const insertAt: number = Math.max(0, Math.min(Math.floor(rawInsert), maxInsert));
   const id: string = generateUlid();
+  const lyricsOrBiblePrimaryLayoutId: string | null =
+    primaryLayoutId !== null && primaryLayoutId.length > 0 ? primaryLayoutId : null;
+  let newPart: unknown;
   if (kind === PART_KIND_FOR_CREATE.PLAIN) {
-    normalized.push({
+    newPart = {
       id,
-      order,
       type: "PLAIN",
       contents: { type: "PLAIN" },
       layout_id: primaryLayoutId,
-    });
-    return normalized;
-  }
-  if (kind === PART_KIND_FOR_CREATE.VALUE) {
-    normalized.push({
+    };
+  } else if (kind === PART_KIND_FOR_CREATE.VALUE) {
+    newPart = {
       id,
-      order,
       type: "VALUE",
       contents: {
         type: "VALUE",
         contents: [{ placeholder_name: "value", value: null }],
       },
       layout_id: primaryLayoutId,
-    });
-    return normalized;
-  }
-  const lyricsOrBiblePrimaryLayoutId: string | null =
-    primaryLayoutId !== null && primaryLayoutId.length > 0 ? primaryLayoutId : null;
-  if (kind === PART_KIND_FOR_CREATE.LYRICS) {
-    normalized.push({
+    };
+  } else if (kind === PART_KIND_FOR_CREATE.LYRICS) {
+    newPart = {
       id,
-      order,
       type: "LYRICS",
       contents: createDefaultLyricsPartContentsPayload(),
       lyrics_layout_id: lyricsOrBiblePrimaryLayoutId,
       title_layout_id: null,
-    });
-    return normalized;
-  }
-  normalized.push({
-    id,
-    order,
-    type: "BIBLE",
-    contents: {
+    };
+  } else {
+    newPart = {
+      id,
       type: "BIBLE",
-      contents: [
-        {
-          start: { version: "NIV", book: "John", chapter: 3, verse: 16 },
-          end: null,
-        },
-      ],
-    },
-    phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
-    title_layout_id: null,
-  });
-  return normalized;
+      contents: {
+        type: "BIBLE",
+        contents: [
+          {
+            start: { version: "NIV", book: "John", chapter: 3, verse: 16 },
+            end: null,
+          },
+        ],
+      },
+      phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
+      title_layout_id: null,
+    };
+  }
+  const next: unknown[] = [...sorted];
+  next.splice(insertAt, 0, newPart);
+  return normalizePartsForPatchRequest(next);
 };
 
 export type TemplateLayoutChoice = {
