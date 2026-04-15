@@ -117,8 +117,8 @@ def resolve_layout_background_color(slide_layout: SlideLayout) -> ColorConfig:
         return ColorConfig(color_type="none", color=None, alpha=None)
 
     # Get Theme Background Color
-    if slide_layout.background.fill.type == MSO_FILL_TYPE.SOLID:
-        theme_background_color_fill: ColorFormat = slide_layout.background.fill.fore_color
+    if slide_layout.slide_master.background.fill.type == MSO_FILL_TYPE.SOLID:
+        theme_background_color_fill: ColorFormat = slide_layout.slide_master.background.fill.fore_color
         theme_background_color_code, _ = _solid_color_resolver(
             color=theme_background_color_fill, theme_color=theme_color
         )
@@ -137,3 +137,21 @@ def resolve_shape_fill_color(shape: BaseShape, theme_color: _ThemeColor) -> Colo
             return ColorConfig(color_type="none", color=None, alpha=None)
     else:
         return ColorConfig(color_type="none", color=None, alpha=None)
+
+
+if __name__ == "__main__":
+    from pptx import Presentation
+    from pptx.presentation import Presentation as PresentationType
+
+    from app.powerpoint.infrastructure.service.PPTXTemplateReadService import PPTXTemplateReadService
+
+    ppt_service: PPTXTemplateReadService = PPTXTemplateReadService()
+    ppt: PresentationType = Presentation(pptx="./thepureum-template.pptx")
+    for slide_layout in ppt_service._get_template_slide_layouts(ppt=ppt):
+        if slide_layout.name != "worshiplyrics":
+            continue
+
+        print(slide_layout.name)
+        print(resolve_layout_background_color(slide_layout=slide_layout))
+        print("-" * 100)
+        print()
