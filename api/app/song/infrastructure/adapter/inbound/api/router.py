@@ -68,6 +68,8 @@ def get_lyrics(song_id: ULID, usecase: Annotated[GetLyricsUseCase, Depends(get_g
         return GetLyricsResponse(song=song, lyrics=lyrics)
     except LyricsNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except DuplicatedPartName as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.patch("/{song_id}", status_code=status.HTTP_200_OK, response_model=PatchSongResponse)
