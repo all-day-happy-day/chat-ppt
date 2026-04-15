@@ -12,5 +12,5 @@ from .BasePart import BasePart
 class BiblePart(BasePart):
     type: Literal[PartType.BIBLE] = Field(default=PartType.BIBLE)
     contents: BibleContents
-    phrase_layout_id: ULID
+    phrase_layout_id: ULID | None = None
     title_layout_id: ULID | None = None

@@ -12,5 +12,5 @@ from .BasePart import BasePart
 class LyricsPart(BasePart):
     type: Literal[PartType.LYRICS] = Field(default=PartType.LYRICS)
     contents: LyricsContents
-    lyrics_layout_id: ULID
+    lyrics_layout_id: ULID | None = None
     title_layout_id: ULID | None = None

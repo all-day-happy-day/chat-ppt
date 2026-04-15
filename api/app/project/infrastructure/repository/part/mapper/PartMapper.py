@@ -1,3 +1,6 @@
+from collections.abc import Mapping
+from typing import Any
+
 from ulid import ULID
 
 from app.project.domain.entity import BiblePart, LyricsPart, PlainPart, ValuePart
@@ -9,8 +12,16 @@ from app.project.infrastructure.repository.part.entity import PartAlchemyEntity
 
 class PartMapper:
     @staticmethod
+    def _optional_ulid_from_additional_data(data: Mapping[str, Any], key: str) -> ULID | None:
+        raw: Any | None = data.get(key)
+        if not isinstance(raw, str) or len(raw) == 0:
+            return None
+        return ULID.from_str(raw)
+
+    @staticmethod
     def to_domain_entity(alchemy_entity: PartAlchemyEntity) -> Parts:
         if alchemy_entity.type == PartType.BIBLE:
+            additional: Mapping[str, Any] = alchemy_entity.additional_data
             return BiblePart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
@@ -19,12 +30,11 @@ class PartMapper:
                 ),
                 order=alchemy_entity.order,
                 contents=BibleContents(**alchemy_entity.contents),
-                phrase_layout_id=ULID.from_str(alchemy_entity.additional_data.get("phrase_layout_id")),
-                title_layout_id=ULID.from_str(alchemy_entity.additional_data.get("title_layout_id"))
-                if alchemy_entity.additional_data["title_layout_id"] is not None
-                else None,
+                phrase_layout_id=PartMapper._optional_ulid_from_additional_data(additional, "phrase_layout_id"),
+                title_layout_id=PartMapper._optional_ulid_from_additional_data(additional, "title_layout_id"),
             )
         elif alchemy_entity.type == PartType.LYRICS:
+            additional_lyrics: Mapping[str, Any] = alchemy_entity.additional_data
             return LyricsPart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
@@ -33,10 +43,8 @@ class PartMapper:
                 ),
                 order=alchemy_entity.order,
                 contents=LyricsContents(**alchemy_entity.contents),
-                lyrics_layout_id=ULID.from_str(alchemy_entity.additional_data.get("lyrics_layout_id")),
-                title_layout_id=ULID.from_str(alchemy_entity.additional_data.get("title_layout_id"))
-                if alchemy_entity.additional_data["title_layout_id"] is not None
-                else None,
+                lyrics_layout_id=PartMapper._optional_ulid_from_additional_data(additional_lyrics, "lyrics_layout_id"),
+                title_layout_id=PartMapper._optional_ulid_from_additional_data(additional_lyrics, "title_layout_id"),
             )
         elif alchemy_entity.type == PartType.PLAIN:
             layout_raw: str | None = alchemy_entity.additional_data.get("layout_id")

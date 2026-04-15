@@ -15,14 +15,14 @@ class BasePartRequest(BaseModel):
 class BiblePartRequest(BasePartRequest):
     type: Literal[PartType.BIBLE] = Field(default=PartType.BIBLE)
     contents: BibleContents
-    phrase_layout_id: ULID
+    phrase_layout_id: ULID | None = None
     title_layout_id: ULID | None = None
 
 
 class LyricsPartRequest(BasePartRequest):
     type: Literal[PartType.LYRICS] = Field(default=PartType.LYRICS)
     contents: LyricsContents
-    lyrics_layout_id: ULID
+    lyrics_layout_id: ULID | None = None
     title_layout_id: ULID | None = None
 
 
