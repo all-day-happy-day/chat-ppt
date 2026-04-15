@@ -31,13 +31,13 @@ class LyricsPartCommand(BasePartCommand):
 class PlainPartCommand(BasePartCommand):
     type: Literal[PartType.PLAIN] = Field(default=PartType.PLAIN)
     contents: PlainContents
-    layout_id: ULID
+    layout_id: ULID | None = None
 
 
 class ValuePartCommand(BasePartCommand):
     type: Literal[PartType.VALUE] = Field(default=PartType.VALUE)
     contents: ValueContents
-    layout_id: ULID
+    layout_id: ULID | None = None
 
 
 PartCommand: TypeAlias = Annotated[

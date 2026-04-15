@@ -12,4 +12,4 @@ from .BasePart import BasePart
 class ValuePart(BasePart):
     type: Literal[PartType.VALUE] = Field(default=PartType.VALUE)
     contents: ValueContents
-    layout_id: ULID
+    layout_id: ULID | None = None

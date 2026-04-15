@@ -39,6 +39,7 @@ class PartMapper:
                 else None,
             )
         elif alchemy_entity.type == PartType.PLAIN:
+            layout_raw: str | None = alchemy_entity.additional_data.get("layout_id")
             return PlainPart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
@@ -47,9 +48,10 @@ class PartMapper:
                 ),
                 order=alchemy_entity.order,
                 contents=PlainContents(**alchemy_entity.contents),
-                layout_id=ULID.from_str(alchemy_entity.additional_data.get("layout_id")),
+                layout_id=ULID.from_str(layout_raw) if layout_raw is not None else None,
             )
         elif alchemy_entity.type == PartType.VALUE:
+            layout_raw_value: str | None = alchemy_entity.additional_data.get("layout_id")
             return ValuePart(
                 id=ULID.from_str(alchemy_entity.id),
                 project_id=ULID.from_str(alchemy_entity.project_id),
@@ -58,7 +60,7 @@ class PartMapper:
                 ),
                 order=alchemy_entity.order,
                 contents=ValueContents(**alchemy_entity.contents),
-                layout_id=ULID.from_str(alchemy_entity.additional_data.get("layout_id")),
+                layout_id=ULID.from_str(layout_raw_value) if layout_raw_value is not None else None,
             )
         else:
             raise ValueError(f"Invalid part type: {alchemy_entity.type}")

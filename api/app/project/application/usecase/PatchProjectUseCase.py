@@ -18,7 +18,11 @@ class PatchProjectUseCase:
         if command.name is not None:
             has_changed = True
             project.name = command.name
-        if command.parts is not None:
+        if command.template_id is not None and command.template_id != project.template_id:
+            has_changed = True
+            project.template_id = command.template_id
+            project.parts = []
+        elif command.parts is not None:
             has_changed = True
             project.parts = [
                 to_domain_part(command_part=command_part, project_id=project_id) for command_part in command.parts
