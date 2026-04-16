@@ -10,11 +10,8 @@ from app.bible.domain.valueobject import BiblePhrase, BibleVerseQuery
 from app.bible.infrastructure.adapter.inbound.api.message import (
     GetBiblePhraseRequest,
     GetBiblePhraseResponse,
-    GetBooksRequest,
     GetBooksResponse,
-    GetChaptersRequest,
     GetChaptersResponse,
-    GetVersesRequest,
     GetVersesResponse,
     GetVersionsResponse,
 )
@@ -61,33 +58,36 @@ def get_bible_phrases(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.get("/books", status_code=status.HTTP_200_OK, response_model=GetBooksResponse)
+@router.get("/books/{version}", status_code=status.HTTP_200_OK, response_model=GetBooksResponse)
 def get_books(
-    request_model: GetBooksRequest,
+    version: AvailableBibleVersions,
     usecase: Annotated[GetBooksUseCase, Depends(get_get_books_use_case)],
 ):
-    books: list[str] = usecase(version=request_model.version)
+    books: list[str] = usecase(version=version)
     return GetBooksResponse(books=books)
 
 
-@router.get("/chapters", status_code=status.HTTP_200_OK, response_model=GetChaptersResponse)
+@router.get("/chapters/{version}/{book}", status_code=status.HTTP_200_OK, response_model=GetChaptersResponse)
 def get_chapters(
-    request_model: GetChaptersRequest,
+    version: AvailableBibleVersions,
+    book: str,
     usecase: Annotated[GetChaptersUseCase, Depends(get_get_chapters_use_case)],
 ):
-    chapters: list[int] = usecase(version=request_model.version, book=request_model.book)
+    chapters: list[int] = usecase(version=version, book=book)
     return GetChaptersResponse(chapters=chapters)
 
 
-@router.get("/verses", status_code=status.HTTP_200_OK, response_model=GetVersesResponse)
+@router.get("/verses/{version}/{book}/{chapter}", status_code=status.HTTP_200_OK, response_model=GetVersesResponse)
 def get_verses(
-    request_model: GetVersesRequest,
+    version: AvailableBibleVersions,
+    book: str,
+    chapter: int,
     usecase: Annotated[GetVersesUseCase, Depends(get_get_verses_use_case)],
 ):
-    verses: list[int] = usecase(version=request_model.version, book=request_model.book, chapter=request_model.chapter)
+    verses: list[int] = usecase(version=version, book=book, chapter=chapter)
     return GetVersesResponse(verses=verses)
 
 
 @router.get("/versions", status_code=status.HTTP_200_OK, response_model=GetVersionsResponse)
 def get_versions():
-    return GetVersionsResponse(versions=list(AvailableBibleVersions.__members__.values()))
+    return GetVersionsResponse(versions=AvailableBibleVersions.__members__)
