@@ -29,13 +29,14 @@ class SignUpUseCase:
         self, email: EmailStr, username: str, password: str, role: Role
     ) -> tuple[User, Credentials, Credentials]:
         # Create user
+        now: datetime = datetime.now(timezone.utc)
         user: User = User(
             id=ULID(),
             email=email,
             username=username,
             password=self.password_hasher.hash(password),
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            created_at=now,
+            updated_at=now,
             last_sign_in=None,
             role=role,
         )
