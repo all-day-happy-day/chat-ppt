@@ -1,0 +1,2 @@
+class DuplicatedUser(Exception):
+    pass

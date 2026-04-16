@@ -28,6 +28,7 @@ from app.di.application.usecase import (
     get_verify_credentials_use_case,
     get_verify_password_use_case,
 )
+from app.shared.user.domain.exception import DuplicatedUser
 from app.user.domain.entity import User
 from core.auth.domain.exception import AlchemyMismatch, DuplicatedPrincipal, InvalidCredentials, PrincipalNotFound
 from core.notifier import EmailNotifier
@@ -157,6 +158,8 @@ def signup(
         return SignUpResponse.from_user_entity(user=user)
 
     except DuplicatedPrincipal as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except DuplicatedUser as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except AlchemyMismatch as e:
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(e))

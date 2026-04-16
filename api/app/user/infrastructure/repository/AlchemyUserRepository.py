@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ulid import ULID
 
 from app.user.domain.entity import User
-from app.user.domain.exception import UserNotFound
+from app.user.domain.exception import DuplicatedUser, UserNotFound
 from app.user.domain.repository import UserRepository
 from app.user.infrastructure.repository.entity import UserAlchemyEntity
 from app.user.infrastructure.repository.mapper import UserMapper
@@ -14,6 +14,8 @@ class AlchemyUserRepository(UserRepository):
         self.db: Session = db
 
     def save(self, user: User) -> User:
+        if self.get_by_username(username=user.username) is not None or self.get_by_email(email=user.email) is not None:
+            raise DuplicatedUser(f"User already exists: {user.username} or {user.email}")
         alchemy_entity: UserAlchemyEntity = UserMapper.to_alchemy_entity(user)
         self.db.add(alchemy_entity)
         self.db.commit()
