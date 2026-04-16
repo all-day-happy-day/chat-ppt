@@ -58,6 +58,7 @@ from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
     GetSongsUseCase,
+    ListAllSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
     ScrapeLyricsUseCase,
@@ -185,6 +186,12 @@ def get_get_songs_use_case(
     song_repository: SongRepository = Depends(get_song_repository),
 ) -> GetSongsUseCase:
     return GetSongsUseCase(song_repository=song_repository)
+
+
+def get_list_all_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> ListAllSongsUseCase:
+    return ListAllSongsUseCase(song_repository=song_repository)
 
 
 def get_patch_lyrics_use_case(

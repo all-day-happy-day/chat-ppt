@@ -27,6 +27,14 @@ class AlchemySongRepository(SongRepository):
             raise SongNotFound(f"Songs not found: {title}")
         return [SongMapper.to_domain_entity(entity) for entity in alchemy_entities]
 
+    def list_all(self) -> list[Song]:
+        alchemy_entities: list[SongAlchemyEntity] = (
+            self.db.query(SongAlchemyEntity)
+            .order_by(SongAlchemyEntity.title.asc(), SongAlchemyEntity.id.asc())
+            .all()
+        )
+        return [SongMapper.to_domain_entity(alchemy_entity=entity) for entity in alchemy_entities]
+
     def get_by_title_and_artist(self, title: str, artist: str | None) -> Song:
         alchemy_entity: SongAlchemyEntity | None = (
             self.db

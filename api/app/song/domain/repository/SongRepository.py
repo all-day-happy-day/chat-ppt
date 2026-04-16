@@ -15,6 +15,10 @@ class SongRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def list_all(self) -> list[Song]:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_by_title_and_artist(self, title: str, artist: str | None) -> Song:
         raise NotImplementedError
 

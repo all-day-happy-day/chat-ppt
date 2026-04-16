@@ -7,6 +7,7 @@ from app.di.application.usecase import (
     get_delete_song_use_case,
     get_get_lyrics_use_case,
     get_get_songs_use_case,
+    get_list_all_songs_use_case,
     get_patch_lyrics_use_case,
     get_patch_song_use_case,
     get_scrape_lyrics_use_case,
@@ -17,6 +18,7 @@ from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
     GetSongsUseCase,
+    ListAllSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
     ScrapeLyricsUseCase,
@@ -42,6 +44,12 @@ def list_songs(
     usecase: Annotated[GetSongsUseCase, Depends(get_get_songs_use_case)],
 ):
     songs: list[Song] = usecase(title=title) or []
+    return GetSongsResponse(songs=songs)
+
+
+@router.get("/list-all-songs", status_code=status.HTTP_200_OK, response_model=GetSongsResponse)
+def list_all_songs(usecase: Annotated[ListAllSongsUseCase, Depends(get_list_all_songs_use_case)]):
+    songs: list[Song] = usecase()
     return GetSongsResponse(songs=songs)
 
 
