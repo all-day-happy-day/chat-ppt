@@ -1,6 +1,6 @@
 from fastapi import Depends  # type: ignore
 
-from app.bible.domain.service import ParseVerseQueryService
+from app.bible.domain.service import ParseVerseQueryService as P
 from app.di.domain.repository import (
     get_credentials_repository,
     get_principal_repository,
@@ -38,8 +38,8 @@ def get_authentication_service(
 
 
 # Bible
-def get_parse_verse_query_service() -> ParseVerseQueryService:
-    return ParseVerseQueryService()
+def get_parse_verse_query_service() -> P.ParseVerseQueryService:
+    return P.ParseVerseQueryService()
 
 
 # Song

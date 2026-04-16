@@ -6,6 +6,7 @@ from .GetChaptersRequest import GetChaptersRequest
 from .GetChaptersResponse import GetChaptersResponse
 from .GetVersesRequest import GetVersesRequest
 from .GetVersesResponse import GetVersesResponse
+from .GetVersionsResponse import GetVersionsResponse
 
 __all__ = [
     "GetBiblePhraseRequest",
@@ -16,4 +17,5 @@ __all__ = [
     "GetChaptersResponse",
     "GetVersesRequest",
     "GetVersesResponse",
+    "GetVersionsResponse",
 ]
