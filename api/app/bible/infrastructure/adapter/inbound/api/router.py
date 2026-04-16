@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.bible.application.command import GetBiblePhrasesCommand
 from app.bible.application.usecase import GetBiblePhrasesUseCase, GetBooksUseCase, GetChaptersUseCase, GetVersesUseCase
 from app.bible.domain.exception import PhraseNotFound, UnsupportedVersion
-from app.bible.domain.service import ParseVerseQueryService
+from app.bible.domain.service import ParseVerseQueryService as P
 from app.bible.domain.valueobject import BiblePhrase, BibleVerseQuery
 from app.bible.infrastructure.adapter.inbound.api.message import (
     GetBiblePhraseRequest,
@@ -16,6 +16,7 @@ from app.bible.infrastructure.adapter.inbound.api.message import (
     GetChaptersResponse,
     GetVersesRequest,
     GetVersesResponse,
+    GetVersionsResponse,
 )
 from app.di.application.usecase import (
     get_get_bible_phrases_use_case,
@@ -24,6 +25,7 @@ from app.di.application.usecase import (
     get_get_verses_use_case,
 )
 from app.di.domain.service import get_parse_verse_query_service
+from app.shared.bible.domain.enum import AvailableBibleVersions
 
 router: APIRouter = APIRouter(tags=["Bible"])
 
@@ -32,7 +34,7 @@ router: APIRouter = APIRouter(tags=["Bible"])
 def get_bible_phrases(
     request_model: list[GetBiblePhraseRequest],
     usecase: Annotated[GetBiblePhrasesUseCase, Depends(get_get_bible_phrases_use_case)],
-    parse_verse_query_service: Annotated[ParseVerseQueryService, Depends(get_parse_verse_query_service)],
+    parse_verse_query_service: Annotated[P.ParseVerseQueryService, Depends(get_parse_verse_query_service)],
 ):
     try:
         queries: list[BibleVerseQuery] = []
@@ -84,3 +86,8 @@ def get_verses(
 ):
     verses: list[int] = usecase(version=request_model.version, book=request_model.book, chapter=request_model.chapter)
     return GetVersesResponse(verses=verses)
+
+
+@router.get("/versions", status_code=status.HTTP_200_OK, response_model=GetVersionsResponse)
+def get_versions():
+    return GetVersionsResponse(versions=list(AvailableBibleVersions.__members__.values()))
