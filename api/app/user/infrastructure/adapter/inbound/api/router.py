@@ -18,7 +18,7 @@ from app.user.application.usecase import (
     UpdateUserUseCase,
 )
 from app.user.domain.entity import User
-from app.user.domain.exception import UnauthorizedRequest
+from app.user.domain.exception import UnauthorizedRequest, UserNotFound
 from app.user.infrastructure.adapter.inbound.api.deps import get_current_user
 from app.user.infrastructure.adapter.inbound.api.message import (
     GetUserResponse,
@@ -79,7 +79,7 @@ def patch_user(
         update_fields: dict[str, Any] = {k: v for k, v in request_model.model_dump().items() if v is not None}
         user: User = usecase(user_id=user_id, update_fields=update_fields)
         return UpdateUserResponse.from_domain_entity(user)
-    except Exception as e:
+    except UserNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
