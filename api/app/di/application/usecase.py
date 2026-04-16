@@ -8,7 +8,7 @@ from app.auth.application.usecase import (
     VerifyCredentialsUseCase,
     VerifyPasswordUseCase,
 )
-from app.bible.application.usecase import GetBiblePhrasesUseCase
+from app.bible.application.usecase import GetBiblePhrasesUseCase, GetBooksUseCase, GetChaptersUseCase, GetVersesUseCase
 from app.bible.domain.repository import BibleRepository
 from app.di.domain.repository import (
     get_bible_repository,
@@ -165,6 +165,24 @@ def get_get_bible_phrases_use_case(
     bible_repository: BibleRepository = Depends(get_bible_repository),
 ) -> GetBiblePhrasesUseCase:
     return GetBiblePhrasesUseCase(bible_repository=bible_repository)
+
+
+def get_get_books_use_case(
+    bible_repository: BibleRepository = Depends(get_bible_repository),
+) -> GetBooksUseCase:
+    return GetBooksUseCase(bible_repository=bible_repository)
+
+
+def get_get_chapters_use_case(
+    bible_repository: BibleRepository = Depends(get_bible_repository),
+) -> GetChaptersUseCase:
+    return GetChaptersUseCase(bible_repository=bible_repository)
+
+
+def get_get_verses_use_case(
+    bible_repository: BibleRepository = Depends(get_bible_repository),
+) -> GetVersesUseCase:
+    return GetVersesUseCase(bible_repository=bible_repository)
 
 
 # Song

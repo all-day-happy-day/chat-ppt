@@ -1,0 +1,2 @@
+class ChapterNotFound(Exception):
+    pass
