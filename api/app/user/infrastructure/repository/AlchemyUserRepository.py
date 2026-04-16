@@ -2,8 +2,9 @@ from pydantic import EmailStr
 from sqlalchemy.orm import Session
 from ulid import ULID
 
+from app.shared.user.domain.exception import DuplicatedUser
 from app.user.domain.entity import User
-from app.user.domain.exception import DuplicatedUser, UserNotFound
+from app.user.domain.exception import UserNotFound
 from app.user.domain.repository import UserRepository
 from app.user.infrastructure.repository.entity import UserAlchemyEntity
 from app.user.infrastructure.repository.mapper import UserMapper
