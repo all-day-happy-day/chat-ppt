@@ -1,10 +1,5 @@
-from pydantic import BaseModel
-
-from app.shared.bible.domain.enum import AvailableBibleVersions
+from app.bible.domain.valueobject import BibleVerseQuery
 
 
-class GetBiblePhraseRequest(BaseModel):
-    version: AvailableBibleVersions
-    book: str
-    chapter: int
-    verse: int
+class GetBiblePhraseRequest(BibleVerseQuery):
+    pass
