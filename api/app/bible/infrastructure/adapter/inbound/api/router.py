@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.bible.application.command import GetBiblePhrasesCommand
 from app.bible.application.usecase import GetBiblePhrasesUseCase, GetBooksUseCase, GetChaptersUseCase, GetVersesUseCase
 from app.bible.domain.exception import PhraseNotFound, UnsupportedVersion
-from app.bible.domain.valueobject import BiblePhrase
+from app.bible.domain.service import ParseVerseQueryService
+from app.bible.domain.valueobject import BiblePhrase, BibleVerseQuery
 from app.bible.infrastructure.adapter.inbound.api.message import (
     GetBiblePhraseRequest,
     GetBiblePhraseResponse,
@@ -22,6 +23,7 @@ from app.di.application.usecase import (
     get_get_chapters_use_case,
     get_get_verses_use_case,
 )
+from app.di.domain.service import get_parse_verse_query_service
 
 router: APIRouter = APIRouter(tags=["Bible"])
 
@@ -30,17 +32,22 @@ router: APIRouter = APIRouter(tags=["Bible"])
 def get_bible_phrases(
     request_model: list[GetBiblePhraseRequest],
     usecase: Annotated[GetBiblePhrasesUseCase, Depends(get_get_bible_phrases_use_case)],
+    parse_verse_query_service: Annotated[ParseVerseQueryService, Depends(get_parse_verse_query_service)],
 ):
     try:
+        queries: list[BibleVerseQuery] = []
+        for request in request_model:
+            queries.extend(parse_verse_query_service.parse(verse_query=request))
+
         bible_phrases: list[BiblePhrase] = usecase(
             commands=[
                 GetBiblePhrasesCommand(
-                    version=request.version,
-                    book=request.book,
-                    chapter=request.chapter,
-                    verse=request.verse,
+                    version=query.version,
+                    book=query.book,
+                    chapter=int(query.chapter),
+                    verse=int(query.verse),
                 )
-                for request in request_model
+                for query in queries
             ]
         )
         return [GetBiblePhraseResponse.from_model(bible_phrase) for bible_phrase in bible_phrases]
