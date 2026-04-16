@@ -5,7 +5,7 @@ from pydantic import BaseModel, model_validator
 from app.bible.domain.exception import UnsupportedLetter, UnsupportedVersion
 from app.shared.bible.domain.enum import AvailableBibleVersions
 
-from ..service.ParseVerseQueryService import ParseVerseQueryService
+from ..service.ParseVerseRangeService import ParseVerseRangeService
 
 
 class BibleVerseQuery(BaseModel):
@@ -28,5 +28,5 @@ class BibleVerseQuery(BaseModel):
 
     @model_validator(mode="after")
     def validate_verse(self) -> Self:
-        ParseVerseQueryService().parse_verse(verse=self.verse)
+        ParseVerseRangeService().parse(verse=self.verse)
         return self
