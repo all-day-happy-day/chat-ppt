@@ -1,10 +1,10 @@
-import type { GetLayoutResponse } from '../../types/template-layout';
-import type { GetUserResponse } from '../../types/user';
-import { PART_KIND_FOR_CREATE, type PartKindForCreate } from '../../lib/project-parts-for-patch';
+import type { GetLayoutResponse } from "../../types/template-layout";
+import type { GetUserResponse } from "../../types/user";
+import { PART_KIND_FOR_CREATE, type PartKindForCreate } from "../../lib/project-parts-for-patch";
 
 export const INFO_DATE_FORMATTER: Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
+  dateStyle: "medium",
+  timeStyle: "short",
 });
 
 export const pickDefaultLayoutId = (layouts: GetLayoutResponse[]): string | null => {
@@ -20,7 +20,7 @@ export const pickDefaultLayoutId = (layouts: GetLayoutResponse[]): string | null
 export const resolveOwnerUsername = (users: GetUserResponse[], ownerUserId: string): string => {
   const match: GetUserResponse | undefined = users.find((user: GetUserResponse) => user.id === ownerUserId);
   if (match === undefined) {
-    return ownerUserId.length > 0 ? ownerUserId : 'Unknown';
+    return ownerUserId.length > 0 ? ownerUserId : "Unknown";
   }
   return match.username;
 };
@@ -41,11 +41,11 @@ export const shortenId = (value: string): string => {
 };
 
 export const readProjectPartType = (part: unknown): string => {
-  if (typeof part !== 'object' || part === null || Array.isArray(part)) {
-    return '';
+  if (typeof part !== "object" || part === null || Array.isArray(part)) {
+    return "";
   }
   const typeValue: unknown = (part as { type?: unknown }).type;
-  return typeof typeValue === 'string' ? typeValue : '';
+  return typeof typeValue === "string" ? typeValue : "";
 };
 
 export const isPlainValuePartKindCrossover = (currentType: string, targetKind: PartKindForCreate): boolean => {
@@ -62,5 +62,5 @@ export const needsDestructivePartKindConfirm = (currentType: string, targetKind:
   if (isPlainValuePartKindCrossover(currentType, targetKind)) {
     return false;
   }
-  return currentType === 'LYRICS' || currentType === 'BIBLE' || currentType === 'VALUE';
+  return currentType === "LYRICS" || currentType === "BIBLE" || currentType === "VALUE";
 };

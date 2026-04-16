@@ -1,7 +1,7 @@
-import type { ReactElement, RefObject } from 'react';
+import type { ReactElement, RefObject } from "react";
 
 const TEMPLATE_CHANGE_WARNING_BODY: string =
-  'Changing the template removes all parts from this project. Anything you added in those parts will be lost. This cannot be undone.';
+  "Changing the template removes all parts from this project. Anything you added in those parts will be lost. This cannot be undone.";
 
 export type TemplateChangeWarningDialogProps = {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -30,14 +30,14 @@ export const TemplateChangeWarningDialog = ({
         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
-            className="flex h-11 items-center justify-center rounded-xl border border-neutral-300 bg-transparent px-5 text-[15px] font-medium text-neutral-900 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
+            className="flex h-9 items-center justify-center rounded-lg border border-neutral-300 bg-transparent px-3.5 text-[13px] font-medium text-neutral-900 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
             onClick={onCancel}
           >
             Cancel
           </button>
           <button
             type="button"
-            className="flex h-11 items-center justify-center rounded-xl bg-[#0071e3] px-5 text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+            className="flex h-9 items-center justify-center rounded-lg bg-[#0071e3] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
             onClick={onContinue}
           >
             Continue

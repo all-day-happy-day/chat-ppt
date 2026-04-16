@@ -494,7 +494,7 @@ export const CreateProjectPage = () => {
                   <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button
                       type="button"
-                      className="flex h-11 items-center justify-center rounded-xl border border-neutral-300 bg-transparent px-5 text-[15px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
+                      className="flex h-9 items-center justify-center rounded-lg border border-neutral-300 bg-transparent px-3.5 text-[13px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
                       onClick={handleBackToProjects}
                       disabled={isSubmitting}
                     >
@@ -502,7 +502,7 @@ export const CreateProjectPage = () => {
                     </button>
                     <button
                       type="submit"
-                      className="flex h-11 items-center justify-center rounded-xl bg-[#0071e3] px-5 text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+                      className="flex h-9 items-center justify-center rounded-lg bg-[#0071e3] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
                       disabled={isCreateDisabled}
                     >
                       {isSubmitting ? "Creating…" : "Create project"}
@@ -580,7 +580,7 @@ export const CreateProjectPage = () => {
                 <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:justify-end">
                   <button
                     type="button"
-                    className="flex h-11 items-center justify-center rounded-xl border border-neutral-300 bg-transparent px-5 text-[15px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
+                    className="flex h-9 items-center justify-center rounded-lg border border-neutral-300 bg-transparent px-3.5 text-[13px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
                     onClick={closeNewTemplatePanel}
                     disabled={isUploadingTemplate}
                   >
@@ -588,7 +588,7 @@ export const CreateProjectPage = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex h-11 items-center justify-center rounded-xl bg-[#0071e3] px-5 text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+                    className="flex h-9 items-center justify-center rounded-lg bg-[#0071e3] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
                     disabled={isUploadingTemplate}
                   >
                     {isUploadingTemplate ? "Uploading…" : "Add template"}

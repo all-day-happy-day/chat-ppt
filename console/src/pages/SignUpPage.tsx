@@ -152,7 +152,7 @@ export const SignUpPage = ({ onSuccess, onGoHome, onGoSignIn }: SignUpPageProps)
 
             <button
               type="submit"
-              className="mt-1 flex h-11 w-full items-center justify-center rounded-xl bg-[#0071e3] text-[17px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+              className="mt-1 flex h-10 w-full items-center justify-center rounded-lg bg-[#0071e3] text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating account…" : "Sign up"}

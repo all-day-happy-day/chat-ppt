@@ -331,7 +331,7 @@ export const UserSettingsPage = () => {
 
               <button
                 type="submit"
-                className="mx-auto flex h-11 w-full max-w-[280px] items-center justify-center rounded-xl bg-[#0071e3] text-[17px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+                className="mx-auto flex h-10 w-full max-w-[280px] items-center justify-center rounded-lg bg-[#0071e3] text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
                 disabled={isSaving}
               >
                 {isSaving ? "Saving…" : "Save changes"}

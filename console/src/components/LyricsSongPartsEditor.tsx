@@ -89,16 +89,12 @@ const chipDisplayLabel = (line: LyricsSongLine, definitionIndex: number): string
   return deriveDefaultPartLabel(definitionIndex + 1);
 };
 
-/** Lead `blank` with empty lyrics is palette-only in split layout when other definitions exist. */
-const shouldHideLeadBlankInSplitPartsColumn = (line: LyricsSongLine, definitionIndex: number, lineCount: number): boolean => {
+/** Lead `blank` with empty lyrics is omitted from the parts list when other definitions exist (split column or stacked song library edit). */
+const shouldOmitOptionalLeadBlankRow = (line: LyricsSongLine, definitionIndex: number, lineCount: number): boolean => {
   if (lineCount <= 1) {
     return false;
   }
-  return (
-    definitionIndex === 0 &&
-    line.part.trim().toLowerCase() === LYRIC_BLANK_PART_NAME &&
-    line.lyrics.trim() === ""
-  );
+  return definitionIndex === 0 && line.part.trim().toLowerCase() === LYRIC_BLANK_PART_NAME && line.lyrics.trim() === "";
 };
 
 const CHIP_BUTTON_CLASS: string =
@@ -150,6 +146,8 @@ export type LyricsSongPartsEditorProps = {
   variant?: LyricsSongPartsEditorVariant;
   partSequence?: number[];
   onPartSequenceChange?: (next: number[]) => void;
+  /** When `variant` is `stacked`, hide the synthetic lead `blank` row when it is empty and other parts exist. */
+  omitOptionalLeadBlankRow?: boolean;
 };
 
 type PartFieldsBlockProps = {
@@ -215,6 +213,7 @@ export const LyricsSongPartsEditor = ({
   variant = "stacked",
   partSequence,
   onPartSequenceChange,
+  omitOptionalLeadBlankRow = false,
 }: LyricsSongPartsEditorProps): ReactElement => {
   const songFormStripRef = useRef<HTMLDivElement | null>(null);
 
@@ -652,7 +651,7 @@ export const LyricsSongPartsEditor = ({
           </div>
           <ol className="flex flex-col gap-4">
             {lines.flatMap((line: LyricsSongLine, index: number): ReactElement[] => {
-              if (shouldHideLeadBlankInSplitPartsColumn(line, index, lines.length)) {
+              if (shouldOmitOptionalLeadBlankRow(line, index, lines.length)) {
                 return [];
               }
               return [
@@ -802,52 +801,57 @@ export const LyricsSongPartsEditor = ({
   return (
     <div className="flex flex-col gap-4">
       <ol className="flex flex-col gap-4">
-        {lines.map((line: LyricsSongLine, index: number) => (
-          <li
-            key={`${fieldIdPrefix}-lyrics-part-${String(index)}`}
-            className="rounded-xl border border-black/[0.08] bg-neutral-50/80 p-3 dark:border-white/[0.1] dark:bg-white/[0.04]"
-          >
-            <PartFieldsBlock
-              line={line}
-              index={index}
-              fieldIdPrefix={fieldIdPrefix}
-              onPartNameChange={handlePartNameChange}
-              onLyricsChange={handleLyricsChange}
-            />
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                className="rounded-md border border-black/[0.1] bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 outline-none transition hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-100 dark:hover:bg-white/5 dark:focus-visible:ring-[#0a84ff]"
-                onClick={() => {
-                  handleMoveLineUp(index);
-                }}
-                disabled={index === 0}
-              >
-                {MOVE_UP_LABEL}
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-black/[0.1] bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 outline-none transition hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-100 dark:hover:bg-white/5 dark:focus-visible:ring-[#0a84ff]"
-                onClick={() => {
-                  handleMoveLineDown(index);
-                }}
-                disabled={index === lines.length - 1}
-              >
-                {MOVE_DOWN_LABEL}
-              </button>
-              <button
-                type="button"
-                className="ml-auto rounded-md px-2 py-1 text-[10px] font-medium text-red-700 outline-none transition hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-500/15 dark:focus-visible:ring-red-400/40"
-                onClick={() => {
-                  handleRemoveLine(index);
-                }}
-                disabled={lines.length <= MIN_LYRIC_PART_COUNT}
-              >
-                {REMOVE_PART_LABEL}
-              </button>
-            </div>
-          </li>
-        ))}
+        {lines.flatMap((line: LyricsSongLine, index: number): ReactElement[] => {
+          if (omitOptionalLeadBlankRow && shouldOmitOptionalLeadBlankRow(line, index, lines.length)) {
+            return [];
+          }
+          return [
+            <li
+              key={`${fieldIdPrefix}-lyrics-part-${String(index)}`}
+              className="rounded-xl border border-black/[0.08] bg-neutral-50/80 p-3 dark:border-white/[0.1] dark:bg-white/[0.04]"
+            >
+              <PartFieldsBlock
+                line={line}
+                index={index}
+                fieldIdPrefix={fieldIdPrefix}
+                onPartNameChange={handlePartNameChange}
+                onLyricsChange={handleLyricsChange}
+              />
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  className="rounded-md border border-black/[0.1] bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 outline-none transition hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-100 dark:hover:bg-white/5 dark:focus-visible:ring-[#0a84ff]"
+                  onClick={() => {
+                    handleMoveLineUp(index);
+                  }}
+                  disabled={index === 0}
+                >
+                  {MOVE_UP_LABEL}
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md border border-black/[0.1] bg-white px-2 py-1 text-[10px] font-medium text-neutral-800 outline-none transition hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-100 dark:hover:bg-white/5 dark:focus-visible:ring-[#0a84ff]"
+                  onClick={() => {
+                    handleMoveLineDown(index);
+                  }}
+                  disabled={index === lines.length - 1}
+                >
+                  {MOVE_DOWN_LABEL}
+                </button>
+                <button
+                  type="button"
+                  className="ml-auto rounded-md px-2 py-1 text-[10px] font-medium text-red-700 outline-none transition hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-500/15 dark:focus-visible:ring-red-400/40"
+                  onClick={() => {
+                    handleRemoveLine(index);
+                  }}
+                  disabled={lines.length <= MIN_LYRIC_PART_COUNT}
+                >
+                  {REMOVE_PART_LABEL}
+                </button>
+              </div>
+            </li>,
+          ];
+        })}
       </ol>
       <button
         type="button"

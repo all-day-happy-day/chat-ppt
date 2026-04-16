@@ -986,12 +986,7 @@ export const ProjectWorkspacePage = () => {
         setPartPlainValueNotice(null);
         setIsPatchingParts(true);
         try {
-          const partsPayload: unknown[] = appendNewPartForPatch(
-            project.parts,
-            kind,
-            null,
-            insertBeforeSortedIndex
-          );
+          const partsPayload: unknown[] = appendNewPartForPatch(project.parts, kind, null, insertBeforeSortedIndex);
           const updated: GetProjectResponse = await patchProjectById(project.id, {
             parts: partsPayload,
           });
@@ -1177,9 +1172,7 @@ export const ProjectWorkspacePage = () => {
       }
       const rowsFromPart: LyricsSongRow[] = readLyricsSongRowsFromPart(part);
       const nextSongs: LyricsSongRow[] =
-        lyricsSongRowsOverride !== null &&
-        lyricsSongRowsOverride !== undefined &&
-        lyricsSongRowsOverride.length > 0
+        lyricsSongRowsOverride !== null && lyricsSongRowsOverride !== undefined && lyricsSongRowsOverride.length > 0
           ? lyricsSongRowsOverride
           : rowsFromPart;
       setPartEditLyricsLyricsLayoutId(nextLyricsLayoutId);

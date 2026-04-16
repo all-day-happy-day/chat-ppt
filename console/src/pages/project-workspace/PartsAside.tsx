@@ -1,7 +1,7 @@
-import { createPortal } from 'react-dom';
-import type { DragEvent, MouseEvent, ReactElement, RefObject } from 'react';
-import { Fragment, useCallback, useState } from 'react';
-import { TemplateLayoutThumbnail } from '../../components/TemplateLayoutThumbnail';
+import { createPortal } from "react-dom";
+import type { DragEvent, MouseEvent, ReactElement, RefObject } from "react";
+import { Fragment, useCallback, useState } from "react";
+import { TemplateLayoutThumbnail } from "../../components/TemplateLayoutThumbnail";
 import {
   findTemplateLayoutEntryByLayoutId,
   getPartTypeLabel,
@@ -9,24 +9,24 @@ import {
   getProjectPartId,
   getProjectPartStableKey,
   PART_KIND_FOR_CREATE,
-} from '../../lib/project-parts-for-patch';
-import { buildLyricsPartThumbnailCaption } from '../../lib/lyrics-part-contents';
-import type { GetLayoutResponse } from '../../types/template-layout';
+} from "../../lib/project-parts-for-patch";
+import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
+import type { GetLayoutResponse } from "../../types/template-layout";
 import {
   ADD_PART_KIND_MENU_ID,
   ADD_PART_KIND_OPTION_CLASS,
   ADD_PART_KIND_OPTIONS,
   type AddPartKindOption,
   PART_KIND_CHANGE_MENU_ID,
-} from './constants';
-import type { AddPartMenuAnchor } from './types';
-import { PartDeleteIcon } from './icons';
-import { readProjectPartType } from './utils';
+} from "./constants";
+import type { AddPartMenuAnchor } from "./types";
+import { PartDeleteIcon } from "./icons";
+import { readProjectPartType } from "./utils";
 
-const PART_SORTED_DRAG_PREFIX: string = 'chatPptPartSortedIndex=';
+const PART_SORTED_DRAG_PREFIX: string = "chatPptPartSortedIndex=";
 
 const INSERT_GAP_PLUS_LABEL_CLASS: string =
-  'text-xs font-bold leading-none text-neutral-400 group-hover:text-[#0071e3] dark:text-neutral-500 dark:group-hover:text-[#0a84ff]';
+  "text-xs font-bold leading-none text-neutral-400 group-hover:text-[#0071e3] dark:text-neutral-500 dark:group-hover:text-[#0a84ff]";
 
 const encodeSortedPartDragPayload = (sortedIndex: number): string => {
   return `${PART_SORTED_DRAG_PREFIX}${String(sortedIndex)}`;
@@ -59,7 +59,7 @@ export type PartsAsideProps = {
   partTypeMenuOpenIndex: number | null;
   onPartTypeMenuButtonClick: (event: MouseEvent<HTMLButtonElement>, index: number) => void;
   onDeletePartAtIndex: (index: number) => void;
-  onAddPartOfKind: (kind: AddPartKindOption['kind']) => void;
+  onAddPartOfKind: (kind: AddPartKindOption["kind"]) => void;
   onReorderSortedParts: (fromSortedIndex: number, toSortedIndex: number) => void;
   onPartsListRailScroll: () => void;
 };
@@ -99,29 +99,23 @@ export const PartsAside = ({
     clearDragHighlight();
   }, [clearDragHighlight]);
 
-  const handlePartDragOver = useCallback(
-    (sortedIndex: number) => {
-      return (event: DragEvent<HTMLElement>): void => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-        setDragOverPartSortedIndex(sortedIndex);
-        setDragOverInsertSortedIndex(null);
-      };
-    },
-    []
-  );
+  const handlePartDragOver = useCallback((sortedIndex: number) => {
+    return (event: DragEvent<HTMLElement>): void => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      setDragOverPartSortedIndex(sortedIndex);
+      setDragOverInsertSortedIndex(null);
+    };
+  }, []);
 
-  const handleInsertGapDragOver = useCallback(
-    (insertBeforeSortedIndex: number) => {
-      return (event: DragEvent<HTMLButtonElement>): void => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-        setDragOverInsertSortedIndex(insertBeforeSortedIndex);
-        setDragOverPartSortedIndex(null);
-      };
-    },
-    []
-  );
+  const handleInsertGapDragOver = useCallback((insertBeforeSortedIndex: number) => {
+    return (event: DragEvent<HTMLButtonElement>): void => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      setDragOverInsertSortedIndex(insertBeforeSortedIndex);
+      setDragOverPartSortedIndex(null);
+    };
+  }, []);
 
   const handleDragLeaveZone = useCallback((): void => {
     setDragOverPartSortedIndex(null);
@@ -132,7 +126,7 @@ export const PartsAside = ({
     (toSortedIndex: number) => {
       return (event: DragEvent<HTMLElement>): void => {
         event.preventDefault();
-        const raw: string = event.dataTransfer.getData('text/plain');
+        const raw: string = event.dataTransfer.getData("text/plain");
         const fromSortedIndex: number | null = decodeSortedPartDragPayload(raw);
         clearDragHighlight();
         if (fromSortedIndex === null || fromSortedIndex === toSortedIndex) {
@@ -148,7 +142,7 @@ export const PartsAside = ({
     (insertBeforeSortedIndex: number) => {
       return (event: DragEvent<HTMLButtonElement>): void => {
         event.preventDefault();
-        const raw: string = event.dataTransfer.getData('text/plain');
+        const raw: string = event.dataTransfer.getData("text/plain");
         const fromSortedIndex: number | null = decodeSortedPartDragPayload(raw);
         clearDragHighlight();
         if (fromSortedIndex === null) {
@@ -160,20 +154,17 @@ export const PartsAside = ({
     [clearDragHighlight, onReorderSortedParts]
   );
 
-  const handleDragStartFromSortedIndex = useCallback(
-    (sortedIndex: number) => {
-      return (event: DragEvent<HTMLButtonElement>): void => {
-        event.dataTransfer.setData('text/plain', encodeSortedPartDragPayload(sortedIndex));
-        event.dataTransfer.effectAllowed = 'move';
-      };
-    },
-    []
-  );
+  const handleDragStartFromSortedIndex = useCallback((sortedIndex: number) => {
+    return (event: DragEvent<HTMLButtonElement>): void => {
+      event.dataTransfer.setData("text/plain", encodeSortedPartDragPayload(sortedIndex));
+      event.dataTransfer.effectAllowed = "move";
+    };
+  }, []);
 
   const insertGapClassName = (insertBeforeSortedIndex: number): string => {
     const isActive: boolean = dragOverInsertSortedIndex === insertBeforeSortedIndex;
     return `group relative flex w-3 max-w-[14px] shrink-0 touch-none flex-col items-center justify-center overflow-visible rounded-sm border border-dashed border-transparent px-0 py-0 transition min-h-[18px] max-h-12 sm:h-2 sm:max-h-[10px] sm:min-h-[6px] sm:w-full sm:max-w-none ${
-      isActive ? 'border-[#0071e3]/55 bg-[#0071e3]/[0.08] dark:border-[#0a84ff]/50 dark:bg-[#0a84ff]/[0.1]' : ''
+      isActive ? "border-[#0071e3]/55 bg-[#0071e3]/[0.08] dark:border-[#0a84ff]/50 dark:bg-[#0a84ff]/[0.1]" : ""
     }`;
   };
 
@@ -230,12 +221,12 @@ export const PartsAside = ({
               <Fragment key={getProjectPartStableKey(part, index)}>
                 <div
                   className={`relative flex shrink-0 flex-col gap-1 sm:w-full ${
-                    isDropTargetPart ? 'rounded-xl ring-2 ring-[#0071e3]/45 dark:ring-[#0a84ff]/45' : ''
+                    isDropTargetPart ? "rounded-xl ring-2 ring-[#0071e3]/45 dark:ring-[#0a84ff]/45" : ""
                   }`}
                 >
                   <div
                     className={`relative min-w-0 rounded-lg sm:w-full ${
-                      isSelected ? 'ring-2 ring-[#0071e3]/35 dark:ring-[#0a84ff]/40' : ''
+                      isSelected ? "ring-2 ring-[#0071e3]/35 dark:ring-[#0a84ff]/40" : ""
                     }`}
                     onDragOver={isPatchingParts ? undefined : handlePartDragOver(index)}
                     onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
@@ -244,8 +235,8 @@ export const PartsAside = ({
                     <div
                       className={`flex w-full flex-col rounded-lg border text-left transition ${
                         isSelected
-                          ? 'border-[#0071e3] bg-white shadow-sm dark:border-[#0a84ff] dark:bg-[#2c2c2e]'
-                          : 'border-black/[0.08] bg-white/90 hover:border-black/[0.14] dark:border-white/[0.1] dark:bg-[#1c1c1e]/90 dark:hover:border-white/[0.16]'
+                          ? "border-[#0071e3] bg-white shadow-sm dark:border-[#0a84ff] dark:bg-[#2c2c2e]"
+                          : "border-black/[0.08] bg-white/90 hover:border-black/[0.14] dark:border-white/[0.1] dark:bg-[#1c1c1e]/90 dark:hover:border-white/[0.16]"
                       }`}
                     >
                       <button
@@ -254,7 +245,7 @@ export const PartsAside = ({
                         title="Drag slide to reorder"
                         aria-label={`Slide ${String(index + 1)} — click to select, drag to reorder`}
                         className={`flex w-full flex-col gap-1 rounded-t-lg p-2 pb-1 text-left outline-none transition hover:bg-black/[0.02] dark:hover:bg-white/[0.03] ${
-                          isPatchingParts ? '' : 'cursor-grab active:cursor-grabbing'
+                          isPatchingParts ? "" : "cursor-grab active:cursor-grabbing"
                         }`}
                         onDragStart={handleDragStartFromSortedIndex(index)}
                         onDragEnd={handleDragEnd}
@@ -265,62 +256,62 @@ export const PartsAside = ({
                           onSelectPartIndex(index);
                         }}
                       >
-                          <div className="relative aspect-video w-full overflow-hidden rounded-md bg-neutral-200/90 dark:bg-neutral-800/90">
-                            {isLyricsPartForThumb ? (
-                              <div className="flex h-full w-full items-center justify-center px-1" role="status">
-                                <span className="text-center text-[10px] font-medium leading-tight text-neutral-500 dark:text-neutral-400">
-                                  {buildLyricsPartThumbnailCaption(part)}
-                                </span>
-                              </div>
-                            ) : thumbLayoutEntry !== null ? (
-                              <TemplateLayoutThumbnail
-                                key={`part-thumb-${getProjectPartId(part) ?? `idx-${String(index)}`}-${effectivePrimaryLayoutId ?? 'nolayout'}`}
-                                entry={thumbLayoutEntry}
-                                className="block h-full w-full"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-neutral-600 dark:text-neutral-300">
-                                {index + 1}
-                              </div>
-                            )}
-                            <span
-                              className="pointer-events-none absolute left-1 top-1 rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold text-white"
-                              aria-hidden
-                            >
+                        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-neutral-200/90 dark:bg-neutral-800/90">
+                          {isLyricsPartForThumb ? (
+                            <div className="flex h-full w-full items-center justify-center px-1" role="status">
+                              <span className="text-center text-[10px] font-medium leading-tight text-neutral-500 dark:text-neutral-400">
+                                {buildLyricsPartThumbnailCaption(part)}
+                              </span>
+                            </div>
+                          ) : thumbLayoutEntry !== null ? (
+                            <TemplateLayoutThumbnail
+                              key={`part-thumb-${getProjectPartId(part) ?? `idx-${String(index)}`}-${effectivePrimaryLayoutId ?? "nolayout"}`}
+                              entry={thumbLayoutEntry}
+                              className="block h-full w-full"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-neutral-600 dark:text-neutral-300">
                               {index + 1}
-                            </span>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          ref={partTypeMenuOpenIndex === index ? partTypeMenuTriggerRef : undefined}
-                          className="w-full truncate rounded-b-lg px-2 pb-2 pt-0 text-left text-[11px] font-medium uppercase tracking-wide text-neutral-500 outline-none transition hover:bg-black/[0.02] hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-white/[0.03] dark:hover:text-neutral-200 dark:focus-visible:ring-[#0a84ff]"
-                          aria-haspopup="menu"
-                          aria-expanded={partTypeMenuOpenIndex === index}
-                          aria-controls={PART_KIND_CHANGE_MENU_ID}
-                          disabled={isPatchingParts}
-                          onDragOver={isPatchingParts ? undefined : handlePartDragOver(index)}
-                          onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
-                          onDrop={isPatchingParts ? undefined : handlePartDrop(index)}
-                          onClick={(event: MouseEvent<HTMLButtonElement>): void => {
-                            onPartTypeMenuButtonClick(event, index);
-                          }}
-                        >
-                          {partTypeLabel}
-                        </button>
-                      </div>
+                            </div>
+                          )}
+                          <span
+                            className="pointer-events-none absolute left-1 top-1 rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold text-white"
+                            aria-hidden
+                          >
+                            {index + 1}
+                          </span>
+                        </div>
+                      </button>
                       <button
                         type="button"
-                        className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-md border border-black/[0.06] bg-white/95 text-neutral-500 shadow-sm outline-none transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:opacity-40 dark:border-white/[0.1] dark:bg-[#2c2c2e]/95 dark:text-neutral-400 dark:hover:border-red-500/40 dark:hover:bg-red-500/15 dark:hover:text-red-400 dark:focus-visible:ring-[#0a84ff]"
-                        aria-label={`Delete part ${String(index + 1)}`}
+                        ref={partTypeMenuOpenIndex === index ? partTypeMenuTriggerRef : undefined}
+                        className="w-full truncate rounded-b-lg px-2 pb-2 pt-0 text-left text-[11px] font-medium uppercase tracking-wide text-neutral-500 outline-none transition hover:bg-black/[0.02] hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-white/[0.03] dark:hover:text-neutral-200 dark:focus-visible:ring-[#0a84ff]"
+                        aria-haspopup="menu"
+                        aria-expanded={partTypeMenuOpenIndex === index}
+                        aria-controls={PART_KIND_CHANGE_MENU_ID}
                         disabled={isPatchingParts}
+                        onDragOver={isPatchingParts ? undefined : handlePartDragOver(index)}
+                        onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
+                        onDrop={isPatchingParts ? undefined : handlePartDrop(index)}
                         onClick={(event: MouseEvent<HTMLButtonElement>): void => {
-                          event.stopPropagation();
-                          onDeletePartAtIndex(index);
+                          onPartTypeMenuButtonClick(event, index);
                         }}
                       >
-                        <PartDeleteIcon />
+                        {partTypeLabel}
                       </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-md border border-black/[0.06] bg-white/95 text-neutral-500 shadow-sm outline-none transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-[#0071e3] disabled:opacity-40 dark:border-white/[0.1] dark:bg-[#2c2c2e]/95 dark:text-neutral-400 dark:hover:border-red-500/40 dark:hover:bg-red-500/15 dark:hover:text-red-400 dark:focus-visible:ring-[#0a84ff]"
+                      aria-label={`Delete part ${String(index + 1)}`}
+                      disabled={isPatchingParts}
+                      onClick={(event: MouseEvent<HTMLButtonElement>): void => {
+                        event.stopPropagation();
+                        onDeletePartAtIndex(index);
+                      }}
+                    >
+                      <PartDeleteIcon />
+                    </button>
                   </div>
                 </div>
                 {index < sortedParts.length - 1 ? (
@@ -373,7 +364,7 @@ export const PartsAside = ({
                       left: addPartMenuAnchor.leftPx,
                       width: addPartMenuAnchor.widthPx,
                       maxHeight: `${addPartMenuAnchor.maxHeightPx}px`,
-                      overflowY: 'auto',
+                      overflowY: "auto",
                     }}
                   >
                     {ADD_PART_KIND_OPTIONS.map((row: AddPartKindOption) => (

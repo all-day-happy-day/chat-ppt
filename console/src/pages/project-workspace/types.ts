@@ -1,4 +1,4 @@
-import type { PartKindForCreate } from '../../lib/project-parts-for-patch';
+import type { PartKindForCreate } from "../../lib/project-parts-for-patch";
 
 export type AddPartMenuAnchor = {
   topPx: number;
@@ -7,7 +7,7 @@ export type AddPartMenuAnchor = {
   maxHeightPx: number;
 };
 
-export type PartKindChangeConfirmMode = 'loseFilledData' | 'plainValueCrossover';
+export type PartKindChangeConfirmMode = "loseFilledData" | "plainValueCrossover";
 
 export type PendingPartKindChangeConfirm = {
   mode: PartKindChangeConfirmMode;

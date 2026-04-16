@@ -1,13 +1,10 @@
-import { SIGN_IN_REQUIRED_MESSAGE } from '../lib/auth-errors';
-import { getApiBaseUrl } from '../lib/api-base';
-import type { LyricsSongLine } from '../lib/lyrics-part-contents';
-import { readLyricsSongLines } from '../lib/lyrics-part-contents';
-import {
-  attachChatPptHttpErrorToThrownError,
-  messageFromFailedResponseBody,
-} from '../lib/parse-api-error';
-import { readFetchErrorMessage } from '../lib/read-fetch-error';
-import type { SongListItem } from '../types/song';
+import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
+import { getApiBaseUrl } from "../lib/api-base";
+import type { LyricsSongLine } from "../lib/lyrics-part-contents";
+import { readLyricsSongLines } from "../lib/lyrics-part-contents";
+import { attachChatPptHttpErrorToThrownError, messageFromFailedResponseBody } from "../lib/parse-api-error";
+import { readFetchErrorMessage } from "../lib/read-fetch-error";
+import type { SongListItem } from "../types/song";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -29,14 +26,11 @@ const readSongListItem = (value: unknown): SongListItem | null => {
   return { id, title, artist };
 };
 
-export const listSongsByTitle = async (title: string, signal?: AbortSignal): Promise<SongListItem[]> => {
-  const trimmed: string = title.trim();
-  if (trimmed.length === 0) {
-    return [];
-  }
-  const baseUrl: string = getApiBaseUrl();
-  const encodedTitle: string = encodeURIComponent(trimmed);
-  const url: string = `${baseUrl}/song/list-songs?title=${encodedTitle}`;
+const fetchSongListFromGetSongsUrl = async (
+  url: string,
+  errorMessage: string,
+  signal?: AbortSignal
+): Promise<SongListItem[]> => {
   const response: Response = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -46,7 +40,7 @@ export const listSongsByTitle = async (title: string, signal?: AbortSignal): Pro
     if (response.status === 401) {
       throw new Error(SIGN_IN_REQUIRED_MESSAGE);
     }
-    const message: string = await readFetchErrorMessage(response, "Could not search songs.");
+    const message: string = await readFetchErrorMessage(response, errorMessage);
     throw new Error(message);
   }
   const text: string = await response.text();
@@ -69,6 +63,16 @@ export const listSongsByTitle = async (title: string, signal?: AbortSignal): Pro
   return songs;
 };
 
+export const listSongsByTitle = async (title: string, signal?: AbortSignal): Promise<SongListItem[]> => {
+  if (title.length === 0) {
+    return [];
+  }
+  const baseUrl: string = getApiBaseUrl();
+  const encodedTitle: string = encodeURIComponent(title);
+  const url: string = `${baseUrl}/song/list-songs?title=${encodedTitle}`;
+  return fetchSongListFromGetSongsUrl(url, "Could not search songs.", signal);
+};
+
 const ULID_PATTERN: RegExp = /^[0-7][0-9A-HJKMNP-TV-Z]{25}$/i;
 
 const HEX16_PATTERN: RegExp = /^[\dA-F]{16}$/i;
@@ -84,7 +88,7 @@ export const isPlausibleBackendSongId = (songId: string): boolean => {
 };
 
 const normalizeComparableSongText = (value: string): string => {
-  return value.trim().toLowerCase().replace(/\s+/g, ' ');
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 };
 
 export const findMatchingStoredSongId = (title: string, artist: string, items: SongListItem[]): string | null => {
@@ -111,7 +115,7 @@ export const findMatchingStoredSongId = (title: string, artist: string, items: S
     return pickFirstPlausibleId(titleMatches);
   }
   const artistMatches: SongListItem[] = titleMatches.filter((item: SongListItem): boolean => {
-    const itemArtist: string = item.artist ?? '';
+    const itemArtist: string = item.artist ?? "";
     return normalizeComparableSongText(itemArtist) === artistNorm;
   });
   if (artistMatches.length > 0) {
@@ -138,29 +142,29 @@ const lyricsLinesHaveNonWhitespaceContent = (lines: LyricsSongLine[]): boolean =
 
 const fetchLyricsEnvelopeJson = async (url: string, signal?: AbortSignal): Promise<unknown> => {
   const response: Response = await fetch(url, {
-    method: 'GET',
-    credentials: 'include',
+    method: "GET",
+    credentials: "include",
     signal,
   });
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error(SIGN_IN_REQUIRED_MESSAGE);
     }
-    const message: string = await readFetchErrorMessage(response, 'Could not load lyrics.');
+    const message: string = await readFetchErrorMessage(response, "Could not load lyrics.");
     throw new Error(message);
   }
   const text: string = await response.text();
   try {
     return JSON.parse(text) as unknown;
   } catch {
-    throw new Error('Invalid response from server.');
+    throw new Error("Invalid response from server.");
   }
 };
 
 export const getLyricsBySongId = async (songId: string, signal?: AbortSignal): Promise<LyricsSongLine[]> => {
   const trimmed: string = songId.trim();
   if (trimmed.length === 0) {
-    throw new Error('Song id is required to load lyrics.');
+    throw new Error("Song id is required to load lyrics.");
   }
   const baseUrl: string = getApiBaseUrl();
   const encodedId: string = encodeURIComponent(trimmed);
@@ -168,7 +172,7 @@ export const getLyricsBySongId = async (songId: string, signal?: AbortSignal): P
   const parsed: unknown = await fetchLyricsEnvelopeJson(url, signal);
   const lines: LyricsSongLine[] | null = readLyricsLinesFromLyricsEnvelope(parsed);
   if (lines === null) {
-    throw new Error('Invalid response from server.');
+    throw new Error("Invalid response from server.");
   }
   return lines;
 };
@@ -180,20 +184,121 @@ export const scrapeLyrics = async (
 ): Promise<LyricsSongLine[]> => {
   const trimmedTitle: string = title.trim();
   if (trimmedTitle.length === 0) {
-    throw new Error('Title is required to load lyrics.');
+    throw new Error("Title is required to load lyrics.");
   }
   const baseUrl: string = getApiBaseUrl();
   const titleQuery: string = encodeURIComponent(trimmedTitle);
-  const artistTrimmed: string = artist === null ? '' : artist.trim();
-  const artistQuery: string =
-    artistTrimmed.length > 0 ? `&artist=${encodeURIComponent(artistTrimmed)}` : '';
+  const artistTrimmed: string = artist === null ? "" : artist.trim();
+  const artistQuery: string = artistTrimmed.length > 0 ? `&artist=${encodeURIComponent(artistTrimmed)}` : "";
   const url: string = `${baseUrl}/song/lyrics/scrape?title=${titleQuery}${artistQuery}`;
   const parsed: unknown = await fetchLyricsEnvelopeJson(url, signal);
   const lines: LyricsSongLine[] | null = readLyricsLinesFromLyricsEnvelope(parsed);
   if (lines === null) {
-    throw new Error('Invalid response from server.');
+    throw new Error("Invalid response from server.");
   }
   return lines;
+};
+
+const readSongMetaFromEnvelopeRoot = (parsed: unknown): { id: string; title: string; artist: string | null } | null => {
+  if (!isRecord(parsed)) {
+    return null;
+  }
+  const songRaw: unknown = parsed.song;
+  if (!isRecord(songRaw)) {
+    return null;
+  }
+  const idValue: unknown = songRaw.id;
+  const titleValue: unknown = songRaw.title;
+  const artistValue: unknown = songRaw.artist;
+  const title: string = typeof titleValue === "string" ? titleValue.trim() : "";
+  if (title.length === 0) {
+    return null;
+  }
+  const id: string = typeof idValue === "string" && idValue.length > 0 ? idValue : "";
+  if (!isPlausibleBackendSongId(id)) {
+    return null;
+  }
+  const artist: string | null =
+    artistValue === null ? null : typeof artistValue === "string" && artistValue.length > 0 ? artistValue : null;
+  return { id, title, artist };
+};
+
+export type ScrapeCreateSongResult = {
+  songId: string;
+  title: string;
+  artist: string | null;
+  lines: LyricsSongLine[];
+};
+
+export const scrapeLyricsCreatingSong = async (
+  title: string,
+  artist: string | null,
+  signal?: AbortSignal
+): Promise<ScrapeCreateSongResult> => {
+  const trimmedTitle: string = title.trim();
+  if (trimmedTitle.length === 0) {
+    throw new Error("Title is required to add a song.");
+  }
+  const baseUrl: string = getApiBaseUrl();
+  const titleQuery: string = encodeURIComponent(trimmedTitle);
+  const artistTrimmed: string = artist === null ? "" : artist.trim();
+  const artistQuery: string = artistTrimmed.length > 0 ? `&artist=${encodeURIComponent(artistTrimmed)}` : "";
+  const url: string = `${baseUrl}/song/lyrics/scrape?title=${titleQuery}${artistQuery}`;
+  const parsed: unknown = await fetchLyricsEnvelopeJson(url, signal);
+  const meta: { id: string; title: string; artist: string | null } | null = readSongMetaFromEnvelopeRoot(parsed);
+  if (meta === null) {
+    throw new Error("Invalid response from server.");
+  }
+  const lines: LyricsSongLine[] | null = readLyricsLinesFromLyricsEnvelope(parsed);
+  if (lines === null) {
+    throw new Error("Invalid response from server.");
+  }
+  return {
+    songId: meta.id,
+    title: meta.title,
+    artist: meta.artist,
+    lines,
+  };
+};
+
+export const listBroadSongLibrary = async (signal?: AbortSignal): Promise<SongListItem[]> => {
+  const baseUrl: string = getApiBaseUrl();
+  const url: string = `${baseUrl}/song/list-all-songs`;
+  return fetchSongListFromGetSongsUrl(url, "Could not load the song library.", signal);
+};
+
+export const songIdHasLyricsWithContentInLibrary = async (songId: string, signal?: AbortSignal): Promise<boolean> => {
+  if (!isPlausibleBackendSongId(songId.trim())) {
+    return false;
+  }
+  try {
+    const lines: LyricsSongLine[] = await getLyricsBySongId(songId, signal);
+    return lyricsLinesHaveNonWhitespaceContent(lines);
+  } catch {
+    return false;
+  }
+};
+
+export const deleteSongById = async (songId: string, signal?: AbortSignal): Promise<void> => {
+  const trimmed: string = songId.trim();
+  if (!isPlausibleBackendSongId(trimmed)) {
+    throw new Error("Song id is not valid.");
+  }
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(trimmed);
+  const url: string = `${baseUrl}/song/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not delete the song.");
+    throw new Error(message);
+  }
 };
 
 export type ResolveLyricsLinesForConfigureInput = {
@@ -208,7 +313,7 @@ export const resolveLyricsLinesForConfigure = async (
 ): Promise<LyricsSongLine[]> => {
   const title: string = input.title.trim();
   if (title.length === 0) {
-    throw new Error('Title is required to load lyrics.');
+    throw new Error("Title is required to load lyrics.");
   }
   const artist: string = input.artist.trim();
   const tryStoredLyrics = async (songId: string | null): Promise<LyricsSongLine[] | null> => {
@@ -235,7 +340,7 @@ export const resolveLyricsLinesForConfigure = async (
   return scrapeLyrics(title, artistForScrape, signal);
 };
 
-const patchLyricsForSongRepository = async (
+export const patchLyricsInLibrary = async (
   songId: string,
   lines: LyricsSongLine[],
   signal?: AbortSignal
@@ -273,7 +378,7 @@ const patchLyricsForSongRepository = async (
   }
 };
 
-const patchSongMetadataForRepository = async (
+export const patchSongMetadataInLibrary = async (
   songId: string,
   payload: { title: string; artist: string | null },
   signal?: AbortSignal
@@ -343,8 +448,8 @@ export const syncSongLibraryFromLyricsConfigureSave = async (
   if (songId === null) {
     return;
   }
-  await patchLyricsForSongRepository(songId, input.lyricsLines, signal);
-  await patchSongMetadataForRepository(
+  await patchLyricsInLibrary(songId, input.lyricsLines, signal);
+  await patchSongMetadataInLibrary(
     songId,
     {
       title: titleTrimmed,

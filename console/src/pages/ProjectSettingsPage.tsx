@@ -1,44 +1,35 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type RefObject,
-} from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { signOut, verifySession } from '../api/auth';
-import { deleteProjectById, listProjectsByUserId, patchProjectById } from '../api/project';
-import { listTemplatesByUserId } from '../api/template';
-import { listUsers } from '../api/user';
-import { WorkspaceHeader } from './project-workspace/WorkspaceHeader';
-import { ProjectDeleteDialog } from './project-workspace/ProjectDeleteDialog';
-import { TemplateChangeWarningDialog } from './project-workspace/TemplateChangeWarningDialog';
-import { AUTH_FIELD_CLASS } from '../lib/auth-screen-classes';
-import { isSignInRequiredError } from '../lib/auth-errors';
-import { generateDestructiveConfirmCode } from '../lib/destructive-confirm-code';
-import { findUserIdByPrincipal } from '../lib/resolve-user-id';
-import { readableClientFetchFailureMessage } from '../lib/read-fetch-error';
-import { readAppliedThemeFromDocument } from '../lib/read-applied-theme';
-import { setSessionExpiredRedirect } from '../lib/session-expired-redirect';
-import type { ThemePreference } from '../lib/theme';
-import { toggleStoredTheme } from '../lib/theme';
-import type { GetProjectResponse } from '../types/project';
-import type { GetTemplateResponse } from '../types/template';
-import type { GetUserResponse } from '../types/user';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type RefObject } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { signOut, verifySession } from "../api/auth";
+import { deleteProjectById, listProjectsByUserId, patchProjectById } from "../api/project";
+import { listTemplatesByUserId } from "../api/template";
+import { listUsers } from "../api/user";
+import { WorkspaceHeader } from "./project-workspace/WorkspaceHeader";
+import { ProjectDeleteDialog } from "./project-workspace/ProjectDeleteDialog";
+import { TemplateChangeWarningDialog } from "./project-workspace/TemplateChangeWarningDialog";
+import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
+import { isSignInRequiredError } from "../lib/auth-errors";
+import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
+import type { ThemePreference } from "../lib/theme";
+import { toggleStoredTheme } from "../lib/theme";
+import type { GetProjectResponse } from "../types/project";
+import type { GetTemplateResponse } from "../types/template";
+import type { GetUserResponse } from "../types/user";
 
-const USER_RESOLVE_ERROR: string = 'We could not match your signed-in user to an account in this workspace.';
+const USER_RESOLVE_ERROR: string = "We could not match your signed-in user to an account in this workspace.";
 
 const WORKSPACE_LOAD_NETWORK_FALLBACK: string =
-  'Could not reach the server. Check your connection and that the API is running, then refresh this page.';
+  "Could not reach the server. Check your connection and that the API is running, then refresh this page.";
 
 const SETTINGS_SECTION_TITLE_CLASS: string =
-  'text-[13px] font-semibold uppercase tracking-[0.08em] text-neutral-500 dark:text-neutral-400';
+  "text-[13px] font-semibold uppercase tracking-[0.08em] text-neutral-500 dark:text-neutral-400";
 
 const SETTINGS_PRIMARY_BUTTON_CLASS: string =
-  'inline-flex h-11 items-center justify-center rounded-xl bg-[#0071e3] px-5 text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]';
+  "inline-flex h-9 items-center justify-center rounded-lg bg-[#0071e3] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]";
 
 export const ProjectSettingsPage = () => {
   const navigate: ReturnType<typeof useNavigate> = useNavigate();
@@ -52,16 +43,16 @@ export const ProjectSettingsPage = () => {
   const [templates, setTemplates] = useState<GetTemplateResponse[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [draftName, setDraftName] = useState<string>('');
-  const [draftTemplateId, setDraftTemplateId] = useState<string>('');
+  const [draftName, setDraftName] = useState<string>("");
+  const [draftTemplateId, setDraftTemplateId] = useState<string>("");
   const [saveNameError, setSaveNameError] = useState<string | null>(null);
   const [saveTemplateError, setSaveTemplateError] = useState<string | null>(null);
   const [isSavingName, setIsSavingName] = useState<boolean>(false);
   const [isSavingTemplate, setIsSavingTemplate] = useState<boolean>(false);
   const [projectDeleteError, setProjectDeleteError] = useState<string | null>(null);
   const [isDeletingProject, setIsDeletingProject] = useState<boolean>(false);
-  const [deleteConfirmCode, setDeleteConfirmCode] = useState<string>('');
-  const [typedDeleteConfirm, setTypedDeleteConfirm] = useState<string>('');
+  const [deleteConfirmCode, setDeleteConfirmCode] = useState<string>("");
+  const [typedDeleteConfirm, setTypedDeleteConfirm] = useState<string>("");
   const templateWarningDialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement | null>(null);
   const projectDeleteDialogRef: RefObject<HTMLDialogElement | null> = useRef<HTMLDialogElement | null>(null);
 
@@ -71,16 +62,16 @@ export const ProjectSettingsPage = () => {
 
   const handleSessionExpiredNavigation = useCallback((): void => {
     setSessionExpiredRedirect();
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   }, [navigate]);
 
   const handleGoHome = useCallback((): void => {
     void (async (): Promise<void> => {
       try {
         await verifySession();
-        navigate('/', { replace: true });
+        navigate("/", { replace: true });
       } catch {
-        navigate('/', { replace: true });
+        navigate("/", { replace: true });
       }
     })();
   }, [navigate]);
@@ -94,14 +85,14 @@ export const ProjectSettingsPage = () => {
         // Session may already be invalid or the network failed; still return to the home shell.
       } finally {
         setIsSigningOut(false);
-        navigate('/', { replace: true });
+        navigate("/", { replace: true });
       }
     })();
   }, [navigate]);
 
   useEffect(() => {
     if (projectId === undefined || projectId.length === 0) {
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
       return;
     }
     let cancelled: boolean = false;
@@ -110,8 +101,8 @@ export const ProjectSettingsPage = () => {
       setLoadError(null);
       setProject(null);
       setTemplates([]);
-      setDraftName('');
-      setDraftTemplateId('');
+      setDraftName("");
+      setDraftTemplateId("");
       try {
         const session = await verifySession();
         if (cancelled) {
@@ -128,7 +119,7 @@ export const ProjectSettingsPage = () => {
         }
         const self: GetUserResponse | undefined = users.find((row: GetUserResponse) => row.id === resolvedId);
         if (!cancelled) {
-          setIsSessionAdmin(self?.role === 'ADMIN');
+          setIsSessionAdmin(self?.role === "ADMIN");
         }
         const projectList: GetProjectResponse[] = await listProjectsByUserId(resolvedId);
         if (cancelled) {
@@ -138,7 +129,7 @@ export const ProjectSettingsPage = () => {
           (row: GetProjectResponse) => row.id === projectId
         );
         if (match === undefined) {
-          navigate('/', { replace: true });
+          navigate("/", { replace: true });
           return;
         }
         let templateList: GetTemplateResponse[] = [];
@@ -203,7 +194,7 @@ export const ProjectSettingsPage = () => {
     }
     const trimmed: string = draftName.trim();
     if (trimmed.length === 0) {
-      setSaveNameError('Enter a project name.');
+      setSaveNameError("Enter a project name.");
       return;
     }
     if (trimmed === project.name) {
@@ -222,7 +213,7 @@ export const ProjectSettingsPage = () => {
           return;
         }
         const message: string =
-          error instanceof Error ? error.message : 'Could not update the project name. Try again after refreshing.';
+          error instanceof Error ? error.message : "Could not update the project name. Try again after refreshing.";
         setSaveNameError(message);
       } finally {
         setIsSavingName(false);
@@ -239,7 +230,7 @@ export const ProjectSettingsPage = () => {
     }
     setSaveTemplateError(null);
     const dialogEl: HTMLDialogElement | null = templateWarningDialogRef.current;
-    if (dialogEl !== null && typeof dialogEl.showModal === 'function' && !dialogEl.open) {
+    if (dialogEl !== null && typeof dialogEl.showModal === "function" && !dialogEl.open) {
       dialogEl.showModal();
     }
   }, [project, draftTemplateId]);
@@ -270,7 +261,7 @@ export const ProjectSettingsPage = () => {
           return;
         }
         const message: string =
-          error instanceof Error ? error.message : 'Could not change the template. Try again after refreshing.';
+          error instanceof Error ? error.message : "Could not change the template. Try again after refreshing.";
         setSaveTemplateError(message);
       } finally {
         setIsSavingTemplate(false);
@@ -280,17 +271,17 @@ export const ProjectSettingsPage = () => {
 
   const handleOpenProjectDeleteDialog = useCallback((): void => {
     setDeleteConfirmCode(generateDestructiveConfirmCode());
-    setTypedDeleteConfirm('');
+    setTypedDeleteConfirm("");
     setProjectDeleteError(null);
     const dialogEl: HTMLDialogElement | null = projectDeleteDialogRef.current;
-    if (dialogEl !== null && typeof dialogEl.showModal === 'function' && !dialogEl.open) {
+    if (dialogEl !== null && typeof dialogEl.showModal === "function" && !dialogEl.open) {
       dialogEl.showModal();
     }
   }, []);
 
   const handleProjectDeleteDialogClose = useCallback((): void => {
     setProjectDeleteError(null);
-    setTypedDeleteConfirm('');
+    setTypedDeleteConfirm("");
   }, []);
 
   const handleTypedDeleteConfirmChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
@@ -307,7 +298,7 @@ export const ProjectSettingsPage = () => {
       return;
     }
     if (typedDeleteConfirm !== deleteConfirmCode) {
-      setProjectDeleteError('The code does not match. Try again.');
+      setProjectDeleteError("The code does not match. Try again.");
       return;
     }
     void (async (): Promise<void> => {
@@ -316,7 +307,7 @@ export const ProjectSettingsPage = () => {
       try {
         await deleteProjectById(project.id);
         projectDeleteDialogRef.current?.close();
-        navigate('/', { replace: true });
+        navigate("/", { replace: true });
       } catch (error: unknown) {
         if (isSignInRequiredError(error)) {
           projectDeleteDialogRef.current?.close();
@@ -324,7 +315,7 @@ export const ProjectSettingsPage = () => {
           return;
         }
         const message: string =
-          error instanceof Error ? error.message : 'Could not delete the project. Try again after refreshing.';
+          error instanceof Error ? error.message : "Could not delete the project. Try again after refreshing.";
         setProjectDeleteError(message);
       } finally {
         setIsDeletingProject(false);
@@ -351,16 +342,10 @@ export const ProjectSettingsPage = () => {
   }, [project, templates]);
 
   const isSaveNameDisabled: boolean =
-    project === null ||
-    isSavingName ||
-    draftName.trim().length === 0 ||
-    draftName.trim() === project.name;
+    project === null || isSavingName || draftName.trim().length === 0 || draftName.trim() === project.name;
 
   const isApplyTemplateDisabled: boolean =
-    project === null ||
-    isSavingTemplate ||
-    draftTemplateId === project.template_id ||
-    templateSelectRows.length === 0;
+    project === null || isSavingTemplate || draftTemplateId === project.template_id || templateSelectRows.length === 0;
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-hidden bg-[#fbfbfa] dark:bg-[#191919]">
@@ -395,9 +380,7 @@ export const ProjectSettingsPage = () => {
         <p className="mt-2 text-[15px] leading-relaxed text-neutral-500 dark:text-neutral-400">
           Name, template, and deleting this project.
         </p>
-        {isLoading ? (
-          <p className="mt-10 text-[15px] text-neutral-500 dark:text-neutral-400">Loading…</p>
-        ) : null}
+        {isLoading ? <p className="mt-10 text-[15px] text-neutral-500 dark:text-neutral-400">Loading…</p> : null}
         {loadError !== null ? (
           <p
             className="mt-8 rounded-xl bg-red-500/10 px-4 py-3 text-[14px] leading-relaxed text-red-700 dark:bg-red-500/15 dark:text-red-300"
@@ -412,7 +395,10 @@ export const ProjectSettingsPage = () => {
               <h2 id="project-settings-name-heading" className={SETTINGS_SECTION_TITLE_CLASS}>
                 Project name
               </h2>
-              <label className="mt-3 block text-[14px] font-medium text-neutral-700 dark:text-neutral-300" htmlFor="project-settings-name-input">
+              <label
+                className="mt-3 block text-[14px] font-medium text-neutral-700 dark:text-neutral-300"
+                htmlFor="project-settings-name-input"
+              >
                 Name
               </label>
               <input
@@ -436,7 +422,7 @@ export const ProjectSettingsPage = () => {
                 disabled={isSaveNameDisabled}
                 onClick={handleSaveProjectName}
               >
-                {isSavingName ? 'Saving…' : 'Save name'}
+                {isSavingName ? "Saving…" : "Save name"}
               </button>
             </section>
             <section aria-labelledby="project-settings-template-heading">
@@ -501,7 +487,7 @@ export const ProjectSettingsPage = () => {
               </p>
               <button
                 type="button"
-                className="mt-4 inline-flex h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-[14px] font-medium text-red-700 outline-none transition hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/35 dark:bg-[#2c2c2e] dark:text-red-300 dark:hover:bg-red-500/10 dark:focus-visible:ring-red-400/40"
+                className="mt-4 inline-flex h-9 items-center justify-center rounded-lg border border-red-200 bg-white px-3.5 text-[13px] font-medium text-red-700 outline-none transition hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/35 dark:bg-[#2c2c2e] dark:text-red-300 dark:hover:bg-red-500/10 dark:focus-visible:ring-red-400/40"
                 disabled={isDeletingProject}
                 onClick={handleOpenProjectDeleteDialog}
               >

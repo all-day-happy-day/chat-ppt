@@ -6,10 +6,10 @@ import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
 
 const PRIMARY_BUTTON_CLASS =
-  "flex h-11 w-full max-w-[280px] items-center justify-center rounded-xl bg-[#0071e3] text-[17px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]" as const;
+  "flex h-10 w-full max-w-[280px] items-center justify-center rounded-lg bg-[#0071e3] text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]" as const;
 
 const SECONDARY_BUTTON_CLASS =
-  "flex h-11 w-full max-w-[280px] items-center justify-center rounded-xl border border-neutral-300 bg-transparent text-[17px] font-medium text-neutral-900 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10" as const;
+  "flex h-10 w-full max-w-[280px] items-center justify-center rounded-lg border border-neutral-300 bg-transparent text-[15px] font-medium text-neutral-900 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10" as const;
 
 export type HomePageProps = {
   onGoHome: () => void;

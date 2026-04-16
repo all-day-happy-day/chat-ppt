@@ -198,3 +198,62 @@ export const readTemplateFromUpload = async (
   }
   return parsed;
 };
+
+const isChangeTemplateNameResponse = (value: unknown): value is GetTemplateResponse => {
+  return isGetTemplateResponse(value);
+};
+
+export const changeTemplateName = async (templateId: string, newName: string): Promise<GetTemplateResponse> => {
+  const trimmedName: string = newName.trim();
+  if (trimmedName.length === 0) {
+    throw new Error("Template name cannot be empty.");
+  }
+  const baseUrl: string = getApiBaseUrl();
+  const url: string = `${baseUrl}/powerpoint/template/name`;
+  const response: Response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      template_id: templateId,
+      new_name: trimmedName,
+    }),
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not rename the template.");
+    throw new Error(message);
+  }
+  const text: string = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch {
+    throw new Error("Invalid response from server.");
+  }
+  if (!isChangeTemplateNameResponse(parsed)) {
+    throw new Error("Invalid response from server.");
+  }
+  return parsed;
+};
+
+export const deleteTemplateById = async (templateId: string): Promise<void> => {
+  const baseUrl: string = getApiBaseUrl();
+  const encodedId: string = encodeURIComponent(templateId);
+  const url: string = `${baseUrl}/powerpoint/template/${encodedId}`;
+  const response: Response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(SIGN_IN_REQUIRED_MESSAGE);
+    }
+    const message: string = await readFetchErrorMessage(response, "Could not delete the template.");
+    throw new Error(message);
+  }
+};

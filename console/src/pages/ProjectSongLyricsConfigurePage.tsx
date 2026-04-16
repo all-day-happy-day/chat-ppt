@@ -372,9 +372,7 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
     const serverSongRows: LyricsSongRow[] = readLyricsSongRowsFromPart(part);
     const snapshotSongRows: LyricsSongRow[] | null = readLyricsPartSongsSnapshotFromLocation(location.state);
     const songRows: LyricsSongRow[] =
-      snapshotSongRows !== null && songIndexParsed < snapshotSongRows.length
-        ? snapshotSongRows
-        : serverSongRows;
+      snapshotSongRows !== null && songIndexParsed < snapshotSongRows.length ? snapshotSongRows : serverSongRows;
     if (songIndexParsed >= songRows.length) {
       return null;
     }
@@ -398,9 +396,7 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
     const serverSongRows: LyricsSongRow[] = readLyricsSongRowsFromPart(part);
     const snapshotSongRows: LyricsSongRow[] | null = readLyricsPartSongsSnapshotFromLocation(location.state);
     const songs: LyricsSongRow[] =
-      snapshotSongRows !== null && songIndexParsed < snapshotSongRows.length
-        ? snapshotSongRows
-        : serverSongRows;
+      snapshotSongRows !== null && songIndexParsed < snapshotSongRows.length ? snapshotSongRows : serverSongRows;
     const songRow: LyricsSongRow | undefined = songs[songIndexParsed];
     if (songRow === undefined) {
       return null;
@@ -468,7 +464,9 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
     const baseSeq: number[] = normalizeLyricsPartSequence(normalized.length, songRow.lyricsPartSequence);
     const initialSeq: number[] = shiftLyricsPartSequenceForBlankLeadInsert(normalized.length, baseSeq, insertedAtStart);
     const configuredBaseline: boolean = Boolean(songRow.lyricsPartsConfigured);
-    setDraftLines(linesWithBlank.map((line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics })));
+    setDraftLines(
+      linesWithBlank.map((line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics }))
+    );
     setDraftSequence(initialSeq);
     setDraftLyricsPartsConfigured(configuredBaseline);
     setBaselineJson(JSON.stringify({ l: linesWithBlank, s: initialSeq, c: configuredBaseline }));
@@ -536,7 +534,11 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
         const normalized: LyricsSongLine[] = normalizeEditorLyricsLines(fetched);
         const { lines: linesWithBlank, insertedAtStart } = ensureBlankLeadLyricsLine(normalized);
         const baseSeq: number[] = normalizeLyricsPartSequence(normalized.length, undefined);
-        const nextSeq: number[] = shiftLyricsPartSequenceForBlankLeadInsert(normalized.length, baseSeq, insertedAtStart);
+        const nextSeq: number[] = shiftLyricsPartSequenceForBlankLeadInsert(
+          normalized.length,
+          baseSeq,
+          insertedAtStart
+        );
         setDraftLines(
           linesWithBlank.map((line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics }))
         );
@@ -738,10 +740,11 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
             const baselineSnap: ConfigureDraftBaselineSnapshot | null = parseConfigureDraftBaseline(baselineJson);
             const revertedLines: LyricsSongLine[] =
               baselineSnap !== null
-                ? baselineSnap.lines.map((line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics }))
+                ? baselineSnap.lines.map(
+                    (line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics })
+                  )
                 : draftLinesSnapshot;
-            const revertedSeq: number[] =
-              baselineSnap !== null ? baselineSnap.sequence : draftSequenceSnapshot;
+            const revertedSeq: number[] = baselineSnap !== null ? baselineSnap.sequence : draftSequenceSnapshot;
             const revertedConfigured: boolean =
               baselineSnap !== null ? baselineSnap.lyricsPartsConfigured : lyricsPartsConfiguredForPatch;
             setDraftLines(revertedLines);
@@ -858,7 +861,9 @@ export const ProjectSongLyricsConfigurePage = (): ReactElement => {
           const fromBaseline: ConfigureDraftBaselineSnapshot | null = parseConfigureDraftBaseline(baselineJson);
           if (fromBaseline !== null) {
             setDraftLines(
-              fromBaseline.lines.map((line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics }))
+              fromBaseline.lines.map(
+                (line: LyricsSongLine): LyricsSongLine => ({ part: line.part, lyrics: line.lyrics })
+              )
             );
             setDraftSequence(fromBaseline.sequence);
             setDraftLyricsPartsConfigured(fromBaseline.lyricsPartsConfigured);

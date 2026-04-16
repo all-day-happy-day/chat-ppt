@@ -1,9 +1,6 @@
-import type { ReactElement, RefObject } from 'react';
-import {
-  PART_KIND_LOSE_FILLED_DATA_MESSAGE,
-  PART_KIND_PLAIN_VALUE_CROSSOVER_MESSAGE,
-} from './constants';
-import type { PendingPartKindChangeConfirm } from './types';
+import type { ReactElement, RefObject } from "react";
+import { PART_KIND_LOSE_FILLED_DATA_MESSAGE, PART_KIND_PLAIN_VALUE_CROSSOVER_MESSAGE } from "./constants";
+import type { PendingPartKindChangeConfirm } from "./types";
 
 export type PartKindChangeDialogProps = {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -32,14 +29,14 @@ export const PartKindChangeDialog = ({
         <div className="flex flex-col gap-4">
           <h2 className="text-[18px] font-semibold tracking-tight">Change part type</h2>
           <p className="text-[14px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-            {pendingPartKindChangeConfirm.mode === 'plainValueCrossover'
+            {pendingPartKindChangeConfirm.mode === "plainValueCrossover"
               ? PART_KIND_PLAIN_VALUE_CROSSOVER_MESSAGE
               : PART_KIND_LOSE_FILLED_DATA_MESSAGE}
           </p>
           <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
-              className="flex h-11 items-center justify-center rounded-xl border border-neutral-300 bg-transparent px-5 text-[15px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
+              className="flex h-9 items-center justify-center rounded-lg border border-neutral-300 bg-transparent px-3.5 text-[13px] font-medium text-neutral-900 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-white/10"
               onClick={onCancel}
               disabled={isPatchingParts}
             >
@@ -47,11 +44,11 @@ export const PartKindChangeDialog = ({
             </button>
             <button
               type="button"
-              className="flex h-11 items-center justify-center rounded-xl bg-[#0071e3] px-5 text-[15px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
+              className="flex h-9 items-center justify-center rounded-lg bg-[#0071e3] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#0077ed] active:bg-[#006edb] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0a84ff] dark:hover:bg-[#409cff] dark:active:bg-[#0077e6]"
               disabled={isPatchingParts}
               onClick={onConfirm}
             >
-              {isPatchingParts ? 'Saving…' : 'Continue'}
+              {isPatchingParts ? "Saving…" : "Continue"}
             </button>
           </div>
         </div>

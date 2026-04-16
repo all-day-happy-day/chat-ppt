@@ -1,8 +1,8 @@
-import type { ReactElement, RefObject } from 'react';
-import type { GetProjectResponse } from '../../types/project';
-import { NotionCalendarIcon, NotionDocumentIcon, NotionHistoryIcon, NotionPersonIcon } from './icons';
-import { NotionPropertyRow } from './NotionPropertyRow';
-import { formatInstant, shortenId } from './utils';
+import type { ReactElement, RefObject } from "react";
+import type { GetProjectResponse } from "../../types/project";
+import { NotionCalendarIcon, NotionDocumentIcon, NotionHistoryIcon, NotionPersonIcon } from "./icons";
+import { NotionPropertyRow } from "./NotionPropertyRow";
+import { formatInstant, shortenId } from "./utils";
 
 export type WorkspaceMetaSectionProps = {
   titleHeadingRef: RefObject<HTMLHeadingElement | null>;

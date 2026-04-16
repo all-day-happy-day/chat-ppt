@@ -106,7 +106,7 @@ export const normalizeLyricsPartSequence = (lineCount: number, raw: unknown): nu
   }
   const filtered: number[] = [];
   for (const entry of raw) {
-    if (typeof entry !== 'number' || !Number.isInteger(entry) || entry < 0 || entry >= lineCount) {
+    if (typeof entry !== "number" || !Number.isInteger(entry) || entry < 0 || entry >= lineCount) {
       continue;
     }
     filtered.push(entry);
@@ -128,7 +128,9 @@ export const resequenceAfterDefinitionRemoved = (sequence: number[], removedDefi
  * Ensures a `blank` definition exists at the front of the list so it appears as a tile in the song part palette.
  * Indices in `lyricsPartSequence` refer to the array *before* insert; use {@link shiftLyricsPartSequenceForBlankLeadInsert} after.
  */
-export const ensureBlankLeadLyricsLine = (lines: LyricsSongLine[]): { lines: LyricsSongLine[]; insertedAtStart: boolean } => {
+export const ensureBlankLeadLyricsLine = (
+  lines: LyricsSongLine[]
+): { lines: LyricsSongLine[]; insertedAtStart: boolean } => {
   if (lines.some((l: LyricsSongLine): boolean => isBlankDefinitionPart(l.part))) {
     return { lines, insertedAtStart: false };
   }
@@ -162,20 +164,16 @@ const readLyricsPartSequenceFromContentItem = (item: Record<string, unknown>, li
 const readLyricsPartsConfiguredFromContentItem = (item: Record<string, unknown>): boolean => {
   const snake: unknown = item.lyrics_parts_configured;
   const camel: unknown = item.lyricsPartsConfigured;
-  if (typeof snake === 'boolean') {
+  if (typeof snake === "boolean") {
     return snake;
   }
-  if (typeof camel === 'boolean') {
+  if (typeof camel === "boolean") {
     return camel;
   }
   return false;
 };
 
-const readNonEmptyLayoutId = (
-  rec: Record<string, unknown>,
-  snakeKey: string,
-  camelKey: string
-): string | null => {
+const readNonEmptyLayoutId = (rec: Record<string, unknown>, snakeKey: string, camelKey: string): string | null => {
   const snakeValue: unknown = rec[snakeKey];
   if (typeof snakeValue === "string" && snakeValue.length > 0) {
     return snakeValue;
@@ -205,8 +203,7 @@ export const normalizeEditorLyricsLines = (lines: LyricsSongLine[]): LyricsSongL
   }
   const normalized: LyricsSongLine[] = lines.map(
     (line: LyricsSongLine): LyricsSongLine => ({
-      part:
-        typeof line.part === "string" && line.part.trim().length > 0 ? line.part.trim() : DEFAULT_LYRIC_LINE_PART,
+      part: typeof line.part === "string" && line.part.trim().length > 0 ? line.part.trim() : DEFAULT_LYRIC_LINE_PART,
       lyrics: typeof line.lyrics === "string" ? line.lyrics : "",
     })
   );
@@ -254,7 +251,7 @@ export const readLyricsSongRowsFromPart = (part: unknown): LyricsSongRow[] => {
   return rows.length > 0 ? rows : [createDefaultLyricsSongRow()];
 };
 
-const LYRICS_LIBRARY_FALLBACK_LABEL: string = 'Lyrics';
+const LYRICS_LIBRARY_FALLBACK_LABEL: string = "Lyrics";
 
 export const getLyricsPartLibraryLabel = (part: unknown): string => {
   const rows: LyricsSongRow[] = readLyricsSongRowsFromPart(part);
@@ -296,18 +293,16 @@ export const buildLyricsPartFingerprintFromServerPart = (part: unknown): string 
 export const buildLyricsContentsPayloadFromSongRows = (
   songs: LyricsSongRow[]
 ): { type: "LYRICS"; contents: LyricsSongContentItem[] } => {
-  const contents: LyricsSongContentItem[] = songs.map(
-    (row: LyricsSongRow): LyricsSongContentItem => {
-      const lyrics: LyricsSongLine[] = normalizeEditorLyricsLines(row.lines);
-      return {
-        title: row.title,
-        artist: row.artist.trim().length > 0 ? row.artist.trim() : null,
-        lyrics,
-        lyrics_part_sequence: normalizeLyricsPartSequence(lyrics.length, row.lyricsPartSequence),
-        lyrics_parts_configured: row.lyricsPartsConfigured,
-      };
-    }
-  );
+  const contents: LyricsSongContentItem[] = songs.map((row: LyricsSongRow): LyricsSongContentItem => {
+    const lyrics: LyricsSongLine[] = normalizeEditorLyricsLines(row.lines);
+    return {
+      title: row.title,
+      artist: row.artist.trim().length > 0 ? row.artist.trim() : null,
+      lyrics,
+      lyrics_part_sequence: normalizeLyricsPartSequence(lyrics.length, row.lyricsPartSequence),
+      lyrics_parts_configured: row.lyricsPartsConfigured,
+    };
+  });
   return {
     type: "LYRICS",
     contents: contents.length > 0 ? contents : [createDefaultLyricsSongContentItem()],
@@ -341,7 +336,7 @@ export const mergeLyricsSongRowsIntoExistingContents = (
   };
 };
 
-const LYRICS_PART_THUMB_FALLBACK: string = 'Lyrics part';
+const LYRICS_PART_THUMB_FALLBACK: string = "Lyrics part";
 
 /** One-line caption for canvas / slide strip when the part is lyrics (progress across titled songs). */
 export const buildLyricsPartThumbnailCaption = (part: unknown): string => {

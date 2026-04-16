@@ -1,11 +1,11 @@
-import type { LyricsSongRow } from './lyrics-part-contents';
-import { readLyricsSongRowsFromPart } from './lyrics-part-contents';
+import type { LyricsSongRow } from "./lyrics-part-contents";
+import { readLyricsSongRowsFromPart } from "./lyrics-part-contents";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
-export const LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY: string = 'lyricsPartSongsSnapshot';
+export const LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY: string = "lyricsPartSongsSnapshot";
 
 /**
  * Drops the workspace draft song list from router state so the configure page reads persisted project data
@@ -28,31 +28,27 @@ export type LyricsSongConfigureOverlay = {
 };
 
 export const readLyricsSongConfigureOverlay = (raw: unknown): LyricsSongConfigureOverlay | null => {
-  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return null;
   }
   const root: Record<string, unknown> = raw as Record<string, unknown>;
   const boxed: unknown = root.lyricsSongConfigure;
-  if (typeof boxed !== 'object' || boxed === null || Array.isArray(boxed)) {
+  if (typeof boxed !== "object" || boxed === null || Array.isArray(boxed)) {
     return null;
   }
   const o: Record<string, unknown> = boxed as Record<string, unknown>;
   const songIndexValue: unknown = o.songIndex;
   const titleValue: unknown = o.title;
   const artistValue: unknown = o.artist;
-  if (typeof songIndexValue !== 'number' || !Number.isInteger(songIndexValue) || songIndexValue < 0) {
+  if (typeof songIndexValue !== "number" || !Number.isInteger(songIndexValue) || songIndexValue < 0) {
     return null;
   }
-  if (typeof titleValue !== 'string' || typeof artistValue !== 'string') {
+  if (typeof titleValue !== "string" || typeof artistValue !== "string") {
     return null;
   }
   const matchedRaw: unknown = o.matchedBackendSongId;
   const matchedBackendSongId: string | null =
-    matchedRaw === null
-      ? null
-      : typeof matchedRaw === 'string' && matchedRaw.length > 0
-        ? matchedRaw
-        : null;
+    matchedRaw === null ? null : typeof matchedRaw === "string" && matchedRaw.length > 0 ? matchedRaw : null;
   return { songIndex: songIndexValue, title: titleValue, artist: artistValue, matchedBackendSongId };
 };
 
@@ -71,7 +67,7 @@ type SnapshotContentPair = {
 };
 
 export const readLyricsPartSongsSnapshotFromLocation = (raw: unknown): LyricsSongRow[] | null => {
-  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     return null;
   }
   const root: Record<string, unknown> = raw as Record<string, unknown>;
@@ -91,18 +87,14 @@ export const readLyricsPartSongsSnapshotFromLocation = (raw: unknown): LyricsSon
     const confValue: unknown = row.lyricsPartsConfigured;
     const matchedValue: unknown = row.matchedBackendSongId;
     const matchedBackendSongId: string | null =
-      matchedValue === null
-        ? null
-        : typeof matchedValue === 'string' && matchedValue.length > 0
-          ? matchedValue
-          : null;
+      matchedValue === null ? null : typeof matchedValue === "string" && matchedValue.length > 0 ? matchedValue : null;
     pairs.push({
       apiItem: {
-        title: typeof titleValue === 'string' ? titleValue : '',
-        artist: typeof artistValue === 'string' ? artistValue : '',
+        title: typeof titleValue === "string" ? titleValue : "",
+        artist: typeof artistValue === "string" ? artistValue : "",
         lyrics: Array.isArray(linesValue) ? linesValue : [],
         lyrics_part_sequence: Array.isArray(seqValue) ? seqValue : [],
-        lyrics_parts_configured: typeof confValue === 'boolean' ? confValue : false,
+        lyrics_parts_configured: typeof confValue === "boolean" ? confValue : false,
       },
       matchedBackendSongId,
     });
@@ -112,8 +104,8 @@ export const readLyricsPartSongsSnapshotFromLocation = (raw: unknown): LyricsSon
   }
   const syntheticPart: unknown = {
     contents: {
-      type: 'LYRICS',
-      contents: pairs.map((p: SnapshotContentPair): SnapshotContentPair['apiItem'] => p.apiItem),
+      type: "LYRICS",
+      contents: pairs.map((p: SnapshotContentPair): SnapshotContentPair["apiItem"] => p.apiItem),
     },
   };
   const baseRows: LyricsSongRow[] = readLyricsSongRowsFromPart(syntheticPart);

@@ -1,20 +1,20 @@
-import { PART_KIND_FOR_CREATE, type PartKindForCreate } from '../../lib/project-parts-for-patch';
+import { PART_KIND_FOR_CREATE, type PartKindForCreate } from "../../lib/project-parts-for-patch";
 
 export const WORKSPACE_LOAD_NETWORK_FALLBACK: string =
-  'Could not reach the server. Check your connection and that the API is running, then refresh this page.';
+  "Could not reach the server. Check your connection and that the API is running, then refresh this page.";
 
-export const ADD_PART_KIND_MENU_ID: string = 'project-add-part-kind-menu';
+export const ADD_PART_KIND_MENU_ID: string = "project-add-part-kind-menu";
 
 /** Marks controls that open the add-part menu (gaps + end tile) for outside-click handling. */
-export const ADD_PART_MENU_ANCHOR_SELECTOR: string = '[data-project-add-part-menu-anchor]';
+export const ADD_PART_MENU_ANCHOR_SELECTOR: string = "[data-project-add-part-menu-anchor]";
 
-export const PART_KIND_CHANGE_MENU_ID: string = 'project-part-kind-change-menu';
+export const PART_KIND_CHANGE_MENU_ID: string = "project-part-kind-change-menu";
 
-export const CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS: string = 'min-h-32';
+export const CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS: string = "min-h-32";
 
-export const CANVAS_PREVIEW_EMPTY_FRAME_MIN_WIDTH_CLASS: string = 'min-w-48';
+export const CANVAS_PREVIEW_EMPTY_FRAME_MIN_WIDTH_CLASS: string = "min-w-48";
 
-export const CANVAS_SECTION_HEADER_ROW_MIN_HEIGHT_CLASS: string = 'min-h-[44px]';
+export const CANVAS_SECTION_HEADER_ROW_MIN_HEIGHT_CLASS: string = "min-h-[44px]";
 
 export const ADD_PART_MENU_MAX_WIDTH_PX: number = 272;
 
@@ -45,7 +45,7 @@ export const SM_BREAKPOINT_MIN_WIDTH_PX: number = 640;
 export const PART_TOAST_AUTO_DISMISS_MS: number = 3000;
 
 export const ADD_PART_KIND_OPTION_CLASS: string =
-  'flex w-full flex-col gap-0.5 rounded-md px-2.5 py-2 text-left text-[13px] outline-none transition hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:hover:bg-white/10 dark:focus-visible:bg-white/10 dark:focus-visible:ring-[#0a84ff]';
+  "flex w-full flex-col gap-0.5 rounded-md px-2.5 py-2 text-left text-[13px] outline-none transition hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:hover:bg-white/10 dark:focus-visible:bg-white/10 dark:focus-visible:ring-[#0a84ff]";
 
 export type AddPartKindOption = {
   kind: PartKindForCreate;
@@ -53,14 +53,14 @@ export type AddPartKindOption = {
 };
 
 export const ADD_PART_KIND_OPTIONS: AddPartKindOption[] = [
-  { kind: PART_KIND_FOR_CREATE.PLAIN, label: 'Plain' },
-  { kind: PART_KIND_FOR_CREATE.VALUE, label: 'Value' },
-  { kind: PART_KIND_FOR_CREATE.LYRICS, label: 'Lyrics' },
-  { kind: PART_KIND_FOR_CREATE.BIBLE, label: 'Bible' },
+  { kind: PART_KIND_FOR_CREATE.PLAIN, label: "Plain" },
+  { kind: PART_KIND_FOR_CREATE.VALUE, label: "Value" },
+  { kind: PART_KIND_FOR_CREATE.LYRICS, label: "Lyrics" },
+  { kind: PART_KIND_FOR_CREATE.BIBLE, label: "Bible" },
 ];
 
 export const PART_KIND_LOSE_FILLED_DATA_MESSAGE: string =
-  'Changing the part type can discard text and values you already entered. Continue?';
+  "Changing the part type can discard text and values you already entered. Continue?";
 
 export const PART_KIND_PLAIN_VALUE_CROSSOVER_MESSAGE: string =
-  'Switching between Plain and Value clears the slide layout selection until you pick a layout again in Edit. Continue?';
+  "Switching between Plain and Value clears the slide layout selection until you pick a layout again in Edit. Continue?";

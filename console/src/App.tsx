@@ -5,6 +5,10 @@ import { ManageUsersPage } from "./pages/ManageUsersPage";
 import { ProjectSettingsPage } from "./pages/ProjectSettingsPage";
 import { ProjectSongLyricsConfigurePage } from "./pages/ProjectSongLyricsConfigurePage";
 import { ProjectWorkspacePage } from "./pages/ProjectWorkspacePage";
+import { SongEditPage } from "./pages/SongEditPage";
+import { SongNewPage } from "./pages/SongNewPage";
+import { TemplateEditPage } from "./pages/TemplateEditPage";
+import { TemplateNewPage } from "./pages/TemplateNewPage";
 import { UserSettingsPage } from "./pages/UserSettingsPage";
 
 const App = () => {
@@ -18,6 +22,10 @@ const App = () => {
           element={<ProjectSongLyricsConfigurePage />}
         />
         <Route path="/projects/:projectId" element={<ProjectWorkspacePage />} />
+        <Route path="/templates/new" element={<TemplateNewPage />} />
+        <Route path="/templates/:templateId/edit" element={<TemplateEditPage />} />
+        <Route path="/songs/new" element={<SongNewPage />} />
+        <Route path="/songs/:songId/edit" element={<SongEditPage />} />
         <Route path="/settings" element={<UserSettingsPage />} />
         <Route path="/users" element={<ManageUsersPage />} />
         <Route path="/" element={<AppRoot />} />

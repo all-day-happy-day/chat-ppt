@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react';
+import type { ReactElement } from "react";
 
 export const NOTION_ICON_CLASS: string =
-  'inline-flex shrink-0 text-neutral-400 dark:text-neutral-500 [&>svg]:h-4 [&>svg]:w-4';
+  "inline-flex shrink-0 text-neutral-400 dark:text-neutral-500 [&>svg]:h-4 [&>svg]:w-4";
 
 export const NotionPersonIcon = (): ReactElement => (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

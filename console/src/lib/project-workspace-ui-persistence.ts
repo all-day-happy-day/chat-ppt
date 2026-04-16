@@ -1,9 +1,9 @@
-import type { LyricsSongLine, LyricsSongRow } from './lyrics-part-contents';
-import { createDefaultLyricsSongRow, normalizeLyricsPartSequence } from './lyrics-part-contents';
+import type { LyricsSongLine, LyricsSongRow } from "./lyrics-part-contents";
+import { createDefaultLyricsSongRow, normalizeLyricsPartSequence } from "./lyrics-part-contents";
 
 const STORAGE_VERSION: number = 1;
 
-const STORAGE_KEY_PREFIX: string = 'console:project-workspace-ui:v';
+const STORAGE_KEY_PREFIX: string = "console:project-workspace-ui:v";
 
 export type PersistedWorkspaceUiSnapshot = {
   v: typeof STORAGE_VERSION;
@@ -15,7 +15,7 @@ export type PersistedWorkspaceUiSnapshot = {
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
 const readLyricsSongLine = (raw: unknown): LyricsSongLine | null => {
@@ -24,8 +24,8 @@ const readLyricsSongLine = (raw: unknown): LyricsSongLine | null => {
   }
   const partValue: unknown = raw.part;
   const lyricsValue: unknown = raw.lyrics;
-  const part: string = typeof partValue === 'string' ? partValue : '';
-  const lyrics: string = typeof lyricsValue === 'string' ? lyricsValue : '';
+  const part: string = typeof partValue === "string" ? partValue : "";
+  const lyrics: string = typeof lyricsValue === "string" ? lyricsValue : "";
   return { part, lyrics };
 };
 
@@ -36,8 +36,8 @@ const readLyricsSongRow = (raw: unknown): LyricsSongRow | null => {
   const titleValue: unknown = raw.title;
   const artistValue: unknown = raw.artist;
   const linesRaw: unknown = raw.lines;
-  const title: string = typeof titleValue === 'string' ? titleValue : '';
-  const artist: string = typeof artistValue === 'string' ? artistValue : '';
+  const title: string = typeof titleValue === "string" ? titleValue : "";
+  const artist: string = typeof artistValue === "string" ? artistValue : "";
   if (!Array.isArray(linesRaw)) {
     return null;
   }
@@ -53,9 +53,9 @@ const readLyricsSongRow = (raw: unknown): LyricsSongRow | null => {
   }
   const matchedRaw: unknown = raw.matchedBackendSongId;
   const matchedBackendSongId: string | null =
-    typeof matchedRaw === 'string' && matchedRaw.length > 0 ? matchedRaw : null;
+    typeof matchedRaw === "string" && matchedRaw.length > 0 ? matchedRaw : null;
   const configuredRaw: unknown = raw.lyricsPartsConfigured;
-  const lyricsPartsConfigured: boolean = typeof configuredRaw === 'boolean' ? configuredRaw : false;
+  const lyricsPartsConfigured: boolean = typeof configuredRaw === "boolean" ? configuredRaw : false;
   const seqSnake: unknown = raw.lyrics_part_sequence;
   const seqCamel: unknown = raw.lyricsPartSequence;
   const seqRaw: unknown = seqSnake !== undefined ? seqSnake : seqCamel;
@@ -98,16 +98,20 @@ export const readPersistedWorkspaceUi = (projectId: string): PersistedWorkspaceU
   const lyricsLayoutValue: unknown = parsed.partEditLyricsLyricsLayoutId;
   const titleLayoutValue: unknown = parsed.partEditLyricsTitleLayoutId;
   const songsRaw: unknown = parsed.partEditLyricsSongs;
-  if (typeof selectedPartIndexValue !== 'number' || !Number.isInteger(selectedPartIndexValue) || selectedPartIndexValue < 0) {
+  if (
+    typeof selectedPartIndexValue !== "number" ||
+    !Number.isInteger(selectedPartIndexValue) ||
+    selectedPartIndexValue < 0
+  ) {
     return null;
   }
-  if (typeof isPartEditPanelOpenValue !== 'boolean') {
+  if (typeof isPartEditPanelOpenValue !== "boolean") {
     return null;
   }
   const partEditLyricsLyricsLayoutId: string | null =
-    typeof lyricsLayoutValue === 'string' && lyricsLayoutValue.length > 0 ? lyricsLayoutValue : null;
+    typeof lyricsLayoutValue === "string" && lyricsLayoutValue.length > 0 ? lyricsLayoutValue : null;
   const partEditLyricsTitleLayoutId: string | null =
-    typeof titleLayoutValue === 'string' && titleLayoutValue.length > 0 ? titleLayoutValue : null;
+    typeof titleLayoutValue === "string" && titleLayoutValue.length > 0 ? titleLayoutValue : null;
   if (!Array.isArray(songsRaw) || songsRaw.length === 0) {
     return null;
   }

@@ -1009,9 +1009,7 @@ export const insertClonedLyricsPartBeforeSortedIndex = (
   insertBeforeSortedIndex: number
 ): unknown[] => {
   const sorted: unknown[] = sortProjectPartsForDisplay(parts);
-  const source: unknown | undefined = sorted.find(
-    (p: unknown): boolean => getProjectPartId(p) === sourceLyricsPartId
-  );
+  const source: unknown | undefined = sorted.find((p: unknown): boolean => getProjectPartId(p) === sourceLyricsPartId);
   if (source === undefined) {
     return normalizePartsForPatchRequest(sorted);
   }

@@ -17,12 +17,6 @@ export const AppRoot = () => {
   });
 
   useEffect(() => {
-    if (window.location.pathname !== "/") {
-      window.history.replaceState(null, "", "/");
-    }
-  }, []);
-
-  useEffect(() => {
     if (screen !== null) {
       return;
     }
