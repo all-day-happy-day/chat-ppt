@@ -1,0 +1,2 @@
+class UnsupportedLetter(Exception):
+    pass
