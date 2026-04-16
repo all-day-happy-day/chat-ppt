@@ -3,8 +3,9 @@ from typing import Self
 from pydantic import BaseModel, model_validator
 
 from app.bible.domain.exception import UnsupportedLetter, UnsupportedVersion
-from app.bible.domain.service import ParseVerseQueryService
 from app.shared.bible.domain.enum import AvailableBibleVersions
+
+from ..service.ParseVerseQueryService import ParseVerseQueryService
 
 
 class BibleVerseQuery(BaseModel):

@@ -2,6 +2,8 @@ import re
 
 from app.bible.domain.exception import MultipleNumbers, MultipleSeparators, UnsupportedLetter
 
+from ..valueobject.BibleVerseQuery import BibleVerseQuery
+
 
 class ParseVerseQueryService:
     SEP: list[str] = ["-", "~", ","]
@@ -32,3 +34,8 @@ class ParseVerseQueryService:
                 raise NotImplementedError
         else:
             return [int(number) for number in numbers]
+
+    def parse(self, verse_query: BibleVerseQuery) -> list[BibleVerseQuery]:
+        verses: list[int] = self.parse_verse(verse=verse_query.verse)
+        queries: list[BibleVerseQuery] = [verse_query.model_copy(update={"verse": verse}) for verse in verses]
+        return queries

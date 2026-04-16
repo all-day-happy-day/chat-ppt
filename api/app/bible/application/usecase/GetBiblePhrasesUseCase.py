@@ -9,6 +9,11 @@ class GetBiblePhrasesUseCase:
 
     def __call__(self, commands: list[GetBiblePhrasesCommand]) -> list[BiblePhrase]:
         return [
-            self.bible_repository.get(command.version, command.book, command.chapter, command.verse)
+            self.bible_repository.get(
+                version=command.version,
+                book=command.book,
+                chapter=command.chapter,
+                verse=command.verse,
+            )
             for command in commands
         ]
