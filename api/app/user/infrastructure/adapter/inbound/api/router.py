@@ -35,7 +35,7 @@ router: APIRouter = APIRouter(tags=["User"])
 def delete_user(user_id: ULID, usecase: Annotated[DeleteUserUseCase, Depends(get_delete_user_use_case)]):
     try:
         usecase(user_id=user_id)
-    except Exception as e:
+    except UserNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
@@ -53,7 +53,7 @@ def get_user(
     try:
         user: User = usecase(user_id=user_id)
         return GetUserResponse.from_domain_entity(user)
-    except Exception as e:
+    except UserNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
