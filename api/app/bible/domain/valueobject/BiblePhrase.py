@@ -1,3 +1,5 @@
+from typing import Self
+
 from pydantic import BaseModel, model_validator
 
 from app.bible.domain.exception import UnsupportedVersion
@@ -12,7 +14,7 @@ class BiblePhrase(BaseModel):
     phrase: str
 
     @model_validator(mode="after")
-    def validate_version(self) -> "BiblePhrase":
+    def validate_version(self) -> Self:
         if self.version.value not in AvailableBibleVersions:
             raise UnsupportedVersion(f"Unsupported version: {self.version}")
         return self

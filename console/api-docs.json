@@ -1108,6 +1108,25 @@
         }
       }
     },
+    "/song/list-all-songs": {
+      "get": {
+        "tags": ["Lyrics"],
+        "summary": "List All Songs",
+        "operationId": "list_all_songs_song_list_all_songs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSongsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/song/lyrics/scrape": {
       "get": {
         "tags": ["Lyrics"],
@@ -1762,7 +1781,14 @@
             "$ref": "#/components/schemas/BibleContents-Output"
           },
           "phrase_layout_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Phrase Layout Id"
           },
           "title_layout_id": {
@@ -1778,7 +1804,7 @@
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents", "phrase_layout_id"],
+        "required": ["project_id", "order", "contents"],
         "title": "BiblePart"
       },
       "BiblePartRequest": {
@@ -1827,6 +1853,9 @@
                 "maxLength": 16,
                 "minLength": 16,
                 "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
               }
             ],
             "title": "Phrase Layout Id"
@@ -1853,7 +1882,7 @@
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents", "phrase_layout_id"],
+        "required": ["id", "order", "contents"],
         "title": "BiblePartRequest"
       },
       "Body_read_template_powerpoint_template_read_post": {
@@ -2357,10 +2386,14 @@
           "slide_size": {
             "$ref": "#/components/schemas/Size",
             "title": "Slide Size"
+          },
+          "background_color": {
+            "$ref": "#/components/schemas/ColorConfig",
+            "title": "Background Color"
           }
         },
         "type": "object",
-        "required": ["name", "shapes", "slide_size"],
+        "required": ["name", "shapes", "slide_size", "background_color"],
         "title": "GetLayoutResponse"
       },
       "GetLyricsResponse": {
@@ -2708,6 +2741,9 @@
                 "maxLength": 16,
                 "minLength": 16,
                 "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
               }
             ],
             "title": "Lyrics Layout Id"
@@ -2734,7 +2770,7 @@
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents", "lyrics_layout_id"],
+        "required": ["id", "order", "contents"],
         "title": "LyricsPartRequest"
       },
       "PatchLyricsRequest": {
@@ -3702,7 +3738,14 @@
             "$ref": "#/components/schemas/LyricsContents-Output"
           },
           "lyrics_layout_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Lyrics Layout Id"
           },
           "title_layout_id": {
@@ -3718,7 +3761,7 @@
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents", "lyrics_layout_id"],
+        "required": ["project_id", "order", "contents"],
         "title": "LyricsPart"
       },
       "app__shared__song__domain__valueobject__LyricsPart__LyricsPart": {
