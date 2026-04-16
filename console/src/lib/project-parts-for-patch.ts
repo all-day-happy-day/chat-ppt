@@ -1003,6 +1003,50 @@ export const moveSortedPartToSortedIndex = (
   return normalizePartsForPatchRequest(next);
 };
 
+export const insertClonedLyricsPartBeforeSortedIndex = (
+  parts: unknown[],
+  sourceLyricsPartId: string,
+  insertBeforeSortedIndex: number
+): unknown[] => {
+  const sorted: unknown[] = sortProjectPartsForDisplay(parts);
+  const source: unknown | undefined = sorted.find(
+    (p: unknown): boolean => getProjectPartId(p) === sourceLyricsPartId
+  );
+  if (source === undefined) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  if (!isRecord(source) || source.type !== PART_KIND_FOR_CREATE.LYRICS) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  const newId: string = generateUlid();
+  let cloned: unknown;
+  try {
+    cloned = JSON.parse(JSON.stringify(source)) as unknown;
+  } catch {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  if (!isRecord(cloned)) {
+    return normalizePartsForPatchRequest(sorted);
+  }
+  cloned.id = newId;
+  const insertAt: number = Math.max(0, Math.min(Math.floor(insertBeforeSortedIndex), sorted.length));
+  const next: unknown[] = [...sorted];
+  next.splice(insertAt, 0, cloned);
+  return normalizePartsForPatchRequest(next);
+};
+
+/**
+ * Display-order index where a new part is inserted (0 = first / only slot when there are no parts yet).
+ */
+export const clampSortedInsertIndexForNewPart = (
+  sortedParts: unknown[],
+  insertBeforeSortedIndex: number | undefined
+): number => {
+  const maxInsert: number = sortedParts.length;
+  const rawInsert: number = insertBeforeSortedIndex === undefined ? maxInsert : insertBeforeSortedIndex;
+  return Math.max(0, Math.min(Math.floor(rawInsert), maxInsert));
+};
+
 export const appendNewPartForPatch = (
   parts: unknown[],
   kind: PartKindForCreate,
@@ -1010,9 +1054,7 @@ export const appendNewPartForPatch = (
   insertBeforeSortedIndex?: number
 ): unknown[] => {
   const sorted: unknown[] = sortProjectPartsForDisplay(parts);
-  const maxInsert: number = sorted.length;
-  const rawInsert: number = insertBeforeSortedIndex === undefined ? maxInsert : insertBeforeSortedIndex;
-  const insertAt: number = Math.max(0, Math.min(Math.floor(rawInsert), maxInsert));
+  const insertAt: number = clampSortedInsertIndexForNewPart(sorted, insertBeforeSortedIndex);
   const id: string = generateUlid();
   const lyricsOrBiblePrimaryLayoutId: string | null =
     primaryLayoutId !== null && primaryLayoutId.length > 0 ? primaryLayoutId : null;

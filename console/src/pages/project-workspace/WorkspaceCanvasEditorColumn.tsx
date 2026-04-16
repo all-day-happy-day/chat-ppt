@@ -5,6 +5,7 @@ import { PartEditPanel, type ValuePlaceholderEditorRow } from "../../components/
 import { TemplateLayoutThumbnail } from "../../components/TemplateLayoutThumbnail";
 import { getPrimaryLayoutIdFromPart, getProjectPartId } from "../../lib/project-parts-for-patch";
 import type { LyricsSongRow } from "../../lib/lyrics-part-contents";
+import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
 import type { GetLayoutResponse } from "../../types/template-layout";
 import type { TemplateLayoutChoice } from "../../lib/project-parts-for-patch";
 import {
@@ -14,7 +15,6 @@ import {
   CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS,
   CANVAS_PREVIEW_EMPTY_FRAME_MIN_WIDTH_CLASS,
   CANVAS_SECTION_HEADER_ROW_MIN_HEIGHT_CLASS,
-  CANVAS_PREVIEW_LYRICS_PART_LABEL,
   PART_KIND_CHANGE_MENU_ID,
 } from "./constants";
 import type { AddPartMenuAnchor } from "./types";
@@ -47,6 +47,8 @@ export type WorkspaceCanvasEditorColumnProps = {
   onChangeTitleLayoutId: (id: string | null) => void;
   partEditLyricsSongs: LyricsSongRow[];
   onPartEditLyricsSongsChange: (rows: LyricsSongRow[]) => void;
+  lyricsConfigureProjectId: string;
+  lyricsConfigurePartSortedIndex: number;
   partEditEmptyStateMessage: string | null;
   isPartLyricsSaveDisabled: boolean;
   onSaveLyricsPart: () => void;
@@ -95,6 +97,8 @@ export const WorkspaceCanvasEditorColumn = ({
   onChangeTitleLayoutId,
   partEditLyricsSongs,
   onPartEditLyricsSongsChange,
+  lyricsConfigureProjectId,
+  lyricsConfigurePartSortedIndex,
   partEditEmptyStateMessage,
   isPartLyricsSaveDisabled,
   onSaveLyricsPart,
@@ -177,8 +181,8 @@ export const WorkspaceCanvasEditorColumn = ({
                       className={`flex ${CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS} ${CANVAS_PREVIEW_EMPTY_FRAME_MIN_WIDTH_CLASS} flex-col items-center justify-center px-4`}
                       role="status"
                     >
-                      <span className="text-center text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
-                        {CANVAS_PREVIEW_LYRICS_PART_LABEL}
+                      <span className="text-center text-[12px] font-medium leading-snug text-neutral-500 dark:text-neutral-400">
+                        {buildLyricsPartThumbnailCaption(selectedPart)}
                       </span>
                     </div>
                   ) : selectedPartLayoutEntry !== null ? (
@@ -216,6 +220,8 @@ export const WorkspaceCanvasEditorColumn = ({
           onChangeTitleLayoutId={onChangeTitleLayoutId}
           songs={partEditLyricsSongs}
           onSongsChange={onPartEditLyricsSongsChange}
+          lyricsConfigureProjectId={lyricsConfigureProjectId}
+          lyricsConfigurePartSortedIndex={lyricsConfigurePartSortedIndex}
           emptyStateMessage={partEditEmptyStateMessage}
           isSaveDisabled={isPartLyricsSaveDisabled || isPatchingParts}
           isSaving={isPatchingParts}

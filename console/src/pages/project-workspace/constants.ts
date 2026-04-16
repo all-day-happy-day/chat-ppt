@@ -38,8 +38,6 @@ export const CANVAS_PREVIEW_FALLBACK_WIDTH_PX: number = 960;
 
 export const CANVAS_PREVIEW_FALLBACK_HEIGHT_PX: number = 540;
 
-export const CANVAS_PREVIEW_LYRICS_PART_LABEL: string = 'Lyrics part';
-
 /** Tailwind `sm:` breakpoint (must match `tailwind` default). */
 export const SM_BREAKPOINT_MIN_WIDTH_PX: number = 640;
 

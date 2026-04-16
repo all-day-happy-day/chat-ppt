@@ -1,5 +1,9 @@
 import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
+import {
+  attachChatPptHttpErrorToThrownError,
+  messageFromFailedResponseBody,
+} from "../lib/parse-api-error";
 import { readFetchErrorMessage } from "../lib/read-fetch-error";
 import type { CreateProjectRequest, CreateProjectResponse, GetProjectResponse } from "../types/project";
 
@@ -118,8 +122,11 @@ export const patchProjectById = async (
     if (response.status === 401) {
       throw new Error(SIGN_IN_REQUIRED_MESSAGE);
     }
-    const message: string = await readFetchErrorMessage(response, "Could not update the project.");
-    throw new Error(message);
+    const text: string = await response.text();
+    const message: string = messageFromFailedResponseBody(text, "Could not update the project.");
+    const err: Error = new Error(message);
+    attachChatPptHttpErrorToThrownError(err, response, text);
+    throw err;
   }
   const text: string = await response.text();
   let parsed: unknown;

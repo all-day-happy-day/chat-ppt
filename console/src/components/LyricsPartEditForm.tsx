@@ -1,5 +1,8 @@
 import { forwardRef, useCallback, type ChangeEvent } from "react";
+import { Link } from "react-router-dom";
 import type { LyricsSongRow } from "../lib/lyrics-part-contents";
+import { createDefaultLyricsSongRow } from "../lib/lyrics-part-contents";
+import { LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY } from "../lib/lyrics-song-configure-location-state";
 import type { TemplateLayoutChoice } from "../lib/project-parts-for-patch";
 import { LyricsSongTitleField } from "./LyricsSongTitleField";
 import {
@@ -16,13 +19,21 @@ const SONGS_SECTION_LABEL: string = "Songs";
 
 const SONG_ARTIST_LABEL: string = "Artist (optional)";
 
-const ADD_SONG_BUTTON_LABEL: string = "Add song";
+const ADD_SONG_BUTTON_LABEL: string = "+ Add song";
 
 const REMOVE_SONG_BUTTON_LABEL: string = "Remove";
 
 const LYRICS_SAVE_BUTTON_LABEL: string = "Save";
 
 const LYRICS_SAVE_BUTTON_SAVING_LABEL: string = "Saving…";
+
+const CONFIGURE_BUTTON_LABEL: string = "Configure";
+
+const CONFIGURE_DISABLED_HINT: string = "Add a song title before configuring lyric parts.";
+
+const CONFIGURED_STATUS_LABEL: string = "configured";
+
+const NOT_CONFIGURED_STATUS_LABEL: string = "not configured";
 
 export type LyricsPartEditFormProps = {
   isOpen: boolean;
@@ -39,6 +50,8 @@ export type LyricsPartEditFormProps = {
   isSaveDisabled: boolean;
   isSaving: boolean;
   onSave: () => void;
+  lyricsConfigureProjectId: string;
+  lyricsConfigurePartSortedIndex: number;
 };
 
 const TEXT_INPUT_CLASS: string =
@@ -60,13 +73,16 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
     isSaveDisabled,
     isSaving,
     onSave,
+    lyricsConfigureProjectId,
+    lyricsConfigurePartSortedIndex,
   },
   ref
 ) {
   const handleSongTitleChange = useCallback(
     (index: number, value: string): void => {
       const next: LyricsSongRow[] = songs.map(
-        (row: LyricsSongRow, i: number): LyricsSongRow => (i === index ? { ...row, title: value } : row)
+        (row: LyricsSongRow, i: number): LyricsSongRow =>
+          i === index ? { ...row, title: value, lyricsPartsConfigured: false } : row
       );
       onSongsChange(next);
     },
@@ -76,7 +92,8 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
   const handleSongArtistChange = useCallback(
     (index: number, value: string): void => {
       const next: LyricsSongRow[] = songs.map(
-        (row: LyricsSongRow, i: number): LyricsSongRow => (i === index ? { ...row, artist: value } : row)
+        (row: LyricsSongRow, i: number): LyricsSongRow =>
+          i === index ? { ...row, artist: value, lyricsPartsConfigured: false } : row
       );
       onSongsChange(next);
     },
@@ -87,7 +104,15 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
     (index: number, pickedTitle: string, pickedArtist: string): void => {
       const next: LyricsSongRow[] = songs.map(
         (row: LyricsSongRow, i: number): LyricsSongRow =>
-          i === index ? { title: pickedTitle, artist: pickedArtist } : row
+          i === index
+            ? {
+                ...row,
+                title: pickedTitle,
+                artist: pickedArtist,
+                matchedBackendSongId: null,
+                lyricsPartsConfigured: false,
+              }
+            : row
       );
       onSongsChange(next);
     },
@@ -95,7 +120,7 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
   );
 
   const handleAddSong = useCallback((): void => {
-    onSongsChange([...songs, { title: "", artist: "" }]);
+    onSongsChange([...songs, createDefaultLyricsSongRow()]);
   }, [songs, onSongsChange]);
 
   const handleRemoveSong = useCallback(
@@ -178,57 +203,102 @@ export const LyricsPartEditForm = forwardRef<HTMLElement, LyricsPartEditFormProp
                 {SONGS_SECTION_LABEL}
               </p>
               <ul className="mt-2 flex flex-col gap-3">
-                {songs.map((song: LyricsSongRow, index: number) => (
-                  <li
-                    key={`lyrics-song-${String(index)}`}
-                    className="rounded-xl border border-black/[0.08] bg-neutral-50/80 p-2.5 dark:border-white/[0.1] dark:bg-white/[0.04]"
-                  >
-                    <div className="flex flex-col gap-2">
-                      <LyricsSongTitleField
-                        title={song.title}
-                        onTitleChange={(nextTitle: string): void => {
-                          handleSongTitleChange(index, nextTitle);
-                        }}
-                        onPickSuggestion={(pickedTitle: string, pickedArtist: string): void => {
-                          handleSongPickFromLibrary(index, pickedTitle, pickedArtist);
-                        }}
-                        inputId={`lyrics-song-title-${String(index)}`}
-                        labelId={`lyrics-song-title-label-${String(index)}`}
-                      />
-                      <div>
-                        <label
-                          htmlFor={`lyrics-song-artist-${String(index)}`}
-                          className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400"
+                {songs.map((song: LyricsSongRow, index: number) => {
+                  const canOpenConfigure: boolean = song.title.trim().length > 0 && lyricsConfigureProjectId.length > 0;
+                  const configureTo: string = `/projects/${lyricsConfigureProjectId}/part/${String(
+                    lyricsConfigurePartSortedIndex
+                  )}/song/${String(index)}/lyrics`;
+                  const statusBadgeClass: string = song.lyricsPartsConfigured
+                    ? "bg-emerald-500/15 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-100"
+                    : "bg-amber-500/12 text-amber-950 dark:bg-amber-500/15 dark:text-amber-100";
+                  const configureControlClass: string =
+                    "inline-flex shrink-0 items-center justify-center rounded-md border px-2 py-1 text-[10px] font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]";
+                  return (
+                    <li
+                      key={`lyrics-song-${String(index)}`}
+                      className="rounded-xl border border-black/[0.08] bg-neutral-50/80 p-2.5 dark:border-white/[0.1] dark:bg-white/[0.04]"
+                    >
+                      <div className="mb-2 flex justify-end">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none ${statusBadgeClass}`}
                         >
-                          {SONG_ARTIST_LABEL}
-                        </label>
-                        <input
-                          id={`lyrics-song-artist-${String(index)}`}
-                          type="text"
-                          className={TEXT_INPUT_CLASS}
-                          value={song.artist}
-                          onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-                            handleSongArtistChange(index, event.target.value);
-                          }}
-                          autoComplete="off"
-                          placeholder="Artist"
-                        />
+                          {song.lyricsPartsConfigured ? CONFIGURED_STATUS_LABEL : NOT_CONFIGURED_STATUS_LABEL}
+                        </span>
                       </div>
-                    </div>
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        type="button"
-                        className="rounded-md px-2 py-1 text-[10px] font-medium text-red-700 outline-none transition hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-500/15 dark:focus-visible:ring-red-400/40"
-                        onClick={() => {
-                          handleRemoveSong(index);
-                        }}
-                        disabled={songs.length <= 1}
-                      >
-                        {REMOVE_SONG_BUTTON_LABEL}
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                      <div className="flex flex-col gap-2">
+                        <LyricsSongTitleField
+                          title={song.title}
+                          onTitleChange={(nextTitle: string): void => {
+                            handleSongTitleChange(index, nextTitle);
+                          }}
+                          onPickSuggestion={(pickedTitle: string, pickedArtist: string): void => {
+                            handleSongPickFromLibrary(index, pickedTitle, pickedArtist);
+                          }}
+                          inputId={`lyrics-song-title-${String(index)}`}
+                          labelId={`lyrics-song-title-label-${String(index)}`}
+                        />
+                        <div>
+                          <label
+                            htmlFor={`lyrics-song-artist-${String(index)}`}
+                            className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400"
+                          >
+                            {SONG_ARTIST_LABEL}
+                          </label>
+                          <input
+                            id={`lyrics-song-artist-${String(index)}`}
+                            type="text"
+                            className={TEXT_INPUT_CLASS}
+                            value={song.artist}
+                            onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                              handleSongArtistChange(index, event.target.value);
+                            }}
+                            autoComplete="off"
+                            placeholder="Artist"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          className="rounded-md px-2 py-1 text-[10px] font-medium text-red-700 outline-none transition hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-500/40 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-500/15 dark:focus-visible:ring-red-400/40"
+                          onClick={() => {
+                            handleRemoveSong(index);
+                          }}
+                          disabled={songs.length <= 1}
+                        >
+                          {REMOVE_SONG_BUTTON_LABEL}
+                        </button>
+                        {canOpenConfigure ? (
+                          <Link
+                            to={configureTo}
+                            state={{
+                              lyricsSongConfigure: {
+                                songIndex: index,
+                                title: song.title,
+                                artist: song.artist,
+                                matchedBackendSongId: song.matchedBackendSongId,
+                              },
+                              [LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY]: songs,
+                              restoreLyricsPartEditPanel: true,
+                              lyricsPartEditPartSortedIndex: lyricsConfigurePartSortedIndex,
+                            }}
+                            className={`${configureControlClass} border-black/[0.1] bg-white text-neutral-800 hover:bg-neutral-50 dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-100 dark:hover:bg-white/5`}
+                          >
+                            {CONFIGURE_BUTTON_LABEL}
+                          </Link>
+                        ) : (
+                          <span
+                            className={`${configureControlClass} cursor-not-allowed border-black/[0.06] bg-neutral-100/80 text-neutral-400 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-neutral-500`}
+                            title={CONFIGURE_DISABLED_HINT}
+                            aria-label={CONFIGURE_DISABLED_HINT}
+                          >
+                            {CONFIGURE_BUTTON_LABEL}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
               <button
                 type="button"

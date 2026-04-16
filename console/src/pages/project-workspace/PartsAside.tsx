@@ -10,13 +10,13 @@ import {
   getProjectPartStableKey,
   PART_KIND_FOR_CREATE,
 } from '../../lib/project-parts-for-patch';
+import { buildLyricsPartThumbnailCaption } from '../../lib/lyrics-part-contents';
 import type { GetLayoutResponse } from '../../types/template-layout';
 import {
   ADD_PART_KIND_MENU_ID,
   ADD_PART_KIND_OPTION_CLASS,
   ADD_PART_KIND_OPTIONS,
   type AddPartKindOption,
-  CANVAS_PREVIEW_LYRICS_PART_LABEL,
   PART_KIND_CHANGE_MENU_ID,
 } from './constants';
 import type { AddPartMenuAnchor } from './types';
@@ -46,7 +46,6 @@ export type PartsAsideProps = {
   partsListMeasureRef: RefObject<HTMLDivElement | null>;
   partsScrollSpacerRef: RefObject<HTMLDivElement | null>;
   partsListScrollerRef: RefObject<HTMLDivElement | null>;
-  addPartTileRef: RefObject<HTMLButtonElement | null>;
   partTypeMenuTriggerRef: RefObject<HTMLButtonElement | null>;
   sortedParts: unknown[];
   selectedPartIndex: number;
@@ -56,7 +55,6 @@ export type PartsAsideProps = {
   isPatchingParts: boolean;
   isAddPartMenuOpen: boolean;
   onOpenAddPartMenu: (anchor: HTMLElement, insertBeforeSortedIndex: number) => void;
-  onToggleAddPartMenuAtEnd: () => void;
   addPartMenuAnchor: AddPartMenuAnchor | null;
   partTypeMenuOpenIndex: number | null;
   onPartTypeMenuButtonClick: (event: MouseEvent<HTMLButtonElement>, index: number) => void;
@@ -72,7 +70,6 @@ export const PartsAside = ({
   partsListMeasureRef,
   partsScrollSpacerRef,
   partsListScrollerRef,
-  addPartTileRef,
   partTypeMenuTriggerRef,
   sortedParts,
   selectedPartIndex,
@@ -82,7 +79,6 @@ export const PartsAside = ({
   isPatchingParts,
   isAddPartMenuOpen,
   onOpenAddPartMenu,
-  onToggleAddPartMenuAtEnd,
   addPartMenuAnchor,
   partTypeMenuOpenIndex,
   onPartTypeMenuButtonClick,
@@ -195,23 +191,21 @@ export const PartsAside = ({
           ref={partsListMeasureRef}
           className="flex w-max min-w-0 shrink-0 flex-row gap-1 sm:w-full sm:flex-col sm:gap-1"
         >
-          {sortedParts.length > 0 ? (
-            <button
-              type="button"
-              data-project-add-part-menu-anchor="true"
-              className={insertGapClassName(0)}
-              aria-label="Insert part before slide 1"
-              disabled={isPatchingParts}
-              onClick={(event: MouseEvent<HTMLButtonElement>): void => {
-                onOpenAddPartMenu(event.currentTarget, 0);
-              }}
-              onDragOver={isPatchingParts ? undefined : handleInsertGapDragOver(0)}
-              onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
-              onDrop={isPatchingParts ? undefined : handleInsertGapDrop(0)}
-            >
-              <span className={INSERT_GAP_PLUS_LABEL_CLASS}>+</span>
-            </button>
-          ) : null}
+          <button
+            type="button"
+            data-project-add-part-menu-anchor="true"
+            className={insertGapClassName(0)}
+            aria-label="Insert part before slide 1"
+            disabled={isPatchingParts}
+            onClick={(event: MouseEvent<HTMLButtonElement>): void => {
+              onOpenAddPartMenu(event.currentTarget, 0);
+            }}
+            onDragOver={isPatchingParts ? undefined : handleInsertGapDragOver(0)}
+            onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
+            onDrop={isPatchingParts ? undefined : handleInsertGapDrop(0)}
+          >
+            <span className={INSERT_GAP_PLUS_LABEL_CLASS}>+</span>
+          </button>
           {sortedParts.map((part: unknown, index: number) => {
             const isSelected: boolean = index === selectedPartIndex;
             const primaryLayoutId: string | null = getPrimaryLayoutIdFromPart(part);
@@ -275,7 +269,7 @@ export const PartsAside = ({
                             {isLyricsPartForThumb ? (
                               <div className="flex h-full w-full items-center justify-center px-1" role="status">
                                 <span className="text-center text-[10px] font-medium leading-tight text-neutral-500 dark:text-neutral-400">
-                                  {CANVAS_PREVIEW_LYRICS_PART_LABEL}
+                                  {buildLyricsPartThumbnailCaption(part)}
                                 </span>
                               </div>
                             ) : thumbLayoutEntry !== null ? (
@@ -349,30 +343,24 @@ export const PartsAside = ({
               </Fragment>
             );
           })}
-          <div className="relative z-40 shrink-0 sm:w-full">
-            <button
-              ref={addPartTileRef}
-              type="button"
-              data-project-add-part-menu-anchor="true"
-              className="flex w-full flex-col gap-1 rounded-lg border border-dashed border-neutral-300 bg-white/70 p-2 text-left outline-none transition hover:border-neutral-400 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-[#1c1c1e]/70 dark:hover:border-neutral-500 dark:hover:bg-[#2c2c2e]"
-              aria-expanded={isAddPartMenuOpen}
-              aria-controls={ADD_PART_KIND_MENU_ID}
-              aria-haspopup="menu"
-              aria-label="Add part at end"
-              disabled={isPatchingParts}
-              onClick={onToggleAddPartMenuAtEnd}
-            >
-              <div className="flex aspect-video w-full items-center justify-center rounded-md bg-neutral-100/90 dark:bg-neutral-800/60">
-                {isPatchingParts ? (
-                  <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">…</span>
-                ) : (
-                  <span className="text-[26px] font-light leading-none text-[#0071e3] dark:text-[#0a84ff]">+</span>
-                )}
-              </div>
-              <span className="pointer-events-none block min-h-[14px] text-center text-[9px] font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500" aria-hidden>
-                End
-              </span>
-            </button>
+          <Fragment>
+            {sortedParts.length > 0 ? (
+              <button
+                type="button"
+                data-project-add-part-menu-anchor="true"
+                className={insertGapClassName(sortedParts.length)}
+                aria-label={`Insert part after slide ${String(sortedParts.length)}`}
+                disabled={isPatchingParts}
+                onClick={(event: MouseEvent<HTMLButtonElement>): void => {
+                  onOpenAddPartMenu(event.currentTarget, sortedParts.length);
+                }}
+                onDragOver={isPatchingParts ? undefined : handleInsertGapDragOver(sortedParts.length)}
+                onDragLeave={isPatchingParts ? undefined : handleDragLeaveZone}
+                onDrop={isPatchingParts ? undefined : handleInsertGapDrop(sortedParts.length)}
+              >
+                <span className={INSERT_GAP_PLUS_LABEL_CLASS}>+</span>
+              </button>
+            ) : null}
             {isAddPartMenuOpen && addPartMenuAnchor !== null
               ? createPortal(
                   <div
@@ -406,7 +394,7 @@ export const PartsAside = ({
                   document.body
                 )
               : null}
-          </div>
+          </Fragment>
         </div>
       </div>
       <div

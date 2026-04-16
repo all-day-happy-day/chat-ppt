@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { signOut, verifySession } from "../api/auth";
 import { listProjectsByUserId, patchProjectById } from "../api/project";
 import { listTemplateLayoutsByTemplateId, listTemplatesByUserId } from "../api/template";
@@ -13,6 +13,7 @@ import { isSignInRequiredError } from "../lib/auth-errors";
 import {
   appendNewPartForPatch,
   applyPlainValueLayoutReconcileToNormalizedParts,
+  clampSortedInsertIndexForNewPart,
   moveSortedPartToSortedIndex,
   buildValuePartContentsPayloadFromFieldRows,
   buildValuePartPlaceholderEditRows,
@@ -34,8 +35,19 @@ import {
   type TemplateLayoutChoice,
 } from "../lib/project-parts-for-patch";
 import type { LyricsSongRow } from "../lib/lyrics-part-contents";
-import { mergeLyricsSongRowsIntoExistingContents, readLyricsSongRowsFromPart } from "../lib/lyrics-part-contents";
+import {
+  createDefaultLyricsSongRow,
+  mergeLyricsSongRowsIntoExistingContents,
+  readLyricsSongRowsFromPart,
+  readLyricsTemplateLayoutIdsFromPart,
+} from "../lib/lyrics-part-contents";
+import { readLyricsPartSongsSnapshotFromLocation } from "../lib/lyrics-song-configure-location-state";
 import { findUserIdByPrincipal } from "../lib/resolve-user-id";
+import {
+  DUPLICATE_LYRIC_PART_NAME_USER_WARNING,
+  DUPLICATE_LYRIC_PART_NAME_WARNING_MS,
+  isDuplicateLyricPartNamePatchError,
+} from "../lib/parse-api-error";
 import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
@@ -83,8 +95,13 @@ import { WorkspaceCanvasEditorColumn } from "./project-workspace/WorkspaceCanvas
 import { WorkspaceHeader } from "./project-workspace/WorkspaceHeader";
 import { WorkspaceMetaSection } from "./project-workspace/WorkspaceMetaSection";
 
+const RESTORE_LYRICS_PART_EDIT_PANEL_KEY: string = "restoreLyricsPartEditPanel";
+
+const LYRICS_PART_EDIT_SORTED_INDEX_KEY: string = "lyricsPartEditPartSortedIndex";
+
 export const ProjectWorkspacePage = () => {
   const navigate: ReturnType<typeof useNavigate> = useNavigate();
+  const location = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const [theme, setTheme] = useState<ThemePreference>(() => readAppliedThemeFromDocument());
   const [project, setProject] = useState<GetProjectResponse | null>(null);
@@ -101,6 +118,7 @@ export const ProjectWorkspacePage = () => {
   const [selectedPartIndex, setSelectedPartIndex] = useState<number>(0);
   const [partActionError, setPartActionError] = useState<string | null>(null);
   const [partPlainValueNotice, setPartPlainValueNotice] = useState<string | null>(null);
+  const [lyricsDuplicatePartNameWarning, setLyricsDuplicatePartNameWarning] = useState<string | null>(null);
   const [partTypeMenuOpenIndex, setPartTypeMenuOpenIndex] = useState<number | null>(null);
   const [partTypeMenuAnchor, setPartTypeMenuAnchor] = useState<AddPartMenuAnchor | null>(null);
   const partTypeMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -114,7 +132,6 @@ export const ProjectWorkspacePage = () => {
   const [partEditSelectedLayoutId, setPartEditSelectedLayoutId] = useState<string | null>(null);
   const [isAddPartMenuOpen, setIsAddPartMenuOpen] = useState<boolean>(false);
   const [addPartMenuAnchor, setAddPartMenuAnchor] = useState<AddPartMenuAnchor | null>(null);
-  const addPartTileRef = useRef<HTMLButtonElement | null>(null);
   const addPartMenuTriggerRef = useRef<HTMLElement | null>(null);
   const addPartInsertBeforeRef = useRef<number>(0);
   const partsListThumbViewportRef = useRef<HTMLDivElement | null>(null);
@@ -147,7 +164,7 @@ export const ProjectWorkspacePage = () => {
   }, []);
   const [partEditLyricsLyricsLayoutId, setPartEditLyricsLyricsLayoutId] = useState<string | null>(null);
   const [partEditLyricsTitleLayoutId, setPartEditLyricsTitleLayoutId] = useState<string | null>(null);
-  const [partEditLyricsSongs, setPartEditLyricsSongs] = useState<LyricsSongRow[]>([{ title: "", artist: "" }]);
+  const [partEditLyricsSongs, setPartEditLyricsSongs] = useState<LyricsSongRow[]>([createDefaultLyricsSongRow()]);
   const [partEditValueFieldRows, setPartEditValueFieldRows] = useState<PartEditValueFieldRowState[]>([]);
   const [canvasValueHighlightShapeKey, setCanvasValueHighlightShapeKey] = useState<string | null>(null);
   const [canvasPlaceholderHoverLabel, setCanvasPlaceholderHoverLabel] = useState<string | null>(null);
@@ -171,6 +188,18 @@ export const ProjectWorkspacePage = () => {
       window.clearTimeout(timeoutId);
     };
   }, [partActionError, partPlainValueNotice]);
+
+  useEffect(() => {
+    if (lyricsDuplicatePartNameWarning === null) {
+      return;
+    }
+    const timeoutId: number = window.setTimeout((): void => {
+      setLyricsDuplicatePartNameWarning(null);
+    }, DUPLICATE_LYRIC_PART_NAME_WARNING_MS);
+    return (): void => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [lyricsDuplicatePartNameWarning]);
 
   const updateCanvasWorkspaceDock = useCallback((): void => {
     const navEl: HTMLElement | null = projectNavRef.current;
@@ -800,23 +829,6 @@ export const ProjectWorkspacePage = () => {
     setIsAddPartMenuOpen(true);
   }, []);
 
-  const toggleAddPartMenuAtEnd = useCallback((): void => {
-    setPartTypeMenuOpenIndex(null);
-    const tile: HTMLButtonElement | null = addPartTileRef.current;
-    if (tile === null) {
-      return;
-    }
-    const endIndex: number = sortedParts.length;
-    if (isAddPartMenuOpen && addPartMenuTriggerRef.current === tile && addPartInsertBeforeRef.current === endIndex) {
-      addPartMenuTriggerRef.current = null;
-      setIsAddPartMenuOpen(false);
-      return;
-    }
-    addPartMenuTriggerRef.current = tile;
-    addPartInsertBeforeRef.current = endIndex;
-    setIsAddPartMenuOpen(true);
-  }, [isAddPartMenuOpen, sortedParts.length]);
-
   const handleReorderSortedParts = useCallback(
     (fromSortedIndex: number, toSortedIndex: number): void => {
       if (project === null || fromSortedIndex === toSortedIndex) {
@@ -984,8 +996,9 @@ export const ProjectWorkspacePage = () => {
             parts: partsPayload,
           });
           setProject(updated);
-          const selectIdx: number = Math.max(0, Math.min(insertBeforeSortedIndex, partsPayload.length - 1));
-          setSelectedPartIndex(selectIdx);
+          const sortedBefore: unknown[] = sortProjectPartsForDisplay(project.parts);
+          const insertAt: number = clampSortedInsertIndexForNewPart(sortedBefore, insertBeforeSortedIndex);
+          setSelectedPartIndex(insertAt);
         } catch (error: unknown) {
           if (isSignInRequiredError(error)) {
             handleSessionExpiredNavigation();
@@ -1061,6 +1074,10 @@ export const ProjectWorkspacePage = () => {
   }, []);
 
   const selectedPart: unknown | undefined = sortedParts[selectedPartIndex];
+  const selectedPartRef = useRef<unknown | undefined>(undefined);
+  selectedPartRef.current = selectedPart;
+  /** Avoid overwriting lyrics song rows hydrated from configure return snapshot (see restore-from-location effect). */
+  const skipLyricsPartEditHydrateFromSelectedPartOnceRef = useRef<boolean>(false);
   const selectedPartLabel: string = selectedPart !== undefined ? getPartTypeLabel(selectedPart) : "";
 
   const selectedPartIsPlainOrValue: boolean = useMemo((): boolean => {
@@ -1131,7 +1148,7 @@ export const ProjectWorkspacePage = () => {
 
   const canvasHeaderCenterDefaultText: string = useMemo((): string => {
     if (sortedParts.length === 0) {
-      return "Use the + tile at the end of the list and pick Plain, Value, Lyrics, or Bible.";
+      return "Use the + before Part 1 in the parts list to add Plain, Value, Lyrics, or Bible.";
     }
     return `Part ${String(selectedPartIndex + 1)} of ${String(sortedParts.length)} · ${selectedPartLabel}`;
   }, [sortedParts.length, selectedPartIndex, selectedPartLabel]);
@@ -1141,19 +1158,12 @@ export const ProjectWorkspacePage = () => {
   }, []);
 
   const applyLyricsPartToEditState = useCallback(
-    (part: unknown): void => {
+    (part: unknown, lyricsSongRowsOverride?: LyricsSongRow[] | null): void => {
       if (readProjectPartType(part) !== PART_KIND_FOR_CREATE.LYRICS) {
         return;
       }
-      let lyricsLayoutIdFromPart: string | null = null;
-      let titleLayoutIdFromPart: string | null = null;
-      if (typeof part === "object" && part !== null && !Array.isArray(part)) {
-        const rec: Record<string, unknown> = part as Record<string, unknown>;
-        const lyricsRaw: unknown = rec.lyrics_layout_id;
-        const titleRaw: unknown = rec.title_layout_id;
-        lyricsLayoutIdFromPart = typeof lyricsRaw === "string" && lyricsRaw.length > 0 ? lyricsRaw : null;
-        titleLayoutIdFromPart = typeof titleRaw === "string" && titleRaw.length > 0 ? titleRaw : null;
-      }
+      const { lyricsLayoutId: lyricsLayoutIdFromPart, titleLayoutId: titleLayoutIdFromPart } =
+        readLyricsTemplateLayoutIdsFromPart(part);
       const choiceIds: Set<string> = new Set(
         templateLayoutChoices.map((choice: TemplateLayoutChoice) => choice.layoutId)
       );
@@ -1165,12 +1175,56 @@ export const ProjectWorkspacePage = () => {
       if (nextTitleLayoutId !== null && !choiceIds.has(nextTitleLayoutId)) {
         nextTitleLayoutId = null;
       }
+      const rowsFromPart: LyricsSongRow[] = readLyricsSongRowsFromPart(part);
+      const nextSongs: LyricsSongRow[] =
+        lyricsSongRowsOverride !== null &&
+        lyricsSongRowsOverride !== undefined &&
+        lyricsSongRowsOverride.length > 0
+          ? lyricsSongRowsOverride
+          : rowsFromPart;
       setPartEditLyricsLyricsLayoutId(nextLyricsLayoutId);
       setPartEditLyricsTitleLayoutId(nextTitleLayoutId);
-      setPartEditLyricsSongs(readLyricsSongRowsFromPart(part));
+      setPartEditLyricsSongs(nextSongs);
     },
     [templateLayoutChoices]
   );
+
+  useEffect((): void => {
+    if (project === null) {
+      return;
+    }
+    const raw: unknown = location.state;
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+      return;
+    }
+    const stateRecord: Record<string, unknown> = raw as Record<string, unknown>;
+    if (stateRecord[RESTORE_LYRICS_PART_EDIT_PANEL_KEY] !== true) {
+      return;
+    }
+    const rawIdx: unknown = stateRecord[LYRICS_PART_EDIT_SORTED_INDEX_KEY];
+    if (typeof rawIdx !== "number" || !Number.isInteger(rawIdx) || rawIdx < 0) {
+      navigate(location.pathname, { replace: true, state: {} });
+      return;
+    }
+    const sortedPartsForRestore: unknown[] = sortProjectPartsForDisplay(project.parts);
+    if (rawIdx >= sortedPartsForRestore.length) {
+      navigate(location.pathname, { replace: true, state: {} });
+      return;
+    }
+    const partToEdit: unknown = sortedPartsForRestore[rawIdx];
+    if (readProjectPartType(partToEdit) !== PART_KIND_FOR_CREATE.LYRICS) {
+      navigate(location.pathname, { replace: true, state: {} });
+      return;
+    }
+    const snapshotRows: LyricsSongRow[] | null = readLyricsPartSongsSnapshotFromLocation(raw);
+    const songsFromConfigureReturn: LyricsSongRow[] | null =
+      snapshotRows !== null && snapshotRows.length > 0 ? snapshotRows : null;
+    skipLyricsPartEditHydrateFromSelectedPartOnceRef.current = true;
+    setSelectedPartIndex(rawIdx);
+    applyLyricsPartToEditState(partToEdit, songsFromConfigureReturn);
+    setIsPartEditPanelOpen(true);
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [project, location.state, location.pathname, applyLyricsPartToEditState, navigate]);
 
   const handleEditSelectedPartFromCanvas = useCallback((): void => {
     if (selectedPart === undefined) {
@@ -1214,14 +1268,25 @@ export const ProjectWorkspacePage = () => {
   ]);
 
   useEffect(() => {
-    if (!isPartEditPanelOpen || selectedPart === undefined) {
+    if (!isPartEditPanelOpen) {
       return;
     }
-    if (readProjectPartType(selectedPart) !== PART_KIND_FOR_CREATE.LYRICS) {
+    const part: unknown | undefined = selectedPartRef.current;
+    if (part === undefined) {
       return;
     }
-    applyLyricsPartToEditState(selectedPart);
-  }, [isPartEditPanelOpen, selectedPart, applyLyricsPartToEditState]);
+    if (readProjectPartType(part) !== PART_KIND_FOR_CREATE.LYRICS) {
+      setPartEditLyricsLyricsLayoutId(null);
+      setPartEditLyricsTitleLayoutId(null);
+      setPartEditLyricsSongs([createDefaultLyricsSongRow()]);
+      return;
+    }
+    if (skipLyricsPartEditHydrateFromSelectedPartOnceRef.current) {
+      skipLyricsPartEditHydrateFromSelectedPartOnceRef.current = false;
+      return;
+    }
+    applyLyricsPartToEditState(part);
+  }, [isPartEditPanelOpen, selectedPartIndex, applyLyricsPartToEditState]);
 
   useEffect(() => {
     if (!isPartEditPanelOpen || selectedPart === undefined) {
@@ -1418,9 +1483,6 @@ export const ProjectWorkspacePage = () => {
     if (partId === null) {
       return;
     }
-    if (partEditLyricsLyricsLayoutId === null || partEditLyricsLyricsLayoutId.length === 0) {
-      return;
-    }
     const contentsPayload = mergeLyricsSongRowsIntoExistingContents(selectedPart, partEditLyricsSongs);
     const sorted: unknown[] = sortProjectPartsForDisplay(project.parts);
     const nextParts: unknown[] = sorted.map((part: unknown): unknown => {
@@ -1431,21 +1493,28 @@ export const ProjectWorkspacePage = () => {
         return part;
       }
       const rec: Record<string, unknown> = part as Record<string, unknown>;
+      const preservedLayouts: { lyricsLayoutId: string | null; titleLayoutId: string | null } =
+        readLyricsTemplateLayoutIdsFromPart(part);
+      const lyricsLayoutForPatch: string | null =
+        partEditLyricsLyricsLayoutId !== null && partEditLyricsLyricsLayoutId.length > 0
+          ? partEditLyricsLyricsLayoutId
+          : preservedLayouts.lyricsLayoutId;
+      const titleLayoutForPatch: string | null =
+        partEditLyricsTitleLayoutId !== null && partEditLyricsTitleLayoutId.length > 0
+          ? partEditLyricsTitleLayoutId
+          : preservedLayouts.titleLayoutId;
       return {
         ...rec,
         type: "LYRICS",
         contents: contentsPayload,
-        lyrics_layout_id: partEditLyricsLyricsLayoutId,
-        title_layout_id: partEditLyricsTitleLayoutId,
+        lyrics_layout_id: lyricsLayoutForPatch,
+        title_layout_id: titleLayoutForPatch,
       };
     });
-    const beforeNormalized: unknown[] = normalizePartsForPatchRequest(project.parts);
     const normalizedNext: unknown[] = normalizePartsForPatchRequest(nextParts);
     setPartActionError(null);
     setPartPlainValueNotice(null);
-    if (JSON.stringify(beforeNormalized) === JSON.stringify(normalizedNext)) {
-      return;
-    }
+    setLyricsDuplicatePartNameWarning(null);
     void (async (): Promise<void> => {
       setIsPatchingParts(true);
       try {
@@ -1456,6 +1525,11 @@ export const ProjectWorkspacePage = () => {
       } catch (error: unknown) {
         if (isSignInRequiredError(error)) {
           handleSessionExpiredNavigation();
+          return;
+        }
+        if (isDuplicateLyricPartNamePatchError(error)) {
+          setPartEditLyricsSongs(readLyricsSongRowsFromPart(selectedPart));
+          setLyricsDuplicatePartNameWarning(DUPLICATE_LYRIC_PART_NAME_USER_WARNING);
           return;
         }
         const message: string =
@@ -1505,11 +1579,7 @@ export const ProjectWorkspacePage = () => {
   const partEditPrimarySaveButtonLabel: string =
     selectedPartIsValue && partEditValueFieldRows.length > 0 ? "Save" : "Save layout";
 
-  const isPartLyricsSaveDisabled: boolean =
-    partEditLyricsLyricsLayoutId === null ||
-    partEditLyricsLyricsLayoutId.length === 0 ||
-    partEditLyricsSongs.some((row: LyricsSongRow): boolean => row.title.trim().length === 0) ||
-    partEditEmptyStateMessage !== null;
+  const isPartLyricsSaveDisabled: boolean = partEditEmptyStateMessage !== null;
 
   const isPartPrimaryLayoutSaveDisabled: boolean = selectedPart === undefined || partEditSelectedLayoutId === null;
 
@@ -1550,9 +1620,6 @@ export const ProjectWorkspacePage = () => {
   useEffect(() => {
     setPartPlainValueNotice(null);
     setPartTypeMenuOpenIndex(null);
-    setPartEditLyricsLyricsLayoutId(null);
-    setPartEditLyricsTitleLayoutId(null);
-    setPartEditLyricsSongs([{ title: "", artist: "" }]);
     setCanvasValueHighlightShapeKey(null);
     if (valuePlaceholderBlurClearTimeoutRef.current !== null) {
       window.clearTimeout(valuePlaceholderBlurClearTimeoutRef.current);
@@ -1953,7 +2020,6 @@ export const ProjectWorkspacePage = () => {
               partsListMeasureRef={partsListMeasureRef}
               partsScrollSpacerRef={partsScrollSpacerRef}
               partsListScrollerRef={partsListScrollerRef}
-              addPartTileRef={addPartTileRef}
               partTypeMenuTriggerRef={partTypeMenuTriggerRef}
               sortedParts={sortedParts}
               selectedPartIndex={selectedPartIndex}
@@ -1963,7 +2029,6 @@ export const ProjectWorkspacePage = () => {
               isPatchingParts={isPatchingParts}
               isAddPartMenuOpen={isAddPartMenuOpen}
               onOpenAddPartMenu={openAddPartMenu}
-              onToggleAddPartMenuAtEnd={toggleAddPartMenuAtEnd}
               addPartMenuAnchor={addPartMenuAnchor}
               partTypeMenuOpenIndex={partTypeMenuOpenIndex}
               onPartTypeMenuButtonClick={handlePartTypeMenuButtonClick}
@@ -2000,6 +2065,8 @@ export const ProjectWorkspacePage = () => {
               onChangeTitleLayoutId={setPartEditLyricsTitleLayoutId}
               partEditLyricsSongs={partEditLyricsSongs}
               onPartEditLyricsSongsChange={setPartEditLyricsSongs}
+              lyricsConfigureProjectId={projectId ?? ""}
+              lyricsConfigurePartSortedIndex={selectedPartIndex}
               partEditEmptyStateMessage={partEditEmptyStateMessage}
               isPartLyricsSaveDisabled={isPartLyricsSaveDisabled}
               onSaveLyricsPart={handleSaveLyricsPart}
@@ -2025,11 +2092,15 @@ export const ProjectWorkspacePage = () => {
       <PartNotifications
         partActionError={partActionError}
         partPlainValueNotice={partPlainValueNotice}
+        lyricsDuplicatePartNameWarning={lyricsDuplicatePartNameWarning}
         onDismissError={() => {
           setPartActionError(null);
         }}
         onDismissNotice={() => {
           setPartPlainValueNotice(null);
+        }}
+        onDismissLyricsDuplicatePartNameWarning={() => {
+          setLyricsDuplicatePartNameWarning(null);
         }}
       />
       <PartKindChangeDialog
