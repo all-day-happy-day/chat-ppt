@@ -2,13 +2,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.bible.application.command import GetBiblePhrasesCommand
 from app.bible.application.usecase import GetBiblePhrasesUseCase, GetBooksUseCase, GetChaptersUseCase, GetVersesUseCase
-from app.bible.domain.exception import PhraseNotFound, UnsupportedVersion
-from app.bible.domain.service import ParseVerseQueryService as P
-from app.bible.domain.valueobject import BiblePhrase, BibleVerseQuery
+from app.bible.domain.exception import (
+    MultipleNumbers,
+    MultipleSeparators,
+    PhraseNotFound,
+    UnsupportedLetter,
+    UnsupportedVersion,
+)
+from app.bible.domain.valueobject import BiblePhrase
 from app.bible.infrastructure.adapter.inbound.api.message import (
-    GetBiblePhraseRequest,
     GetBiblePhraseResponse,
     GetBooksResponse,
     GetChaptersResponse,
@@ -21,40 +24,44 @@ from app.di.application.usecase import (
     get_get_chapters_use_case,
     get_get_verses_use_case,
 )
-from app.di.domain.service import get_parse_verse_query_service
 from app.shared.bible.domain.enum import AvailableBibleVersions
 
 router: APIRouter = APIRouter(tags=["Bible"])
 
 
-@router.get("", status_code=status.HTTP_200_OK, response_model=list[GetBiblePhraseResponse])
-def get_bible_phrases(
-    request_model: list[GetBiblePhraseRequest],
+@router.get(
+    "/{version}/{book}/{chapter}/{verse}", status_code=status.HTTP_200_OK, response_model=list[GetBiblePhraseResponse]
+)
+def get_bibile_phrases(
+    version: AvailableBibleVersions,
+    book: str,
+    chapter: str,
+    verse: str,
     usecase: Annotated[GetBiblePhrasesUseCase, Depends(get_get_bible_phrases_use_case)],
-    parse_verse_query_service: Annotated[P.ParseVerseQueryService, Depends(get_parse_verse_query_service)],
 ):
     try:
-        queries: list[BibleVerseQuery] = []
-        for request in request_model:
-            queries.extend(parse_verse_query_service.parse(verse_query=request))
-
         bible_phrases: list[BiblePhrase] = usecase(
-            commands=[
-                GetBiblePhrasesCommand(
-                    version=query.version,
-                    book=query.book,
-                    chapter=int(query.chapter),
-                    verse=int(query.verse),
-                )
-                for query in queries
-            ]
+            version=version,
+            book=book,
+            chapter=chapter,
+            verse=verse,
         )
         return [GetBiblePhraseResponse.from_model(bible_phrase) for bible_phrase in bible_phrases]
 
     except PhraseNotFound as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
     except UnsupportedVersion as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except MultipleNumbers as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except MultipleSeparators as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except UnsupportedLetter as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
