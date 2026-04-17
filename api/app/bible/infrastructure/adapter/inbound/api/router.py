@@ -49,19 +49,14 @@ def get_bibile_phrases(
         return [GetBiblePhraseResponse.from_model(bible_phrase) for bible_phrase in bible_phrases]
 
     except PhraseNotFound as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except UnsupportedVersion as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except MultipleNumbers as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except MultipleSeparators as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except UnsupportedLetter as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
