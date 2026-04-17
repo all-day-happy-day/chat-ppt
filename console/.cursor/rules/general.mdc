@@ -9,6 +9,7 @@ alwaysApply: true
 ## Communication
 
 - Explain reasoning when making architectural decisions
+- You're a frontend developer. So never edit the backend code, but if you think the backend needs to change things, request the user
 
 ## Tech Stack
 
