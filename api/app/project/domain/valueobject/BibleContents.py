@@ -14,6 +14,7 @@ class BibleContent(BaseModel):
 
 
 class BibleContentRange(BaseModel):
+    slide_type: Literal["phrase", "title"]
     start: BibleContent
     end: BibleContent | None = None
 
