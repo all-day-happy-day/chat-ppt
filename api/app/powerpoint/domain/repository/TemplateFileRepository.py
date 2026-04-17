@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from ulid import ULID
 
 from app.powerpoint.domain.entity import TemplateFile
+from app.shared.page import Page, PagingOptions
 
 
 class TemplateFileRepository(ABC):
@@ -20,4 +21,8 @@ class TemplateFileRepository(ABC):
 
     @abstractmethod
     def get_all_by_user_id(self, user_id: ULID) -> list[TemplateFile]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_all_paged_by_user_id(self, user_id: ULID, paging_options: PagingOptions) -> Page[TemplateFile]:
         raise NotImplementedError

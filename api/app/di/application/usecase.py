@@ -34,6 +34,7 @@ from app.powerpoint.application.usecase import (
     ChangeTemplateNameUseCase,
     DeleteTemplateUseCase,
     GetLayoutsUseCase,
+    GetPagedTemplatesByUserIDUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
@@ -262,6 +263,15 @@ def get_get_layouts_use_case(
     template_repository: TemplateRepository = Depends(get_template_repository),
 ) -> GetLayoutsUseCase:
     return GetLayoutsUseCase(template_repository=template_repository)
+
+
+def get_get_paged_templates_by_user_id_use_case(
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+    template_repository: TemplateRepository = Depends(get_template_repository),
+) -> GetPagedTemplatesByUserIDUseCase:
+    return GetPagedTemplatesByUserIDUseCase(
+        template_file_repository=template_file_repository, template_repository=template_repository
+    )
 
 
 def get_get_templates_by_user_id_use_case(

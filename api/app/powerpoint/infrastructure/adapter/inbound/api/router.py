@@ -7,6 +7,7 @@ from app.di.application.usecase import (
     get_change_template_name_use_case,
     get_delete_template_use_case,
     get_get_layouts_use_case,
+    get_get_paged_templates_by_user_id_use_case,
     get_get_templates_by_user_id_use_case,
     get_read_template_use_case,
     get_update_template_use_case,
@@ -15,6 +16,7 @@ from app.powerpoint.application.usecase import (
     ChangeTemplateNameUseCase,
     DeleteTemplateUseCase,
     GetLayoutsUseCase,
+    GetPagedTemplatesByUserIDUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
@@ -29,6 +31,7 @@ from app.powerpoint.infrastructure.adapter.inbound.api.message import (
     ReadTemplateResponse,
     UpdateTemplateResponse,
 )
+from app.shared.page import Page, PagingOptions
 
 router: APIRouter = APIRouter(tags=["Powerpoint"])
 
@@ -108,13 +111,33 @@ def delete_template(
 
 @router.get("/template/list/{user_id}", status_code=status.HTTP_200_OK, response_model=list[GetTemplateResponse])
 def get_template_list(
-    user_id: ULID, usecase: Annotated[GetTemplatesByUserIDUseCase, Depends(get_get_templates_by_user_id_use_case)]
+    user_id: ULID,
+    usecase: Annotated[GetTemplatesByUserIDUseCase, Depends(get_get_templates_by_user_id_use_case)],
 ):
     template_files, templates = usecase(user_id=user_id)
     return [
         GetTemplateResponse.from_domain_entity(template_file=template_file, template=template)
         for template_file, template in zip(template_files, templates)
     ]
+
+
+@router.get("/template/list/page/{user_id}", status_code=status.HTTP_200_OK, response_model=Page[GetTemplateResponse])
+def get_paged_template_list(
+    user_id: ULID,
+    paging_options: Annotated[PagingOptions, Depends()],
+    usecase: Annotated[GetPagedTemplatesByUserIDUseCase, Depends(get_get_paged_templates_by_user_id_use_case)],
+):
+    template_files, templates = usecase(user_id=user_id, paging_options=paging_options)
+    return Page(
+        items=[
+            GetTemplateResponse.from_domain_entity(template_file=template_file, template=template)
+            for template_file, template in zip(template_files.items, templates.items)
+        ],
+        page=template_files.page,
+        size=template_files.size,
+        total_items=template_files.total_items,
+        total_pages=template_files.total_pages,
+    )
 
 
 @router.get("/template/layouts/{template_id}", status_code=status.HTTP_200_OK, response_model=list[GetLayoutResponse])
