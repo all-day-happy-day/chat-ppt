@@ -8,7 +8,7 @@ class ParseVerseRangeService:
 
     def parse(self, verse: str) -> list[int]:
         # Find unsupported letters
-        survived: list[str] = re.compile(f"[0-9{''.join(self.SEP)}]+").findall(verse)
+        survived: list[str] = re.compile(f"[0-9{''.join(self.SEP)}]").findall(verse)
         if len(survived) != len(verse):
             raise UnsupportedLetter(f"Unsupported letter: {verse}")
 
