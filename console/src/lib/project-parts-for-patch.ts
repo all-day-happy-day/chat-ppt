@@ -963,12 +963,7 @@ export const replacePartKindAtSortedIndex = (
     type: "BIBLE",
     contents: {
       type: "BIBLE",
-      contents: [
-        {
-          start: { version: "NIV", book: "John", chapter: 3, verse: 16 },
-          end: null,
-        },
-      ],
+      contents: [],
     },
     phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
     title_layout_id: null,
@@ -1088,12 +1083,7 @@ export const appendNewPartForPatch = (
       type: "BIBLE",
       contents: {
         type: "BIBLE",
-        contents: [
-          {
-            start: { version: "NIV", book: "John", chapter: 3, verse: 16 },
-            end: null,
-          },
-        ],
+        contents: [],
       },
       phrase_layout_id: lyricsOrBiblePrimaryLayoutId,
       title_layout_id: null,

@@ -10,6 +10,10 @@ export const LYRICS_EDIT_LYRICS_LAYOUT_PALETTE_MENU_ID: string = "lyrics-edit-ly
 
 export const LYRICS_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID: string = "lyrics-edit-title-layout-palette-menu";
 
+export const BIBLE_EDIT_PHRASE_LAYOUT_PALETTE_MENU_ID: string = "bible-edit-phrase-layout-palette-menu";
+
+export const BIBLE_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID: string = "bible-edit-title-layout-palette-menu";
+
 const LAYOUT_PALETTE_VIEWPORT_GUTTER_PX: number = 8;
 
 const LAYOUT_PALETTE_MENU_MAX_WIDTH_PX: number = 260;

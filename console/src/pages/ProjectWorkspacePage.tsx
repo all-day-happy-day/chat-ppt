@@ -5,7 +5,10 @@ import { listProjectsByUserId, patchProjectById } from "../api/project";
 import { listTemplateLayoutsByTemplateId, listTemplatesByUserId } from "../api/template";
 import { listUsers } from "../api/user";
 import { PART_EDIT_LAYOUT_PALETTE_MENU_ID, type ValuePlaceholderEditorRow } from "../components/PartEditPanel";
+import type { BiblePartSavePayload } from "../components/BiblePartEditForm";
 import {
+  BIBLE_EDIT_PHRASE_LAYOUT_PALETTE_MENU_ID,
+  BIBLE_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID,
   LYRICS_EDIT_LYRICS_LAYOUT_PALETTE_MENU_ID,
   LYRICS_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID,
 } from "../components/TemplateLayoutGalleryPicker";
@@ -35,6 +38,7 @@ import {
   type TemplateLayoutChoice,
 } from "../lib/project-parts-for-patch";
 import type { LyricsSongRow } from "../lib/lyrics-part-contents";
+import { buildBiblePartContentsPayloadFromSlides, readBibleTemplateLayoutIdsFromPart } from "../lib/bible-part-contents";
 import {
   createDefaultLyricsSongRow,
   mergeLyricsSongRowsIntoExistingContents,
@@ -165,6 +169,8 @@ export const ProjectWorkspacePage = () => {
   const [partEditLyricsLyricsLayoutId, setPartEditLyricsLyricsLayoutId] = useState<string | null>(null);
   const [partEditLyricsTitleLayoutId, setPartEditLyricsTitleLayoutId] = useState<string | null>(null);
   const [partEditLyricsSongs, setPartEditLyricsSongs] = useState<LyricsSongRow[]>([createDefaultLyricsSongRow()]);
+  const [partEditBiblePhraseLayoutId, setPartEditBiblePhraseLayoutId] = useState<string | null>(null);
+  const [partEditBibleTitleLayoutId, setPartEditBibleTitleLayoutId] = useState<string | null>(null);
   const [partEditValueFieldRows, setPartEditValueFieldRows] = useState<PartEditValueFieldRowState[]>([]);
   const [canvasValueHighlightShapeKey, setCanvasValueHighlightShapeKey] = useState<string | null>(null);
   const [canvasPlaceholderHoverLabel, setCanvasPlaceholderHoverLabel] = useState<string | null>(null);
@@ -501,6 +507,10 @@ export const ProjectWorkspacePage = () => {
       const lyricsTitlePaletteEl: HTMLElement | null = document.getElementById(
         LYRICS_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID
       );
+      const biblePhrasePaletteEl: HTMLElement | null = document.getElementById(
+        BIBLE_EDIT_PHRASE_LAYOUT_PALETTE_MENU_ID
+      );
+      const bibleTitlePaletteEl: HTMLElement | null = document.getElementById(BIBLE_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID);
       if (layoutPaletteEl !== null && layoutPaletteEl.contains(targetNode)) {
         return;
       }
@@ -508,6 +518,12 @@ export const ProjectWorkspacePage = () => {
         return;
       }
       if (lyricsTitlePaletteEl !== null && lyricsTitlePaletteEl.contains(targetNode)) {
+        return;
+      }
+      if (biblePhrasePaletteEl !== null && biblePhrasePaletteEl.contains(targetNode)) {
+        return;
+      }
+      if (bibleTitlePaletteEl !== null && bibleTitlePaletteEl.contains(targetNode)) {
         return;
       }
       if (targetNode instanceof Element && targetNode.closest("[data-lyrics-song-suggestions]") !== null) {
@@ -1090,6 +1106,13 @@ export const ProjectWorkspacePage = () => {
     return readProjectPartType(selectedPart) === PART_KIND_FOR_CREATE.LYRICS;
   }, [selectedPart]);
 
+  const selectedPartIsBible: boolean = useMemo((): boolean => {
+    if (selectedPart === undefined) {
+      return false;
+    }
+    return readProjectPartType(selectedPart) === PART_KIND_FOR_CREATE.BIBLE;
+  }, [selectedPart]);
+
   const selectedPartIsValue: boolean = useMemo((): boolean => {
     if (selectedPart === undefined) {
       return false;
@@ -1115,7 +1138,7 @@ export const ProjectWorkspacePage = () => {
     if (selectedPart === undefined) {
       return null;
     }
-    if (selectedPartIsLyrics) {
+    if (selectedPartIsLyrics || selectedPartIsBible) {
       return null;
     }
     if (plainValueLayoutPreviewSuppressed) {
@@ -1126,7 +1149,7 @@ export const ProjectWorkspacePage = () => {
       return null;
     }
     return findTemplateLayoutEntryByLayoutId(templateLayouts, layoutId);
-  }, [selectedPart, selectedPartIsLyrics, templateLayouts, plainValueLayoutPreviewSuppressed]);
+  }, [selectedPart, selectedPartIsLyrics, selectedPartIsBible, templateLayouts, plainValueLayoutPreviewSuppressed]);
 
   const canvasPreviewHoverResetSignature: string = useMemo((): string => {
     if (selectedPartLayoutEntry === null) {
@@ -1182,6 +1205,29 @@ export const ProjectWorkspacePage = () => {
     [templateLayoutChoices]
   );
 
+  const applyBiblePartToEditState = useCallback(
+    (part: unknown): void => {
+      if (readProjectPartType(part) !== PART_KIND_FOR_CREATE.BIBLE) {
+        return;
+      }
+      const { phraseLayoutId: phraseFromPart, titleLayoutId: titleFromPart } = readBibleTemplateLayoutIdsFromPart(part);
+      const choiceIds: Set<string> = new Set(
+        templateLayoutChoices.map((choice: TemplateLayoutChoice) => choice.layoutId)
+      );
+      let nextPhrase: string | null = phraseFromPart;
+      if (nextPhrase !== null && !choiceIds.has(nextPhrase)) {
+        nextPhrase = null;
+      }
+      let nextTitle: string | null = titleFromPart;
+      if (nextTitle !== null && !choiceIds.has(nextTitle)) {
+        nextTitle = null;
+      }
+      setPartEditBiblePhraseLayoutId(nextPhrase);
+      setPartEditBibleTitleLayoutId(nextTitle);
+    },
+    [templateLayoutChoices]
+  );
+
   useEffect((): void => {
     if (project === null) {
       return;
@@ -1231,6 +1277,11 @@ export const ProjectWorkspacePage = () => {
       setIsPartEditPanelOpen(true);
       return;
     }
+    if (partTypeForEdit === PART_KIND_FOR_CREATE.BIBLE) {
+      applyBiblePartToEditState(selectedPart);
+      setIsPartEditPanelOpen(true);
+      return;
+    }
     if (plainValueLayoutPreviewSuppressed) {
       setPartEditLayoutHydrationSuppressed(true);
       setPartEditSelectedLayoutId(null);
@@ -1258,6 +1309,7 @@ export const ProjectWorkspacePage = () => {
     selectedPartId,
     removePlainValueLayoutPreviewSuppressedPartId,
     applyLyricsPartToEditState,
+    applyBiblePartToEditState,
   ]);
 
   useEffect(() => {
@@ -1268,18 +1320,28 @@ export const ProjectWorkspacePage = () => {
     if (part === undefined) {
       return;
     }
-    if (readProjectPartType(part) !== PART_KIND_FOR_CREATE.LYRICS) {
+    const partType: string = readProjectPartType(part);
+    if (partType !== PART_KIND_FOR_CREATE.LYRICS) {
       setPartEditLyricsLyricsLayoutId(null);
       setPartEditLyricsTitleLayoutId(null);
       setPartEditLyricsSongs([createDefaultLyricsSongRow()]);
+    }
+    if (partType !== PART_KIND_FOR_CREATE.BIBLE) {
+      setPartEditBiblePhraseLayoutId(null);
+      setPartEditBibleTitleLayoutId(null);
+    }
+    if (partType === PART_KIND_FOR_CREATE.LYRICS) {
+      if (skipLyricsPartEditHydrateFromSelectedPartOnceRef.current) {
+        skipLyricsPartEditHydrateFromSelectedPartOnceRef.current = false;
+        return;
+      }
+      applyLyricsPartToEditState(part);
       return;
     }
-    if (skipLyricsPartEditHydrateFromSelectedPartOnceRef.current) {
-      skipLyricsPartEditHydrateFromSelectedPartOnceRef.current = false;
-      return;
+    if (partType === PART_KIND_FOR_CREATE.BIBLE) {
+      applyBiblePartToEditState(part);
     }
-    applyLyricsPartToEditState(part);
-  }, [isPartEditPanelOpen, selectedPartIndex, applyLyricsPartToEditState]);
+  }, [isPartEditPanelOpen, selectedPartIndex, applyLyricsPartToEditState, applyBiblePartToEditState]);
 
   useEffect(() => {
     if (!isPartEditPanelOpen || selectedPart === undefined) {
@@ -1541,6 +1603,77 @@ export const ProjectWorkspacePage = () => {
     handleSessionExpiredNavigation,
   ]);
 
+  const handleSaveBiblePart = useCallback(
+    (payload: BiblePartSavePayload): void => {
+      if (project === null || selectedPart === undefined) {
+        return;
+      }
+      const partId: string | null = getProjectPartId(selectedPart);
+      if (partId === null) {
+        return;
+      }
+      const contentsPayload = buildBiblePartContentsPayloadFromSlides(payload.slides);
+      const sorted: unknown[] = sortProjectPartsForDisplay(project.parts);
+      const preservedIds: { phraseLayoutId: string | null; titleLayoutId: string | null } =
+        readBibleTemplateLayoutIdsFromPart(selectedPart);
+      const phraseForPatch: string | null =
+        partEditBiblePhraseLayoutId !== null && partEditBiblePhraseLayoutId.length > 0
+          ? partEditBiblePhraseLayoutId
+          : preservedIds.phraseLayoutId;
+      const resolvedPhraseLayoutId: string | null = phraseForPatch;
+      const titleForPatch: string | null =
+        partEditBibleTitleLayoutId !== null && partEditBibleTitleLayoutId.length > 0
+          ? partEditBibleTitleLayoutId
+          : preservedIds.titleLayoutId;
+      const nextParts: unknown[] = sorted.map((part: unknown): unknown => {
+        if (getProjectPartId(part) !== partId) {
+          return part;
+        }
+        if (typeof part !== "object" || part === null || Array.isArray(part)) {
+          return part;
+        }
+        const rec: Record<string, unknown> = part as Record<string, unknown>;
+        return {
+          ...rec,
+          type: "BIBLE",
+          contents: contentsPayload,
+          phrase_layout_id: resolvedPhraseLayoutId,
+          title_layout_id: titleForPatch,
+        };
+      });
+      const normalizedNext: unknown[] = normalizePartsForPatchRequest(nextParts);
+      setPartActionError(null);
+      setPartPlainValueNotice(null);
+      void (async (): Promise<void> => {
+        setIsPatchingParts(true);
+        try {
+          const updated: GetProjectResponse = await patchProjectById(project.id, {
+            parts: normalizedNext,
+          });
+          setProject(updated);
+          setPartEditBiblePhraseLayoutId(resolvedPhraseLayoutId);
+        } catch (error: unknown) {
+          if (isSignInRequiredError(error)) {
+            handleSessionExpiredNavigation();
+            return;
+          }
+          const message: string =
+            error instanceof Error ? error.message : "Could not update the Bible part. Try again after refreshing.";
+          setPartActionError(message);
+        } finally {
+          setIsPatchingParts(false);
+        }
+      })();
+    },
+    [
+      project,
+      selectedPart,
+      partEditBiblePhraseLayoutId,
+      partEditBibleTitleLayoutId,
+      handleSessionExpiredNavigation,
+    ]
+  );
+
   const partEditHeading: string =
     selectedPart !== undefined ? `Part ${String(selectedPartIndex + 1)} · ${getPartTypeLabel(selectedPart)}` : "";
 
@@ -1573,6 +1706,8 @@ export const ProjectWorkspacePage = () => {
     selectedPartIsValue && partEditValueFieldRows.length > 0 ? "Save" : "Save layout";
 
   const isPartLyricsSaveDisabled: boolean = partEditEmptyStateMessage !== null;
+
+  const isPartBibleSaveDisabled: boolean = partEditEmptyStateMessage !== null;
 
   const isPartPrimaryLayoutSaveDisabled: boolean = selectedPart === undefined || partEditSelectedLayoutId === null;
 
@@ -1898,7 +2033,8 @@ export const ProjectWorkspacePage = () => {
     if (selectedPart === undefined) {
       return fallback;
     }
-    if (readProjectPartType(selectedPart) === PART_KIND_FOR_CREATE.LYRICS) {
+    const pt: string = readProjectPartType(selectedPart);
+    if (pt === PART_KIND_FOR_CREATE.LYRICS || pt === PART_KIND_FOR_CREATE.BIBLE) {
       return fallback;
     }
     const layoutIds: string[] = extractLayoutIdsForCanvasPreview(selectedPart);
@@ -2044,6 +2180,7 @@ export const ProjectWorkspacePage = () => {
               onCanvasPlaceholderHoverLabelChange={setCanvasPlaceholderHoverLabel}
               selectedPartLayoutEntry={selectedPartLayoutEntry}
               selectedPartIsLyrics={selectedPartIsLyrics}
+              selectedPartIsBible={selectedPartIsBible}
               selectedPartIsValue={selectedPartIsValue}
               plainValueLayoutPreviewSuppressed={plainValueLayoutPreviewSuppressed}
               canvasValueHighlightShapeKey={canvasValueHighlightShapeKey}
@@ -2063,6 +2200,12 @@ export const ProjectWorkspacePage = () => {
               partEditEmptyStateMessage={partEditEmptyStateMessage}
               isPartLyricsSaveDisabled={isPartLyricsSaveDisabled}
               onSaveLyricsPart={handleSaveLyricsPart}
+              partEditBiblePhraseLayoutId={partEditBiblePhraseLayoutId}
+              partEditBibleTitleLayoutId={partEditBibleTitleLayoutId}
+              onChangeBiblePhraseLayoutId={setPartEditBiblePhraseLayoutId}
+              onChangeBibleTitleLayoutId={setPartEditBibleTitleLayoutId}
+              onSaveBiblePart={handleSaveBiblePart}
+              isPartBibleSaveDisabled={isPartBibleSaveDisabled}
               partEditLayoutFieldLabel={partEditLayoutFieldLabel}
               partEditSelectedLayoutId={partEditSelectedLayoutId}
               onSelectPartEditLayoutId={handleSelectPartEditLayoutId}

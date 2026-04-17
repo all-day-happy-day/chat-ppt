@@ -1,10 +1,12 @@
 import { createPortal } from "react-dom";
 import type { ReactElement, RefObject } from "react";
+import { BiblePartEditForm, type BiblePartSavePayload } from "../../components/BiblePartEditForm";
 import { LyricsPartEditForm } from "../../components/LyricsPartEditForm";
 import { PartEditPanel, type ValuePlaceholderEditorRow } from "../../components/PartEditPanel";
 import { TemplateLayoutThumbnail } from "../../components/TemplateLayoutThumbnail";
 import { getPrimaryLayoutIdFromPart, getProjectPartId } from "../../lib/project-parts-for-patch";
 import type { LyricsSongRow } from "../../lib/lyrics-part-contents";
+import { buildBiblePartThumbnailCaption } from "../../lib/bible-part-contents";
 import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
 import type { GetLayoutResponse } from "../../types/template-layout";
 import type { TemplateLayoutChoice } from "../../lib/project-parts-for-patch";
@@ -33,6 +35,7 @@ export type WorkspaceCanvasEditorColumnProps = {
   onCanvasPlaceholderHoverLabelChange: (label: string | null) => void;
   selectedPartLayoutEntry: GetLayoutResponse | null;
   selectedPartIsLyrics: boolean;
+  selectedPartIsBible: boolean;
   selectedPartIsValue: boolean;
   plainValueLayoutPreviewSuppressed: boolean;
   canvasValueHighlightShapeKey: string | null;
@@ -52,6 +55,12 @@ export type WorkspaceCanvasEditorColumnProps = {
   partEditEmptyStateMessage: string | null;
   isPartLyricsSaveDisabled: boolean;
   onSaveLyricsPart: () => void;
+  partEditBiblePhraseLayoutId: string | null;
+  partEditBibleTitleLayoutId: string | null;
+  onChangeBiblePhraseLayoutId: (layoutId: string | null) => void;
+  onChangeBibleTitleLayoutId: (layoutId: string | null) => void;
+  onSaveBiblePart: (payload: BiblePartSavePayload) => void;
+  isPartBibleSaveDisabled: boolean;
   partEditLayoutFieldLabel: string;
   partEditSelectedLayoutId: string | null;
   onSelectPartEditLayoutId: (layoutId: string | null) => void;
@@ -83,6 +92,7 @@ export const WorkspaceCanvasEditorColumn = ({
   onCanvasPlaceholderHoverLabelChange,
   selectedPartLayoutEntry,
   selectedPartIsLyrics,
+  selectedPartIsBible,
   selectedPartIsValue,
   plainValueLayoutPreviewSuppressed,
   canvasValueHighlightShapeKey,
@@ -102,6 +112,12 @@ export const WorkspaceCanvasEditorColumn = ({
   partEditEmptyStateMessage,
   isPartLyricsSaveDisabled,
   onSaveLyricsPart,
+  partEditBiblePhraseLayoutId,
+  partEditBibleTitleLayoutId,
+  onChangeBiblePhraseLayoutId,
+  onChangeBibleTitleLayoutId,
+  onSaveBiblePart,
+  isPartBibleSaveDisabled,
   partEditLayoutFieldLabel,
   partEditSelectedLayoutId,
   onSelectPartEditLayoutId,
@@ -185,6 +201,15 @@ export const WorkspaceCanvasEditorColumn = ({
                         {buildLyricsPartThumbnailCaption(selectedPart)}
                       </span>
                     </div>
+                  ) : selectedPartIsBible ? (
+                    <div
+                      className={`flex ${CANVAS_PREVIEW_EMPTY_FRAME_MIN_HEIGHT_CLASS} ${CANVAS_PREVIEW_EMPTY_FRAME_MIN_WIDTH_CLASS} flex-col items-center justify-center px-4`}
+                      role="status"
+                    >
+                      <span className="text-center text-[12px] font-medium leading-snug text-neutral-500 dark:text-neutral-400">
+                        {buildBiblePartThumbnailCaption(selectedPart)}
+                      </span>
+                    </div>
                   ) : selectedPartLayoutEntry !== null ? (
                     <TemplateLayoutThumbnail
                       key={`canvas-preview-${String(selectedPartIndex)}-${getProjectPartId(selectedPart) ?? "noid"}-${getPrimaryLayoutIdFromPart(selectedPart) ?? "nolayout"}-${plainValueLayoutPreviewSuppressed ? "pv-sup" : "pv-show"}`}
@@ -226,6 +251,23 @@ export const WorkspaceCanvasEditorColumn = ({
           isSaveDisabled={isPartLyricsSaveDisabled || isPatchingParts}
           isSaving={isPatchingParts}
           onSave={onSaveLyricsPart}
+        />
+      ) : isPartEditPanelOpen && selectedPartIsBible ? (
+        <BiblePartEditForm
+          ref={partEditPanelRef}
+          isOpen={isPartEditPanelOpen}
+          onClose={onClosePartEditPanel}
+          partHeading={partEditHeading}
+          layoutChoices={templateLayoutChoices}
+          phraseLayoutId={partEditBiblePhraseLayoutId}
+          titleLayoutId={partEditBibleTitleLayoutId}
+          onChangePhraseLayoutId={onChangeBiblePhraseLayoutId}
+          onChangeTitleLayoutId={onChangeBibleTitleLayoutId}
+          partSnapshot={selectedPart}
+          emptyStateMessage={partEditEmptyStateMessage}
+          isSaveDisabled={isPartBibleSaveDisabled || isPatchingParts}
+          isSaving={isPatchingParts}
+          onSave={onSaveBiblePart}
         />
       ) : (
         <PartEditPanel
