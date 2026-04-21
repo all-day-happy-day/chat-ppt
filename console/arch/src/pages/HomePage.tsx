@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";

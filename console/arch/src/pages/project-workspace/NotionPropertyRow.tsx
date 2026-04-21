@@ -1,5 +1,6 @@
-import type { ReactElement, ReactNode } from "react";
 import { NOTION_ICON_CLASS } from "./icons";
+
+import type { ReactElement, ReactNode } from "react";
 
 export type NotionPropertyRowProps = {
   icon: ReactNode;

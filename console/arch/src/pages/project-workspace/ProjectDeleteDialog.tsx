@@ -1,5 +1,6 @@
-import type { ChangeEvent, ReactElement, RefObject } from "react";
 import { ConfirmationCodeDeleteDialog } from "../../components/ConfirmationCodeDeleteDialog";
+
+import type { ChangeEvent, ReactElement, RefObject } from "react";
 
 const PROJECT_DELETE_BODY_INTRO: string =
   "This permanently deletes the project and all of its parts. You cannot undo this action.";

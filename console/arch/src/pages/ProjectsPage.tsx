@@ -1,23 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import { signOut, verifySession } from "../api/auth";
-import { listBroadSongLibrary, songIdHasLyricsWithContentInLibrary } from "../api/song";
 import { listProjectsByUserId } from "../api/project";
+import { listBroadSongLibrary, songIdHasLyricsWithContentInLibrary } from "../api/song";
 import { listTemplatesByUserId } from "../api/template";
 import { listUsers } from "../api/user";
 import { AccountMenu } from "../components/AccountMenu";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { isSignInRequiredError } from "../lib/auth-errors";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { writeLibrarySongMetaToSession } from "../lib/library-song-session";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
 import type { GetProjectResponse } from "../types/project";
-import type { GetTemplateResponse } from "../types/template";
 import type { SongListItem } from "../types/song";
+import type { GetTemplateResponse } from "../types/template";
 import type { GetUserResponse } from "../types/user";
 
 const DATE_FORMATTER: Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, {

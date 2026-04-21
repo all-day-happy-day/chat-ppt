@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type RefObject } from "react";
+import { type ChangeEvent, type RefObject,useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
 import { signOut, verifySession } from "../api/auth";
 import { deleteProjectById, listProjectsByUserId, patchProjectById } from "../api/project";
 import { listTemplatesByUserId } from "../api/template";
 import { listUsers } from "../api/user";
-import { WorkspaceHeader } from "./project-workspace/WorkspaceHeader";
-import { ProjectDeleteDialog } from "./project-workspace/ProjectDeleteDialog";
-import { TemplateChangeWarningDialog } from "./project-workspace/TemplateChangeWarningDialog";
-import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { isSignInRequiredError } from "../lib/auth-errors";
+import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
 import type { GetProjectResponse } from "../types/project";
 import type { GetTemplateResponse } from "../types/template";
 import type { GetUserResponse } from "../types/user";
+
+import { ProjectDeleteDialog } from "./project-workspace/ProjectDeleteDialog";
+import { TemplateChangeWarningDialog } from "./project-workspace/TemplateChangeWarningDialog";
+import { WorkspaceHeader } from "./project-workspace/WorkspaceHeader";
 
 const USER_RESOLVE_ERROR: string = "We could not match your signed-in user to an account in this workspace.";
 

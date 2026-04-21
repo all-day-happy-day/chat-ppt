@@ -1,27 +1,28 @@
 import {
+  type ChangeEvent,
+  type Dispatch,
+  type FocusEvent,
   forwardRef,
+  Fragment,
+  type MouseEvent as ReactMouseEvent,
+  type ReactElement,
+  type SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
-  type Dispatch,
-  type FocusEvent,
-  type ReactElement,
-  type SetStateAction,
-  type MouseEvent as ReactMouseEvent,
-  Fragment,
 } from "react";
 import { createPortal } from "react-dom";
+
 import {
+  type BiblePhraseProbeResult,
+  type BibleVersionOption,
   fetchBibleBooks,
   fetchBibleChapters,
   fetchBibleVersions,
   probeBiblePhraseViaGetBible,
-  type BiblePhraseProbeResult,
-  type BibleVersionOption,
 } from "../api/bible";
 import type { BibleSlideRange, BibleVerseReference } from "../lib/bible-part-contents";
 import {
@@ -31,6 +32,7 @@ import {
 } from "../lib/bible-part-contents";
 import { generateUlid } from "../lib/generate-ulid";
 import { getProjectPartId, type TemplateLayoutChoice } from "../lib/project-parts-for-patch";
+
 import {
   BIBLE_EDIT_PHRASE_LAYOUT_PALETTE_MENU_ID,
   BIBLE_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID,

@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { type MouseEvent,useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 import { signOut, verifySession } from "../api/auth";
 import { listProjectsByUserId, patchProjectById } from "../api/project";
 import { listTemplateLayoutsByTemplateId, listTemplatesByUserId } from "../api/template";
 import { listUsers } from "../api/user";
-import { PART_EDIT_LAYOUT_PALETTE_MENU_ID, type ValuePlaceholderEditorRow } from "../components/PartEditPanel";
 import type { BiblePartSavePayload } from "../components/BiblePartEditForm";
+import { PART_EDIT_LAYOUT_PALETTE_MENU_ID, type ValuePlaceholderEditorRow } from "../components/PartEditPanel";
 import {
   BIBLE_EDIT_PHRASE_LAYOUT_PALETTE_MENU_ID,
   BIBLE_EDIT_TITLE_LAYOUT_PALETTE_MENU_ID,
@@ -14,12 +15,28 @@ import {
 } from "../components/TemplateLayoutGalleryPicker";
 import { isSignInRequiredError } from "../lib/auth-errors";
 import {
+  buildBiblePartContentsPayloadFromSlides,
+  readBibleTemplateLayoutIdsFromPart,
+} from "../lib/bible-part-contents";
+import type { LyricsSongRow } from "../lib/lyrics-part-contents";
+import {
+  createDefaultLyricsSongRow,
+  mergeLyricsSongRowsIntoExistingContents,
+  readLyricsSongRowsFromPart,
+  readLyricsTemplateLayoutIdsFromPart,
+} from "../lib/lyrics-part-contents";
+import { readLyricsPartSongsSnapshotFromLocation } from "../lib/lyrics-song-configure-location-state";
+import {
+  DUPLICATE_LYRIC_PART_NAME_USER_WARNING,
+  DUPLICATE_LYRIC_PART_NAME_WARNING_MS,
+  isDuplicateLyricPartNamePatchError,
+} from "../lib/parse-api-error";
+import {
   appendNewPartForPatch,
   applyPlainValueLayoutReconcileToNormalizedParts,
-  clampSortedInsertIndexForNewPart,
-  moveSortedPartToSortedIndex,
   buildValuePartContentsPayloadFromFieldRows,
   buildValuePartPlaceholderEditRows,
+  clampSortedInsertIndexForNewPart,
   computeSlideBoundsPxForLayoutIds,
   extractLayoutIdsForCanvasPreview,
   findTemplateLayoutEntryByLayoutId,
@@ -28,42 +45,27 @@ import {
   getPrimaryTemplateLayoutFieldLabel,
   getProjectPartId,
   listTemplateLayoutChoices,
+  moveSortedPartToSortedIndex,
   normalizePartsForPatchRequest,
   PART_KIND_FOR_CREATE,
+  type PartKindForCreate,
   removePartByIdForPatch,
   replacePartKindAtSortedIndex,
   replacePartPrimaryTemplateLayoutId,
   sortProjectPartsForDisplay,
-  type PartKindForCreate,
   type TemplateLayoutChoice,
 } from "../lib/project-parts-for-patch";
-import type { LyricsSongRow } from "../lib/lyrics-part-contents";
-import {
-  buildBiblePartContentsPayloadFromSlides,
-  readBibleTemplateLayoutIdsFromPart,
-} from "../lib/bible-part-contents";
-import {
-  createDefaultLyricsSongRow,
-  mergeLyricsSongRowsIntoExistingContents,
-  readLyricsSongRowsFromPart,
-  readLyricsTemplateLayoutIdsFromPart,
-} from "../lib/lyrics-part-contents";
-import { readLyricsPartSongsSnapshotFromLocation } from "../lib/lyrics-song-configure-location-state";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
-import {
-  DUPLICATE_LYRIC_PART_NAME_USER_WARNING,
-  DUPLICATE_LYRIC_PART_NAME_WARNING_MS,
-  isDuplicateLyricPartNamePatchError,
-} from "../lib/parse-api-error";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
-import type { GetLayoutResponse } from "../types/template-layout";
-import type { GetTemplateResponse } from "../types/template";
 import type { GetProjectResponse } from "../types/project";
+import type { GetTemplateResponse } from "../types/template";
+import type { GetLayoutResponse } from "../types/template-layout";
 import type { GetUserResponse } from "../types/user";
+
 import {
   ADD_PART_KIND_MENU_ID,
   ADD_PART_MENU_ANCHOR_SELECTOR,

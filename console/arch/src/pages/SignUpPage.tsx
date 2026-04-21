@@ -1,4 +1,5 @@
-import { useCallback, useState, type FormEvent } from "react";
+import { type FormEvent,useCallback, useState } from "react";
+
 import { signUp } from "../api/auth";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";

@@ -1,5 +1,5 @@
-import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
+import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import type { LyricsSongLine } from "../lib/lyrics-part-contents";
 import { readLyricsSongLines } from "../lib/lyrics-part-contents";
 import { attachChatPptHttpErrorToThrownError, messageFromFailedResponseBody } from "../lib/parse-api-error";

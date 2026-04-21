@@ -1,15 +1,16 @@
 import {
+  type ChangeEvent,
+  type FormEvent,
+  type ReactElement,
   useCallback,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ReactElement,
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
 import {
   deleteSongById,
   getLyricsBySongId,
@@ -20,12 +21,12 @@ import {
 import { ConfirmationCodeDeleteDialog } from "../components/ConfirmationCodeDeleteDialog";
 import { LyricsSongPartsEditor } from "../components/LyricsSongPartsEditor";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
-import type { LyricsSongLine } from "../lib/lyrics-part-contents";
-import { ensureBlankLeadLyricsLine, normalizeEditorLyricsLines } from "../lib/lyrics-part-contents";
-import { readLibrarySongMetaFromSession, writeLibrarySongMetaToSession } from "../lib/library-song-session";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { isSignInRequiredError } from "../lib/auth-errors";
+import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
+import { readLibrarySongMetaFromSession, writeLibrarySongMetaToSession } from "../lib/library-song-session";
+import type { LyricsSongLine } from "../lib/lyrics-part-contents";
+import { ensureBlankLeadLyricsLine, normalizeEditorLyricsLines } from "../lib/lyrics-part-contents";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";

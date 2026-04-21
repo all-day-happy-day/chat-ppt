@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
+
 import { verifySession } from "./api/auth";
+import { consumeSessionExpiredRedirect } from "./lib/session-expired-redirect";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SignUpPage } from "./pages/SignUpPage";
-import { consumeSessionExpiredRedirect } from "./lib/session-expired-redirect";
 
 export type AppScreen = "home" | "signin" | "signup" | "projects";
 

@@ -1,15 +1,16 @@
 import { createPortal } from "react-dom";
-import type { ReactElement, RefObject } from "react";
+
 import { BiblePartEditForm, type BiblePartSavePayload } from "../../components/BiblePartEditForm";
 import { LyricsPartEditForm } from "../../components/LyricsPartEditForm";
 import { PartEditPanel, type ValuePlaceholderEditorRow } from "../../components/PartEditPanel";
 import { TemplateLayoutThumbnail } from "../../components/TemplateLayoutThumbnail";
-import { getPrimaryLayoutIdFromPart, getProjectPartId } from "../../lib/project-parts-for-patch";
-import type { LyricsSongRow } from "../../lib/lyrics-part-contents";
 import { buildBiblePartThumbnailCaption } from "../../lib/bible-part-contents";
+import type { LyricsSongRow } from "../../lib/lyrics-part-contents";
 import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
-import type { GetLayoutResponse } from "../../types/template-layout";
 import type { TemplateLayoutChoice } from "../../lib/project-parts-for-patch";
+import { getPrimaryLayoutIdFromPart, getProjectPartId } from "../../lib/project-parts-for-patch";
+import type { GetLayoutResponse } from "../../types/template-layout";
+
 import {
   ADD_PART_KIND_OPTION_CLASS,
   ADD_PART_KIND_OPTIONS,
@@ -20,6 +21,8 @@ import {
   PART_KIND_CHANGE_MENU_ID,
 } from "./constants";
 import type { AddPartMenuAnchor } from "./types";
+
+import type { ReactElement, RefObject } from "react";
 
 export type WorkspaceCanvasEditorColumnProps = {
   canvasPreviewSizerRef: RefObject<HTMLDivElement | null>;

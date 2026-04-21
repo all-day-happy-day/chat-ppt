@@ -1,9 +1,11 @@
-import type { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { AccountMenu } from "../../components/AccountMenu";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../../lib/app-display-name";
 import type { ThemePreference } from "../../lib/theme";
+
+import type { ReactElement } from "react";
 
 export type WorkspaceHeaderProps = {
   principal: string | null;

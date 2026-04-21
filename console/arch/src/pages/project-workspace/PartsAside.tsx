@@ -1,7 +1,8 @@
-import { createPortal } from "react-dom";
-import type { DragEvent, MouseEvent, ReactElement, RefObject } from "react";
 import { Fragment, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { TemplateLayoutThumbnail } from "../../components/TemplateLayoutThumbnail";
+import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
 import {
   findTemplateLayoutEntryByLayoutId,
   getPartTypeLabel,
@@ -10,8 +11,8 @@ import {
   getProjectPartStableKey,
   PART_KIND_FOR_CREATE,
 } from "../../lib/project-parts-for-patch";
-import { buildLyricsPartThumbnailCaption } from "../../lib/lyrics-part-contents";
 import type { GetLayoutResponse } from "../../types/template-layout";
+
 import {
   ADD_PART_KIND_MENU_ID,
   ADD_PART_KIND_OPTION_CLASS,
@@ -19,9 +20,11 @@ import {
   type AddPartKindOption,
   PART_KIND_CHANGE_MENU_ID,
 } from "./constants";
-import type { AddPartMenuAnchor } from "./types";
 import { PartDeleteIcon } from "./icons";
+import type { AddPartMenuAnchor } from "./types";
 import { readProjectPartType } from "./utils";
+
+import type { DragEvent, MouseEvent, ReactElement, RefObject } from "react";
 
 const PART_SORTED_DRAG_PREFIX: string = "chatPptPartSortedIndex=";
 

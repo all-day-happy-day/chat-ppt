@@ -1,5 +1,5 @@
-import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
+import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { attachChatPptHttpErrorToThrownError, messageFromFailedResponseBody } from "../lib/parse-api-error";
 import { readFetchErrorMessage } from "../lib/read-fetch-error";
 import type { CreateProjectRequest, CreateProjectResponse, GetProjectResponse } from "../types/project";

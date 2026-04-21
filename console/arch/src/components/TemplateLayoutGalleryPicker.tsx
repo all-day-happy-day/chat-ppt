@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode,useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
 import type { TemplateLayoutChoice } from "../lib/project-parts-for-patch";
+
 import { TemplateLayoutThumbnail } from "./TemplateLayoutThumbnail";
 
 /** Plain/Value part editor — keep id stable for wheel trap and aria-controls. */

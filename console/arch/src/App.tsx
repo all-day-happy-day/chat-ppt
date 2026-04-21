@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AppRoot } from "./AppRoot";
+
 import { CreateProjectPage } from "./pages/CreateProjectPage";
 import { ManageUsersPage } from "./pages/ManageUsersPage";
 import { ProjectSettingsPage } from "./pages/ProjectSettingsPage";
@@ -10,6 +10,7 @@ import { SongNewPage } from "./pages/SongNewPage";
 import { TemplateEditPage } from "./pages/TemplateEditPage";
 import { TemplateNewPage } from "./pages/TemplateNewPage";
 import { UserSettingsPage } from "./pages/UserSettingsPage";
+import { AppRoot } from "./AppRoot";
 
 const App = () => {
   return (

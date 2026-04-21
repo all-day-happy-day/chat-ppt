@@ -1,6 +1,8 @@
-import type { ReactElement, RefObject } from "react";
 import { Link } from "react-router-dom";
+
 import type { GetProjectResponse } from "../../types/project";
+
+import type { ReactElement, RefObject } from "react";
 
 export type WorkspaceBackNavProps = {
   navRef: RefObject<HTMLElement | null>;

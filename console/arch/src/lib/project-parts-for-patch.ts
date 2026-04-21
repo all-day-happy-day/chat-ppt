@@ -1,6 +1,7 @@
-import { createDefaultLyricsPartContentsPayload } from "./lyrics-part-contents";
-import { generateUlid } from "./generate-ulid";
 import type { GetLayoutResponse, TemplateSlideSizeEmu } from "../types/template-layout";
+
+import { generateUlid } from "./generate-ulid";
+import { createDefaultLyricsPartContentsPayload } from "./lyrics-part-contents";
 
 const INVALID_PART_MESSAGE: string = "This project contains a part the editor cannot send back to the server yet.";
 

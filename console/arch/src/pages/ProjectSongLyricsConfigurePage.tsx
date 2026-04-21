@@ -1,14 +1,15 @@
 import {
+  type ChangeEvent,
+  type ReactElement,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
-  type ReactElement,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+
 import { signOut, verifySession } from "../api/auth";
 import { listProjectsByUserId, patchProjectById } from "../api/project";
 import { resolveLyricsLinesForConfigure, syncSongLibraryFromLyricsConfigureSave } from "../api/song";
@@ -26,36 +27,37 @@ import {
   shiftLyricsPartSequenceForBlankLeadInsert,
 } from "../lib/lyrics-part-contents";
 import {
-  getProjectPartId,
-  normalizePartsForPatchRequest,
-  PART_KIND_FOR_CREATE,
-  sortProjectPartsForDisplay,
-} from "../lib/project-parts-for-patch";
-import {
   LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY,
-  type LyricsSongConfigureOverlay,
   lyricSongHasTitleForConfigure,
+  type LyricsSongConfigureOverlay,
   readLyricsPartSongsSnapshotFromLocation,
   readLyricsSongConfigureOverlay,
   withoutLyricsPartSongsSnapshotForLocation,
 } from "../lib/lyrics-song-configure-location-state";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import {
   DUPLICATE_LYRIC_PART_NAME_USER_WARNING,
   DUPLICATE_LYRIC_PART_NAME_WARNING_MS,
   isDuplicateLyricPartNamePatchError,
 } from "../lib/parse-api-error";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import {
+  getProjectPartId,
+  normalizePartsForPatchRequest,
+  PART_KIND_FOR_CREATE,
+  sortProjectPartsForDisplay,
+} from "../lib/project-parts-for-patch";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
 import type { GetProjectResponse } from "../types/project";
 import type { GetUserResponse } from "../types/user";
+
+import { WORKSPACE_LOAD_NETWORK_FALLBACK } from "./project-workspace/constants";
 import { PartNotifications } from "./project-workspace/PartNotifications";
 import { readProjectPartType } from "./project-workspace/utils";
 import { WorkspaceHeader } from "./project-workspace/WorkspaceHeader";
-import { WORKSPACE_LOAD_NETWORK_FALLBACK } from "./project-workspace/constants";
 
 const PAGE_TITLE: string = "Song Parts";
 

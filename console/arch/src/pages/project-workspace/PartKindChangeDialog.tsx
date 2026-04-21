@@ -1,6 +1,7 @@
-import type { ReactElement, RefObject } from "react";
 import { PART_KIND_LOSE_FILLED_DATA_MESSAGE, PART_KIND_PLAIN_VALUE_CROSSOVER_MESSAGE } from "./constants";
 import type { PendingPartKindChangeConfirm } from "./types";
+
+import type { ReactElement, RefObject } from "react";
 
 export type PartKindChangeDialogProps = {
   dialogRef: RefObject<HTMLDialogElement | null>;

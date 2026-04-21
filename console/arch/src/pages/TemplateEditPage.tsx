@@ -1,25 +1,26 @@
 import {
+  type ChangeEvent,
+  type FormEvent,
+  type ReactElement,
   useCallback,
   useEffect,
   useId,
   useRef,
   useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ReactElement,
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
 import { verifySession } from "../api/auth";
 import { changeTemplateName, deleteTemplateById, listTemplatesByUserId } from "../api/template";
 import { listUsers } from "../api/user";
 import { ConfirmationCodeDeleteDialog } from "../components/ConfirmationCodeDeleteDialog";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { isSignInRequiredError } from "../lib/auth-errors";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { generateDestructiveConfirmCode } from "../lib/destructive-confirm-code";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";

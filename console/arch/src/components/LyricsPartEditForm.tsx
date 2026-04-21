@@ -1,9 +1,11 @@
-import { forwardRef, useCallback, type ChangeEvent } from "react";
+import { type ChangeEvent,forwardRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+
 import type { LyricsSongRow } from "../lib/lyrics-part-contents";
 import { createDefaultLyricsSongRow } from "../lib/lyrics-part-contents";
 import { LYRICS_PART_SONGS_SNAPSHOT_STATE_KEY } from "../lib/lyrics-song-configure-location-state";
 import type { TemplateLayoutChoice } from "../lib/project-parts-for-patch";
+
 import { LyricsSongTitleField } from "./LyricsSongTitleField";
 import {
   LYRICS_EDIT_LYRICS_LAYOUT_PALETTE_MENU_ID,

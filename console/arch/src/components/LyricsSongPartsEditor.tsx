@@ -1,14 +1,15 @@
 import {
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+  type ReactElement,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  type ChangeEvent,
-  type DragEvent,
-  type KeyboardEvent,
-  type ReactElement,
 } from "react";
+
 import type { LyricsSongLine } from "../lib/lyrics-part-contents";
 import {
   LYRIC_BLANK_PART_NAME,

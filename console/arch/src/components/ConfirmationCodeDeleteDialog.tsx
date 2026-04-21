@@ -1,5 +1,6 @@
-import type { ChangeEvent, ReactElement, RefObject } from "react";
 import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
+
+import type { ChangeEvent, ReactElement, RefObject } from "react";
 
 export type ConfirmationCodeDeleteDialogProps = {
   dialogRef: RefObject<HTMLDialogElement | null>;

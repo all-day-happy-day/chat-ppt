@@ -1,8 +1,8 @@
-import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { getApiBaseUrl } from "../lib/api-base";
+import { SIGN_IN_REQUIRED_MESSAGE } from "../lib/auth-errors";
 import { readFetchErrorMessage } from "../lib/read-fetch-error";
-import type { GetLayoutResponse, TemplateSlideSizeEmu } from "../types/template-layout";
 import type { GetTemplateResponse } from "../types/template";
+import type { GetLayoutResponse, TemplateSlideSizeEmu } from "../types/template-layout";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);

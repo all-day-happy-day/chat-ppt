@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useId, useState, type FormEvent, type ReactElement } from "react";
+import { type FormEvent, type ReactElement,useCallback, useEffect, useId, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import { verifySession } from "../api/auth";
 import { readTemplateFromUpload } from "../api/template";
 import { listUsers } from "../api/user";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
 import { isSignInRequiredError } from "../lib/auth-errors";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";

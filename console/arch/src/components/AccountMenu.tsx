@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+
 import { getPrincipalDisplayInitial } from "../lib/principal-display-initial";
 
 const MENU_WIDTH_CLASS: string = "w-[min(100vw-2.5rem,248px)]";

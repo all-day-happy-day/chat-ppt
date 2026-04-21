@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { type ReactElement,useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import {
+  type LayoutThumbnailShapeRect,
   listLayoutThumbnailShapeRects,
   readSlideBackgroundSolidFillFromLayoutEntry,
-  type LayoutThumbnailShapeRect,
 } from "../lib/project-parts-for-patch";
 import type { GetLayoutResponse } from "../types/template-layout";
 

@@ -1,6 +1,6 @@
+import { PART_KIND_FOR_CREATE, type PartKindForCreate } from "../../lib/project-parts-for-patch";
 import type { GetLayoutResponse } from "../../types/template-layout";
 import type { GetUserResponse } from "../../types/user";
-import { PART_KIND_FOR_CREATE, type PartKindForCreate } from "../../lib/project-parts-for-patch";
 
 export const INFO_DATE_FORMATTER: Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",

@@ -1,23 +1,24 @@
 import {
+  type ChangeEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
-  type ChangeEvent,
-  type RefObject,
 } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { verifySession } from "../api/auth";
 import { listUsers, patchUserRoleById } from "../api/user";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
-import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { isSignInRequiredError } from "../lib/auth-errors";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";

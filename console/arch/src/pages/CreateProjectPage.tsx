@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { type ChangeEvent, type FormEvent,useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { verifySession } from "../api/auth";
 import { createProject } from "../api/project";
 import { listTemplatesByUserId, readTemplateFromUpload } from "../api/template";
 import { listUsers } from "../api/user";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
-import { AUTH_FIELD_CLASS, AUTH_SELECT_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { isSignInRequiredError } from "../lib/auth-errors";
-import { findUserIdByPrincipal } from "../lib/resolve-user-id";
-import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { AUTH_FIELD_CLASS, AUTH_SELECT_FIELD_CLASS } from "../lib/auth-screen-classes";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
+import { readableClientFetchFailureMessage } from "../lib/read-fetch-error";
+import { findUserIdByPrincipal } from "../lib/resolve-user-id";
 import { setSessionExpiredRedirect } from "../lib/session-expired-redirect";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";

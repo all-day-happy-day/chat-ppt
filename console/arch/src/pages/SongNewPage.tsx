@@ -1,9 +1,10 @@
-import { useCallback, useId, useState, type FormEvent, type ReactElement } from "react";
+import { type FormEvent, type ReactElement,useCallback, useId, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import { scrapeLyricsCreatingSong } from "../api/song";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { writeLibrarySongMetaToSession } from "../lib/library-song-session";
 import { APP_DISPLAY_NAME } from "../lib/app-display-name";
+import { writeLibrarySongMetaToSession } from "../lib/library-song-session";
 import { readAppliedThemeFromDocument } from "../lib/read-applied-theme";
 import type { ThemePreference } from "../lib/theme";
 import { toggleStoredTheme } from "../lib/theme";
