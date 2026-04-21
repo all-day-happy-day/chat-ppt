@@ -38,7 +38,10 @@ import {
   type TemplateLayoutChoice,
 } from "../lib/project-parts-for-patch";
 import type { LyricsSongRow } from "../lib/lyrics-part-contents";
-import { buildBiblePartContentsPayloadFromSlides, readBibleTemplateLayoutIdsFromPart } from "../lib/bible-part-contents";
+import {
+  buildBiblePartContentsPayloadFromSlides,
+  readBibleTemplateLayoutIdsFromPart,
+} from "../lib/bible-part-contents";
 import {
   createDefaultLyricsSongRow,
   mergeLyricsSongRowsIntoExistingContents,
@@ -1665,13 +1668,7 @@ export const ProjectWorkspacePage = () => {
         }
       })();
     },
-    [
-      project,
-      selectedPart,
-      partEditBiblePhraseLayoutId,
-      partEditBibleTitleLayoutId,
-      handleSessionExpiredNavigation,
-    ]
+    [project, selectedPart, partEditBiblePhraseLayoutId, partEditBibleTitleLayoutId, handleSessionExpiredNavigation]
   );
 
   const partEditHeading: string =

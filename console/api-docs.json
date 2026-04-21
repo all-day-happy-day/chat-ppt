@@ -7,7 +7,9 @@
   "paths": {
     "/auth/signin": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Signin",
         "operationId": "signin_auth_signin_post",
         "requestBody": {
@@ -46,8 +48,10 @@
     },
     "/auth/signout": {
       "post": {
-        "tags": ["Auth"],
-        "summary": "Sign out",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Signout",
         "operationId": "signout_auth_signout_post",
         "parameters": [
           {
@@ -109,7 +113,9 @@
     },
     "/auth/signup": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Signup",
         "operationId": "signup_auth_signup_post",
         "requestBody": {
@@ -148,7 +154,9 @@
     },
     "/auth/verify": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Verify Token",
         "operationId": "verify_token_auth_verify_get",
         "parameters": [
@@ -195,7 +203,9 @@
     },
     "/auth/verify-password": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Verify Password",
         "operationId": "verify_password_auth_verify_password_post",
         "requestBody": {
@@ -232,7 +242,9 @@
     },
     "/auth/refresh": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Reissue Tokens",
         "operationId": "reissue_tokens_auth_refresh_post",
         "parameters": [
@@ -275,36 +287,61 @@
         }
       }
     },
-    "/bible": {
+    "/bible/{version}/{book}/{chapter}/{verse}": {
       "get": {
-        "tags": ["Bible"],
-        "summary": "Get Bible Phrases",
-        "operationId": "get_bible_phrases_bible_get",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "items": {
-                  "$ref": "#/components/schemas/GetBiblePhraseRequest"
-                },
-                "type": "array",
-                "title": "Request Model"
-              }
+        "tags": [
+          "Bible"
+        ],
+        "summary": "Get Bibile Phrases",
+        "operationId": "get_bibile_phrases_bible__version___book___chapter___verse__get",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AvailableBibleVersions"
             }
           },
-          "required": true
-        },
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Book"
+            }
+          },
+          {
+            "name": "chapter",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chapter"
+            }
+          },
+          {
+            "name": "verse",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Verse"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/GetBiblePhraseResponse"
                   },
-                  "type": "array",
-                  "title": "Response Get Bible Phrases Bible Get"
+                  "title": "Response Get Bibile Phrases Bible  Version   Book   Chapter   Verse  Get"
                 }
               }
             }
@@ -322,9 +359,182 @@
         }
       }
     },
+    "/bible/books/{version}": {
+      "get": {
+        "tags": [
+          "Bible"
+        ],
+        "summary": "Get Books",
+        "operationId": "get_books_bible_books__version__get",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AvailableBibleVersions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBooksResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bible/chapters/{version}/{book}": {
+      "get": {
+        "tags": [
+          "Bible"
+        ],
+        "summary": "Get Chapters",
+        "operationId": "get_chapters_bible_chapters__version___book__get",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AvailableBibleVersions"
+            }
+          },
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Book"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChaptersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bible/verses/{version}/{book}/{chapter}": {
+      "get": {
+        "tags": [
+          "Bible"
+        ],
+        "summary": "Get Verses",
+        "operationId": "get_verses_bible_verses__version___book___chapter__get",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AvailableBibleVersions"
+            }
+          },
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Book"
+            }
+          },
+          {
+            "name": "chapter",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chapter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVersesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bible/versions": {
+      "get": {
+        "tags": [
+          "Bible"
+        ],
+        "summary": "Get Versions",
+        "operationId": "get_versions_bible_versions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVersionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/powerpoint/template/read": {
       "post": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Read Template",
         "operationId": "read_template_powerpoint_template_read_post",
         "requestBody": {
@@ -363,7 +573,9 @@
     },
     "/powerpoint/template/update": {
       "patch": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Update Template",
         "operationId": "update_template_powerpoint_template_update_patch",
         "requestBody": {
@@ -402,7 +614,9 @@
     },
     "/powerpoint/template/name": {
       "patch": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Change Template Name",
         "operationId": "change_template_name_powerpoint_template_name_patch",
         "requestBody": {
@@ -441,7 +655,9 @@
     },
     "/powerpoint/template/{template_id}": {
       "delete": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Delete Template",
         "operationId": "delete_template_powerpoint_template__template_id__delete",
         "parameters": [
@@ -487,7 +703,9 @@
     },
     "/powerpoint/template/list/{user_id}": {
       "get": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Get Template List",
         "operationId": "get_template_list_powerpoint_template_list__user_id__get",
         "parameters": [
@@ -544,7 +762,9 @@
     },
     "/powerpoint/template/layouts/{template_id}": {
       "get": {
-        "tags": ["Powerpoint"],
+        "tags": [
+          "Powerpoint"
+        ],
         "summary": "Get Layouts",
         "operationId": "get_layouts_powerpoint_template_layouts__template_id__get",
         "parameters": [
@@ -601,7 +821,9 @@
     },
     "/project/{user_id}": {
       "get": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Get Projects",
         "operationId": "get_projects_project__user_id__get",
         "parameters": [
@@ -658,7 +880,9 @@
     },
     "/project": {
       "post": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Create Project",
         "operationId": "create_project_project_post",
         "requestBody": {
@@ -697,7 +921,9 @@
     },
     "/project/{project_id}": {
       "patch": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Patch Project",
         "operationId": "patch_project_project__project_id__patch",
         "parameters": [
@@ -758,7 +984,9 @@
         }
       },
       "delete": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Delete Project",
         "operationId": "delete_project_project__project_id__delete",
         "parameters": [
@@ -804,7 +1032,9 @@
     },
     "/project/container/{project_id}": {
       "get": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Get Project Containers",
         "operationId": "get_project_containers_project_container__project_id__get",
         "parameters": [
@@ -861,7 +1091,9 @@
     },
     "/project/container": {
       "post": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Create Project Container",
         "operationId": "create_project_container_project_container_post",
         "requestBody": {
@@ -900,7 +1132,9 @@
     },
     "/project/container/{project_container_id}": {
       "patch": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Patch Project Container",
         "operationId": "patch_project_container_project_container__project_container_id__patch",
         "parameters": [
@@ -961,7 +1195,9 @@
         }
       },
       "delete": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Delete Project Container",
         "operationId": "delete_project_container_project_container__project_container_id__delete",
         "parameters": [
@@ -1007,7 +1243,9 @@
     },
     "/project/container/export/{project_container_id}": {
       "post": {
-        "tags": ["Project"],
+        "tags": [
+          "Project"
+        ],
         "summary": "Export Ppt",
         "operationId": "export_ppt_project_container_export__project_container_id__post",
         "parameters": [
@@ -1070,7 +1308,9 @@
     },
     "/song/list-songs": {
       "get": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "List Songs",
         "operationId": "list_songs_song_list_songs_get",
         "parameters": [
@@ -1110,7 +1350,9 @@
     },
     "/song/list-all-songs": {
       "get": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "List All Songs",
         "operationId": "list_all_songs_song_list_all_songs_get",
         "responses": {
@@ -1129,7 +1371,9 @@
     },
     "/song/lyrics/scrape": {
       "get": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "Scrape Lyrics",
         "operationId": "scrape_lyrics_song_lyrics_scrape_get",
         "parameters": [
@@ -1195,7 +1439,9 @@
     },
     "/song/lyrics/get/{song_id}": {
       "get": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "Get Lyrics",
         "operationId": "get_lyrics_song_lyrics_get__song_id__get",
         "parameters": [
@@ -1248,7 +1494,9 @@
     },
     "/song/{song_id}": {
       "patch": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "Patch Song",
         "operationId": "patch_song_song__song_id__patch",
         "parameters": [
@@ -1309,7 +1557,9 @@
         }
       },
       "delete": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "Delete Song",
         "operationId": "delete_song_song__song_id__delete",
         "parameters": [
@@ -1355,7 +1605,9 @@
     },
     "/song/lyrics/{song_id}": {
       "patch": {
-        "tags": ["Lyrics"],
+        "tags": [
+          "Lyrics"
+        ],
         "summary": "Patch Lyrics",
         "operationId": "patch_lyrics_song_lyrics__song_id__patch",
         "parameters": [
@@ -1416,69 +1668,11 @@
         }
       }
     },
-    "/user/": {
-      "get": {
-        "tags": ["User"],
-        "summary": "Get Users",
-        "operationId": "get_users_user__get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/GetUserResponse"
-                  },
-                  "type": "array",
-                  "title": "Response Get Users User  Get"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": ["User"],
-        "summary": "Create User",
-        "operationId": "create_user_user__post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateUserResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/user/{user_id}": {
       "delete": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Delete User",
         "operationId": "delete_user_user__user_id__delete",
         "parameters": [
@@ -1522,7 +1716,9 @@
         }
       },
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Get User",
         "operationId": "get_user_user__user_id__get",
         "parameters": [
@@ -1546,6 +1742,22 @@
                 }
               ],
               "title": "User Id"
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Access Token"
             }
           }
         ],
@@ -1573,7 +1785,9 @@
         }
       },
       "patch": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Patch User",
         "operationId": "patch_user_user__user_id__patch",
         "parameters": [
@@ -1597,6 +1811,22 @@
                 }
               ],
               "title": "User Id"
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Access Token"
             }
           }
         ],
@@ -1633,13 +1863,129 @@
           }
         }
       }
+    },
+    "/user/": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get Users",
+        "operationId": "get_users_user__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GetUserResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Users User  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/role/{user_id}": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Patch User Role",
+        "operationId": "patch_user_role_user_role__user_id__patch",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 26,
+                  "maxLength": 26,
+                  "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+                },
+                {
+                  "type": "string",
+                  "contentMediaType": "application/octet-stream",
+                  "minLength": 16,
+                  "maxLength": 16
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Access Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserRoleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "AvailableBibleVersions": {
         "type": "string",
-        "enum": ["ESV", "KJV", "NIV", "NLT", "개역개정", "개역한글", "새번역", "공동번역", "현대인의 성경"],
+        "enum": [
+          "ESV",
+          "KJV",
+          "NIV",
+          "NLT",
+          "개역개정",
+          "개역한글",
+          "새번역",
+          "공동번역",
+          "현대인의 성경"
+        ],
         "title": "AvailableBibleVersions"
       },
       "BibleContent": {
@@ -1661,7 +2007,12 @@
           }
         },
         "type": "object",
-        "required": ["version", "book", "chapter", "verse"],
+        "required": [
+          "version",
+          "book",
+          "chapter",
+          "verse"
+        ],
         "title": "BibleContent"
       },
       "BibleContentRange-Input": {
@@ -1678,10 +2029,21 @@
                 "type": "null"
               }
             ]
+          },
+          "slide_type": {
+            "type": "string",
+            "enum": [
+              "phrase",
+              "title"
+            ],
+            "title": "Slide Type",
+            "default": "phrase"
           }
         },
         "type": "object",
-        "required": ["start"],
+        "required": [
+          "start"
+        ],
         "title": "BibleContentRange"
       },
       "BibleContentRange-Output": {
@@ -1698,10 +2060,21 @@
                 "type": "null"
               }
             ]
+          },
+          "slide_type": {
+            "type": "string",
+            "enum": [
+              "phrase",
+              "title"
+            ],
+            "title": "Slide Type",
+            "default": "phrase"
           }
         },
         "type": "object",
-        "required": ["start"],
+        "required": [
+          "start"
+        ],
         "title": "BibleContentRange"
       },
       "BibleContents-Input": {
@@ -1721,7 +2094,9 @@
           }
         },
         "type": "object",
-        "required": ["contents"],
+        "required": [
+          "contents"
+        ],
         "title": "BibleContents"
       },
       "BibleContents-Output": {
@@ -1741,7 +2116,9 @@
           }
         },
         "type": "object",
-        "required": ["contents"],
+        "required": [
+          "contents"
+        ],
         "title": "BibleContents"
       },
       "BiblePart": {
@@ -1767,7 +2144,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order",
             "description": "Index number starting from 0."
           },
@@ -1804,7 +2181,11 @@
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents"],
+        "required": [
+          "project_id",
+          "order",
+          "contents"
+        ],
         "title": "BiblePart"
       },
       "BiblePartRequest": {
@@ -1828,7 +2209,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order"
           },
           "type": {
@@ -1882,7 +2263,11 @@
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents"],
+        "required": [
+          "id",
+          "order",
+          "contents"
+        ],
         "title": "BiblePartRequest"
       },
       "Body_read_template_powerpoint_template_read_post": {
@@ -1922,7 +2307,10 @@
           }
         },
         "type": "object",
-        "required": ["file", "user_id"],
+        "required": [
+          "file",
+          "user_id"
+        ],
         "title": "Body_read_template_powerpoint_template_read_post"
       },
       "Body_update_template_powerpoint_template_update_patch": {
@@ -1968,7 +2356,11 @@
           }
         },
         "type": "object",
-        "required": ["file", "user_id", "template_id"],
+        "required": [
+          "file",
+          "user_id",
+          "template_id"
+        ],
         "title": "Body_update_template_powerpoint_template_update_patch"
       },
       "ChangeTemplateNameRequest": {
@@ -1996,7 +2388,10 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "new_name"],
+        "required": [
+          "template_id",
+          "new_name"
+        ],
         "title": "ChangeTemplateNameRequest"
       },
       "ChangeTemplateNameResponse": {
@@ -2025,14 +2420,23 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "user_id", "name", "created_at", "updated_at"],
+        "required": [
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
         "title": "ChangeTemplateNameResponse"
       },
       "ColorConfig": {
         "properties": {
           "color_type": {
             "type": "string",
-            "enum": ["solid", "none"],
+            "enum": [
+              "solid",
+              "none"
+            ],
             "title": "Color Type"
           },
           "color": {
@@ -2050,8 +2454,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1,
-                "minimum": 0
+                "maximum": 1.0,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -2061,7 +2465,11 @@
           }
         },
         "type": "object",
-        "required": ["color_type", "color", "alpha"],
+        "required": [
+          "color_type",
+          "color",
+          "alpha"
+        ],
         "title": "ColorConfig"
       },
       "CreateProjectContainerRequest": {
@@ -2106,7 +2514,11 @@
           }
         },
         "type": "object",
-        "required": ["project_id", "user_id", "container_name"],
+        "required": [
+          "project_id",
+          "user_id",
+          "container_name"
+        ],
         "title": "CreateProjectContainerRequest"
       },
       "CreateProjectContainerResponse": {
@@ -2159,7 +2571,15 @@
           }
         },
         "type": "object",
-        "required": ["id", "project_id", "container_name", "created_at", "updated_at", "completed", "parts"],
+        "required": [
+          "id",
+          "project_id",
+          "container_name",
+          "created_at",
+          "updated_at",
+          "completed",
+          "parts"
+        ],
         "title": "CreateProjectContainerResponse"
       },
       "CreateProjectRequest": {
@@ -2204,7 +2624,11 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "user_id", "name"],
+        "required": [
+          "template_id",
+          "user_id",
+          "name"
+        ],
         "title": "CreateProjectRequest"
       },
       "CreateProjectResponse": {
@@ -2257,46 +2681,16 @@
           }
         },
         "type": "object",
-        "required": ["id", "template_id", "user_id", "name", "created_at", "updated_at", "parts"],
+        "required": [
+          "id",
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at",
+          "parts"
+        ],
         "title": "CreateProjectResponse"
-      },
-      "CreateUserRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "role": {
-            "$ref": "#/components/schemas/Role"
-          }
-        },
-        "type": "object",
-        "required": ["email", "username", "password", "role"],
-        "title": "CreateUserRequest"
-      },
-      "CreateUserResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          }
-        },
-        "type": "object",
-        "required": ["id", "username"],
-        "title": "CreateUserResponse"
       },
       "ExportPPTRequest": {
         "properties": {
@@ -2306,7 +2700,9 @@
           }
         },
         "type": "object",
-        "required": ["save_path"],
+        "required": [
+          "save_path"
+        ],
         "title": "ExportPPTRequest"
       },
       "ExportPPTResponse": {
@@ -2318,30 +2714,10 @@
           }
         },
         "type": "object",
-        "required": ["path"],
+        "required": [
+          "path"
+        ],
         "title": "ExportPPTResponse"
-      },
-      "GetBiblePhraseRequest": {
-        "properties": {
-          "version": {
-            "$ref": "#/components/schemas/AvailableBibleVersions"
-          },
-          "book": {
-            "type": "string",
-            "title": "Book"
-          },
-          "chapter": {
-            "type": "integer",
-            "title": "Chapter"
-          },
-          "verse": {
-            "type": "integer",
-            "title": "Verse"
-          }
-        },
-        "type": "object",
-        "required": ["version", "book", "chapter", "verse"],
-        "title": "GetBiblePhraseRequest"
       },
       "GetBiblePhraseResponse": {
         "properties": {
@@ -2367,8 +2743,46 @@
           }
         },
         "type": "object",
-        "required": ["version", "book", "chapter", "verse", "phrase"],
+        "required": [
+          "version",
+          "book",
+          "chapter",
+          "verse",
+          "phrase"
+        ],
         "title": "GetBiblePhraseResponse"
+      },
+      "GetBooksResponse": {
+        "properties": {
+          "books": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Books"
+          }
+        },
+        "type": "object",
+        "required": [
+          "books"
+        ],
+        "title": "GetBooksResponse"
+      },
+      "GetChaptersResponse": {
+        "properties": {
+          "chapters": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Chapters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chapters"
+        ],
+        "title": "GetChaptersResponse"
       },
       "GetLayoutResponse": {
         "properties": {
@@ -2384,16 +2798,19 @@
             "title": "Shapes"
           },
           "slide_size": {
-            "$ref": "#/components/schemas/Size",
-            "title": "Slide Size"
+            "$ref": "#/components/schemas/Size"
           },
           "background_color": {
-            "$ref": "#/components/schemas/ColorConfig",
-            "title": "Background Color"
+            "$ref": "#/components/schemas/ColorConfig"
           }
         },
         "type": "object",
-        "required": ["name", "shapes", "slide_size", "background_color"],
+        "required": [
+          "name",
+          "shapes",
+          "slide_size",
+          "background_color"
+        ],
         "title": "GetLayoutResponse"
       },
       "GetLyricsResponse": {
@@ -2406,7 +2823,10 @@
           }
         },
         "type": "object",
-        "required": ["song", "lyrics"],
+        "required": [
+          "song",
+          "lyrics"
+        ],
         "title": "GetLyricsResponse"
       },
       "GetProjectContainerResponse": {
@@ -2459,7 +2879,15 @@
           }
         },
         "type": "object",
-        "required": ["id", "project_id", "container_name", "created_at", "updated_at", "completed", "parts"],
+        "required": [
+          "id",
+          "project_id",
+          "container_name",
+          "created_at",
+          "updated_at",
+          "completed",
+          "parts"
+        ],
         "title": "GetProjectContainerResponse"
       },
       "GetProjectResponse": {
@@ -2512,7 +2940,15 @@
           }
         },
         "type": "object",
-        "required": ["id", "template_id", "user_id", "name", "created_at", "updated_at", "parts"],
+        "required": [
+          "id",
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at",
+          "parts"
+        ],
         "title": "GetProjectResponse"
       },
       "GetSongsResponse": {
@@ -2526,7 +2962,9 @@
           }
         },
         "type": "object",
-        "required": ["songs"],
+        "required": [
+          "songs"
+        ],
         "title": "GetSongsResponse"
       },
       "GetTemplateResponse": {
@@ -2555,7 +2993,13 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "user_id", "name", "created_at", "updated_at"],
+        "required": [
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
         "title": "GetTemplateResponse"
       },
       "GetUserResponse": {
@@ -2567,11 +3011,73 @@
           "username": {
             "type": "string",
             "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_sign_in": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sign In"
           }
         },
         "type": "object",
-        "required": ["id", "username"],
+        "required": [
+          "id",
+          "username",
+          "email",
+          "role",
+          "created_at"
+        ],
         "title": "GetUserResponse"
+      },
+      "GetVersesResponse": {
+        "properties": {
+          "verses": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Verses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verses"
+        ],
+        "title": "GetVersesResponse"
+      },
+      "GetVersionsResponse": {
+        "properties": {
+          "versions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Versions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "versions"
+        ],
+        "title": "GetVersionsResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -2601,7 +3107,10 @@
           }
         },
         "type": "object",
-        "required": ["song_id", "lyrics"],
+        "required": [
+          "song_id",
+          "lyrics"
+        ],
         "title": "Lyrics"
       },
       "LyricsContent-Input": {
@@ -2616,10 +3125,36 @@
             },
             "type": "array",
             "title": "Lyrics"
+          },
+          "artist": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artist"
+          },
+          "lyrics_part_sequence": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Lyrics Part Sequence"
+          },
+          "lyrics_parts_configured": {
+            "type": "boolean",
+            "title": "Lyrics Parts Configured",
+            "default": false
           }
         },
         "type": "object",
-        "required": ["title", "lyrics"],
+        "required": [
+          "title",
+          "lyrics"
+        ],
         "title": "LyricsContent"
       },
       "LyricsContent-Output": {
@@ -2634,10 +3169,36 @@
             },
             "type": "array",
             "title": "Lyrics"
+          },
+          "artist": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artist"
+          },
+          "lyrics_part_sequence": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Lyrics Part Sequence"
+          },
+          "lyrics_parts_configured": {
+            "type": "boolean",
+            "title": "Lyrics Parts Configured",
+            "default": false
           }
         },
         "type": "object",
-        "required": ["title", "lyrics"],
+        "required": [
+          "title",
+          "lyrics"
+        ],
         "title": "LyricsContent"
       },
       "LyricsContents-Input": {
@@ -2657,7 +3218,9 @@
           }
         },
         "type": "object",
-        "required": ["contents"],
+        "required": [
+          "contents"
+        ],
         "title": "LyricsContents"
       },
       "LyricsContents-Output": {
@@ -2677,7 +3240,9 @@
           }
         },
         "type": "object",
-        "required": ["contents"],
+        "required": [
+          "contents"
+        ],
         "title": "LyricsContents"
       },
       "LyricsPart-Input": {
@@ -2692,7 +3257,10 @@
           }
         },
         "type": "object",
-        "required": ["part", "lyrics"],
+        "required": [
+          "part",
+          "lyrics"
+        ],
         "title": "LyricsPart"
       },
       "LyricsPartRequest": {
@@ -2716,7 +3284,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order"
           },
           "type": {
@@ -2770,7 +3338,11 @@
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents"],
+        "required": [
+          "id",
+          "order",
+          "contents"
+        ],
         "title": "LyricsPartRequest"
       },
       "PatchLyricsRequest": {
@@ -2784,7 +3356,9 @@
           }
         },
         "type": "object",
-        "required": ["lyrics"],
+        "required": [
+          "lyrics"
+        ],
         "title": "PatchLyricsRequest"
       },
       "PatchLyricsResponse": {
@@ -2794,7 +3368,9 @@
           }
         },
         "type": "object",
-        "required": ["lyrics"],
+        "required": [
+          "lyrics"
+        ],
         "title": "PatchLyricsResponse"
       },
       "PatchProjectContainerRequest": {
@@ -2911,7 +3487,15 @@
           }
         },
         "type": "object",
-        "required": ["id", "project_id", "container_name", "created_at", "updated_at", "completed", "parts"],
+        "required": [
+          "id",
+          "project_id",
+          "container_name",
+          "created_at",
+          "updated_at",
+          "completed",
+          "parts"
+        ],
         "title": "PatchProjectContainerResponse"
       },
       "PatchProjectRequest": {
@@ -2926,6 +3510,26 @@
               }
             ],
             "title": "Name"
+          },
+          "template_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 26,
+                "minLength": 26,
+                "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}"
+              },
+              {
+                "type": "string",
+                "maxLength": 16,
+                "minLength": 16,
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Id"
           },
           "parts": {
             "anyOf": [
@@ -3017,7 +3621,15 @@
           }
         },
         "type": "object",
-        "required": ["id", "template_id", "user_id", "name", "created_at", "updated_at", "parts"],
+        "required": [
+          "id",
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at",
+          "parts"
+        ],
         "title": "PatchProjectResponse"
       },
       "PatchSongRequest": {
@@ -3048,7 +3660,9 @@
           }
         },
         "type": "object",
-        "required": ["song"],
+        "required": [
+          "song"
+        ],
         "title": "PatchSongResponse"
       },
       "PlainContents": {
@@ -3086,7 +3700,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order",
             "description": "Index number starting from 0."
           },
@@ -3100,12 +3714,23 @@
             "$ref": "#/components/schemas/PlainContents"
           },
           "layout_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Layout Id"
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents", "layout_id"],
+        "required": [
+          "project_id",
+          "order",
+          "contents"
+        ],
         "title": "PlainPart"
       },
       "PlainPartRequest": {
@@ -3129,7 +3754,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order"
           },
           "type": {
@@ -3154,13 +3779,20 @@
                 "maxLength": 16,
                 "minLength": 16,
                 "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
               }
             ],
             "title": "Layout Id"
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents", "layout_id"],
+        "required": [
+          "id",
+          "order",
+          "contents"
+        ],
         "title": "PlainPartRequest"
       },
       "Position": {
@@ -3179,7 +3811,11 @@
           }
         },
         "type": "object",
-        "required": ["x", "y", "rotation"],
+        "required": [
+          "x",
+          "y",
+          "rotation"
+        ],
         "title": "Position"
       },
       "ReadTemplateResponse": {
@@ -3208,12 +3844,21 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "user_id", "name", "created_at", "updated_at"],
+        "required": [
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
         "title": "ReadTemplateResponse"
       },
       "Role": {
         "type": "string",
-        "enum": ["ADMIN", "USER"],
+        "enum": [
+          "ADMIN",
+          "USER"
+        ],
         "title": "Role"
       },
       "ScrapeLyricsResponse": {
@@ -3226,7 +3871,10 @@
           }
         },
         "type": "object",
-        "required": ["song", "lyrics"],
+        "required": [
+          "song",
+          "lyrics"
+        ],
         "title": "ScrapeLyricsResponse"
       },
       "Shape": {
@@ -3276,12 +3924,28 @@
           }
         },
         "type": "object",
-        "required": ["layout_id", "shape_id", "size", "position", "name", "text", "placeholder", "type", "fill_color"],
+        "required": [
+          "layout_id",
+          "shape_id",
+          "size",
+          "position",
+          "name",
+          "text",
+          "placeholder",
+          "type",
+          "fill_color"
+        ],
         "title": "Shape"
       },
       "ShapeType": {
         "type": "string",
-        "enum": ["TEXT", "IMAGE", "SHAPE", "TABLE", "OTHER"],
+        "enum": [
+          "TEXT",
+          "IMAGE",
+          "SHAPE",
+          "TABLE",
+          "OTHER"
+        ],
         "title": "ShapeType"
       },
       "SignInRequest": {
@@ -3296,7 +3960,10 @@
           }
         },
         "type": "object",
-        "required": ["principal", "secret"],
+        "required": [
+          "principal",
+          "secret"
+        ],
         "title": "SignInRequest"
       },
       "SignInResponse": {
@@ -3307,7 +3974,9 @@
           }
         },
         "type": "object",
-        "required": ["username"],
+        "required": [
+          "username"
+        ],
         "title": "SignInResponse"
       },
       "SignOutResponse": {
@@ -3318,7 +3987,9 @@
           }
         },
         "type": "object",
-        "required": ["username"],
+        "required": [
+          "username"
+        ],
         "title": "SignOutResponse"
       },
       "SignUpRequest": {
@@ -3342,7 +4013,11 @@
           }
         },
         "type": "object",
-        "required": ["email", "username", "password"],
+        "required": [
+          "email",
+          "username",
+          "password"
+        ],
         "title": "SignUpRequest"
       },
       "SignUpResponse": {
@@ -3353,7 +4028,9 @@
           }
         },
         "type": "object",
-        "required": ["username"],
+        "required": [
+          "username"
+        ],
         "title": "SignUpResponse"
       },
       "Size": {
@@ -3368,7 +4045,10 @@
           }
         },
         "type": "object",
-        "required": ["width", "height"],
+        "required": [
+          "width",
+          "height"
+        ],
         "title": "Size"
       },
       "Song": {
@@ -3394,7 +4074,9 @@
           }
         },
         "type": "object",
-        "required": ["title"],
+        "required": [
+          "title"
+        ],
         "title": "Song"
       },
       "UpdateTemplateResponse": {
@@ -3423,7 +4105,13 @@
           }
         },
         "type": "object",
-        "required": ["template_id", "user_id", "name", "created_at", "updated_at"],
+        "required": [
+          "template_id",
+          "user_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
         "title": "UpdateTemplateResponse"
       },
       "UpdateUserRequest": {
@@ -3461,16 +4149,6 @@
               }
             ],
             "title": "Password"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -3485,11 +4163,98 @@
           "username": {
             "type": "string",
             "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_sign_in": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sign In"
           }
         },
         "type": "object",
-        "required": ["id", "username"],
+        "required": [
+          "id",
+          "username",
+          "email",
+          "role",
+          "created_at"
+        ],
         "title": "UpdateUserResponse"
+      },
+      "UpdateUserRoleRequest": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "UpdateUserRoleRequest"
+      },
+      "UpdateUserRoleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_sign_in": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sign In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email",
+          "role",
+          "created_at"
+        ],
+        "title": "UpdateUserRoleResponse"
       },
       "ValidationError": {
         "properties": {
@@ -3524,7 +4289,11 @@
           }
         },
         "type": "object",
-        "required": ["loc", "msg", "type"],
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
         "title": "ValidationError"
       },
       "ValueContent": {
@@ -3546,7 +4315,9 @@
           }
         },
         "type": "object",
-        "required": ["placeholder_name"],
+        "required": [
+          "placeholder_name"
+        ],
         "title": "ValueContent"
       },
       "ValueContents": {
@@ -3566,7 +4337,9 @@
           }
         },
         "type": "object",
-        "required": ["contents"],
+        "required": [
+          "contents"
+        ],
         "title": "ValueContents"
       },
       "ValuePart": {
@@ -3592,7 +4365,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order",
             "description": "Index number starting from 0."
           },
@@ -3606,12 +4379,23 @@
             "$ref": "#/components/schemas/ValueContents"
           },
           "layout_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Layout Id"
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents", "layout_id"],
+        "required": [
+          "project_id",
+          "order",
+          "contents"
+        ],
         "title": "ValuePart"
       },
       "ValuePartRequest": {
@@ -3635,7 +4419,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order"
           },
           "type": {
@@ -3660,13 +4444,20 @@
                 "maxLength": 16,
                 "minLength": 16,
                 "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
               }
             ],
             "title": "Layout Id"
           }
         },
         "type": "object",
-        "required": ["id", "order", "contents", "layout_id"],
+        "required": [
+          "id",
+          "order",
+          "contents"
+        ],
         "title": "ValuePartRequest"
       },
       "VerifyPasswordRequest": {
@@ -3681,7 +4472,10 @@
           }
         },
         "type": "object",
-        "required": ["principal", "password"],
+        "required": [
+          "principal",
+          "password"
+        ],
         "title": "VerifyPasswordRequest"
       },
       "VerifyTokenResponse": {
@@ -3698,7 +4492,9 @@
           }
         },
         "type": "object",
-        "required": ["principal"],
+        "required": [
+          "principal"
+        ],
         "title": "VerifyTokenResponse"
       },
       "app__project__domain__entity__LyricsPart__LyricsPart": {
@@ -3724,7 +4520,7 @@
           },
           "order": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Order",
             "description": "Index number starting from 0."
           },
@@ -3761,7 +4557,11 @@
           }
         },
         "type": "object",
-        "required": ["project_id", "order", "contents"],
+        "required": [
+          "project_id",
+          "order",
+          "contents"
+        ],
         "title": "LyricsPart"
       },
       "app__shared__song__domain__valueobject__LyricsPart__LyricsPart": {
@@ -3776,7 +4576,10 @@
           }
         },
         "type": "object",
-        "required": ["part", "lyrics"],
+        "required": [
+          "part",
+          "lyrics"
+        ],
         "title": "LyricsPart"
       }
     }
