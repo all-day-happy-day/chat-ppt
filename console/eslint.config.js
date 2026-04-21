@@ -22,6 +22,7 @@ export default defineConfig([
       '.turbo/**/*',
       '.pnpm-store/**/*',
       'pnpm-lock.yaml',
+      "arch/**/*"
     ],
     extends: [
       js.configs.recommended,
