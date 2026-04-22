@@ -3,7 +3,7 @@ import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } fr
 
 import { useMousePosition } from '@/hooks/useMousePosition'
 
-export default function CenteredLayout({ children }: PropsWithChildren) {
+export function CenteredLayout({ children }: PropsWithChildren) {
   const mousePosition = useMousePosition()
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
