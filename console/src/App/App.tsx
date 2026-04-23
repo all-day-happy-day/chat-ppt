@@ -12,9 +12,10 @@ export default function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<RootLayout />} />
-            <Route path="/error" element={<GlobalErrorPage />} />
-            <Route path="/notfound" element={<NotFoundPage />} />
+            <Route path="/" element={<RootLayout />}>
+              <Route path="/error" element={<GlobalErrorPage />} />
+              <Route path="/notfound" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
