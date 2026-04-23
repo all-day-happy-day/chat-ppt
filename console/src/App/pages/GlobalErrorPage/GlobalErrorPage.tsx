@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ServerCrash } from 'lucide-react'
+import { ServerCrash } from 'lucide-react'
 
 import { CenteredLayout } from '@/App/layouts/CenteredLayout/CenteredLayout'
-import { AnimatedOverlayButton } from '@/components/ui/AnimatedOverlayButton/AnimatedOverlayButton'
+import { BackButton } from '@/components/ui/BackButton'
 import { useInterval } from '@/hooks/useInterval'
 
 import '@/i18n/i18n'
@@ -40,22 +40,5 @@ export function GlobalErrorPage() {
         <BackButton />
       </div>
     </CenteredLayout>
-  )
-}
-
-const BackButton = () => {
-  const { t } = useTranslation()
-
-  const onClickBackButton = () => {
-    window.history.back()
-  }
-
-  return (
-    <AnimatedOverlayButton className="mt-8" onClick={onClickBackButton}>
-      <div className="flex items-center gap-2 px-2 py-1 pr-3">
-        <ArrowLeft size="32" strokeWidth="2.5" />
-        <span className="text-3xl font-semibold">{t('common.global.back')}</span>
-      </div>
-    </AnimatedOverlayButton>
   )
 }
