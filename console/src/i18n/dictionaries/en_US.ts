@@ -6,4 +6,8 @@ export const en_US = {
   'page.global_error.title': 'Error Occurred',
   'page.global_error.description': 'An internal error has occurred. Please contact the administrator for support.',
   'page.global_error.reload_description': 'The page will reload in {{countdown}} seconds.',
+
+  //NotFoundPage
+  'page.not_found.title': 'Page Not Found',
+  'page.not_found.description': 'The page you are looking for does not exist.',
 } as const
