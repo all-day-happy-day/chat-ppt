@@ -2,10 +2,11 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
-import { GlobalErrorPage } from './layouts/misc/GlobalErrorPage/GlobalErrorPage'
 import { RootLayout } from './layouts/RootLayout/RootLayout'
+import { GlobalErrorPage } from './pages/GlobalErrorPage/GlobalErrorPage'
+import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider>
       <ThemeProvider>
@@ -13,11 +14,10 @@ function App() {
           <Routes>
             <Route path="/" element={<RootLayout />} />
             <Route path="/error" element={<GlobalErrorPage />} />
+            <Route path="/notfound" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   )
 }
-
-export default App
