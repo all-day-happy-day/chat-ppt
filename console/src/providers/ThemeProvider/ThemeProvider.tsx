@@ -26,18 +26,20 @@ export function ThemeProvider({ children, defaultTheme = 'system', storageKey = 
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme)
 
   useEffect(() => {
-    const root: HTMLElement = window.document.documentElement
+    const media: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
 
-    root.classList.remove('light', 'dark')
-
-    if (theme === 'system') {
-      const systemTheme: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-
-      root.classList.add(systemTheme)
-      return
+    const apply = (): void => {
+      const root: HTMLElement = document.documentElement
+      root.classList.remove('light', 'dark')
+      root.classList.add(theme === 'system' ? (media.matches ? 'dark' : 'light') : theme)
     }
 
-    root.classList.add(theme)
+    apply()
+
+    if (theme !== 'system') return
+
+    media.addEventListener('change', apply)
+    return (): void => media.removeEventListener('change', apply)
   }, [theme])
 
   const value: ThemeProviderState = {
