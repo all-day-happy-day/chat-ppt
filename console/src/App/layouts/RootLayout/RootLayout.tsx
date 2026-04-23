@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Outlet } from 'react-router-dom'
 
-import { GlobalErrorPage } from '@/App/layouts/misc/GlobalErrorPage/GlobalErrorPage'
+import { GlobalErrorPage } from '@/App/pages/GlobalErrorPage/GlobalErrorPage'
 import { Toaster } from '@/components/ui/sonner'
 import { useEventListener } from '@/hooks/useEventListener'
 import { useTheme } from '@/providers'
