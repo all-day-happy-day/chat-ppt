@@ -27,14 +27,14 @@ export function GlobalErrorPage() {
   return (
     <CenteredLayout>
       <div className="z-10 flex w-1/2 flex-col items-center justify-center gap-3">
-        <ServerCrash className="text-brand-9 z-10" size="128" strokeWidth="1.5" />
-        <p className="text-foreground z-10 text-center text-6xl font-bold wrap-break-word">
+        <ServerCrash className="text-brand-9 z-10" size="64" strokeWidth="1.5" />
+        <p className="text-foreground z-10 text-center text-4xl font-bold wrap-break-word">
           {t('page.global_error.title')}
         </p>
-        <p className="text-foreground/80 z-10 w-full text-center text-2xl font-semibold wrap-break-word">
+        <p className="text-foreground/80 z-10 w-full text-center text-xl font-semibold wrap-break-word">
           {t('page.global_error.description')}
         </p>
-        <p className="text-foreground/80 z-10 w-full text-center text-2xl font-semibold wrap-break-word">
+        <p className="text-foreground/80 z-10 w-full text-center text-xl font-semibold wrap-break-word">
           {t('page.global_error.reload_description', { countdown })}
         </p>
         <BackButton />
