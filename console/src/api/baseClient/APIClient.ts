@@ -1,5 +1,5 @@
 import { prepareRequestBody } from './utils/prepareRequestBody'
-import type { PreparedBody } from './utils/prepareRequestBody.type'
+import type { PreparedBody, RequestBody } from './utils/prepareRequestBody.type'
 import type { APIRequest, APIResponse, InterceptorManager } from './APIClient.type'
 
 export class APIClient {
@@ -28,7 +28,7 @@ export class APIClient {
     return this.request<TResponse>({ url: url, method: 'GET', headers: headers })
   }
 
-  async post<TRequestBody extends APIRequest, TResponse>(
+  async post<TRequestBody extends RequestBody, TResponse>(
     url: string,
     body: TRequestBody,
     headers?: HeadersInit
@@ -36,7 +36,7 @@ export class APIClient {
     return this.request<TResponse>({ url: url, method: 'POST', headers: headers, body: body })
   }
 
-  async patch<TRequestBody extends APIRequest, TResponse>(
+  async patch<TRequestBody extends RequestBody, TResponse>(
     url: string,
     body: TRequestBody,
     headers?: HeadersInit
