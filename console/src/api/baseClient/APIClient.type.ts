@@ -14,7 +14,7 @@ type GetRequest = BaseRequest & {
   method: GetHttpMethod
 }
 
-type BodyRequest<T extends RequestBody = RequestBody> = BaseRequest & {
+export type BodyRequest<T extends RequestBody = RequestBody> = BaseRequest & {
   method: PostHttpMethod
   body: T
 }
