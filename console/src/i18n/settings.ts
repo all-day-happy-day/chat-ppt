@@ -2,6 +2,10 @@ import { en_US } from './dictionaries/en_US'
 
 export const LOCALES: string[] = ['en', 'ko'] as const
 export type Locale = (typeof LOCALES)[number]
+export const LANGUAGE_MAP: Record<Locale, string> = {
+  en: 'English',
+  ko: '한국어',
+}
 
 export const DEFAULT_LOCALE: Locale = 'en'
 
