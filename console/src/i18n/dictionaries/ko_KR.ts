@@ -8,6 +8,9 @@ export const ko_KR = {
   'header.settings.language': '언어: {{language}}',
   'header.settings.theme': '테마: {{theme}}',
   'header.settings.signout': '로그아웃',
+  'header.settings.theme.light': '라이트 테마',
+  'header.settings.theme.dark': '다크 테마',
+  'header.settings.theme.system': '시스템 테마',
 
   // GlobalErrorPage
   'page.global_error.title': '오류가 발생',

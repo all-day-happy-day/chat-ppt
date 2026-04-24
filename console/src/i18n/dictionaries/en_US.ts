@@ -4,10 +4,13 @@ export const en_US = {
 
   // Header
   'header.settings.settings': 'Settings',
-  'header.settings.manage_users': 'Manage Users',
+  'header.settings.manage_users': 'Users Management',
   'header.settings.language': 'Language: {{language}}',
   'header.settings.theme': 'Theme: {{theme}}',
   'header.settings.signout': 'Sign Out',
+  'header.settings.theme.light': 'Light Theme',
+  'header.settings.theme.dark': 'Dark Theme',
+  'header.settings.theme.system': 'System Theme',
 
   // GlobalErrorPage
   'page.global_error.title': 'Error Occurred',
