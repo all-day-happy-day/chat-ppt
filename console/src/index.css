@@ -405,9 +405,9 @@
   --muted: var(--gray-8);
   --muted-foreground: var(--gray-11);
   --muted-background: var(--gray-2);
-  --accent: var(--gray-5);
+  --accent: var(--gray-7);
   --accent-foreground: var(--gray-12);
-  --destructive: #c43537;
+  --destructive: #ef2528;
   --warning: var(--yellow-9);
   --border: var(--gray-6);
   --input: var(--gray-6);
@@ -493,7 +493,7 @@ button {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-brand: var(--brand);
-
+  --color-initial-avatar: var(--orange-8);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
