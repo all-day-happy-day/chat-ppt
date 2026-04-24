@@ -12,6 +12,7 @@ from app.auth.application.usecase import (
     VerifyPasswordUseCase,
 )
 from app.auth.infrastructure.adapter.inbound.api.message import (
+    GetCurrentUserResponse,
     SignInRequest,
     SignInResponse,
     SignOutResponse,
@@ -230,3 +231,18 @@ def reissue_tokens(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except PrincipalNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/me", status_code=status.HTTP_200_OK)
+def get_current_user(
+    usecase: Annotated[VerifyCredentialsUseCase, Depends(get_verify_credentials_use_case)],
+    access_token: str | None = Cookie(None),
+):
+    try:
+        if not access_token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing access token")
+        return GetCurrentUserResponse.from_user_entity(user=usecase(raw_short_lived_credentials=access_token))
+    except InvalidCredentials as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except AlchemyMismatch as e:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(e))

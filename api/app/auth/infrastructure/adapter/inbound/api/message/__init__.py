@@ -1,3 +1,4 @@
+from .GetCurrentUserResponse import GetCurrentUserResponse
 from .SignInRequest import SignInRequest
 from .SignInResponse import SignInResponse
 from .SignOutResponse import SignOutResponse
@@ -7,6 +8,7 @@ from .VerifyPasswordRequest import VerifyPasswordRequest
 from .VerifyTokenResponse import VerifyTokenResponse
 
 __all__ = [
+    "GetCurrentUserResponse",
     "SignInRequest",
     "SignInResponse",
     "SignOutResponse",
