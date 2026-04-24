@@ -11,6 +11,23 @@ export function DropdownMenuTrigger({ ...props }: React.ComponentProps<typeof Dr
   return <DropdownMenuPrimitive.Trigger {...props} />
 }
 
+export function DropdownMenuSub({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
+  return <DropdownMenuPrimitive.Sub {...props} />
+}
+
+export function DropdownMenuSubTrigger({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger>) {
+  return (
+    <DropdownMenuPrimitive.SubTrigger
+      className="hover:bg-accent/60 hover:text-accent-foreground flex cursor-pointer flex-row items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50"
+      {...props}
+    />
+  )
+}
+
+export function DropdownMenuSubContent({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
+  return <DropdownMenuPrimitive.SubContent {...props} />
+}
+
 export function DropdownMenuContent({
   className,
   sideOffset = 6,
@@ -65,6 +82,33 @@ export function DropdownMenuLabel({
   return (
     <DropdownMenuPrimitive.Label
       className={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
+      {...props}
+    />
+  )
+}
+
+export function DropdownMenuRadioGroup({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioGroup>) {
+  return (
+    <DropdownMenuPrimitive.RadioGroup
+      className={cn('bg-secondary flex flex-col gap-1 rounded-lg p-1.5', className)}
+      {...props}
+    />
+  )
+}
+
+export function DropdownMenuRadioItem({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>) {
+  return (
+    <DropdownMenuPrimitive.RadioItem
+      className={cn(
+        'hover:bg-accent/60 hover:text-accent-foreground flex cursor-pointer flex-row items-center gap-2 rounded-lg px-2 py-1.5 pr-8 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+        className
+      )}
       {...props}
     />
   )
