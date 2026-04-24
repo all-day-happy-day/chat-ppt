@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react'
 import { createContext } from 'react'
 
-type Theme = 'dark' | 'light' | 'system'
+export type Theme = 'dark' | 'light' | 'system'
 
 export type ThemeProviderState = {
   theme: Theme
