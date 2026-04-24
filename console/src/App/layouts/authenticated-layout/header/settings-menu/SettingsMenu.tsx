@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GlobeIcon, LogOutIcon, MonitorIcon, MoonIcon, SettingsIcon, SunIcon, UsersIcon } from 'lucide-react'
+import { CheckIcon, GlobeIcon, LogOutIcon, MonitorIcon, MoonIcon, SettingsIcon, SunIcon, UsersIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button/Button'
 import {
@@ -22,6 +22,8 @@ import { type Theme, useTheme } from '@/providers'
 
 import '@/i18n/i18n'
 
+import { ThemeToggleIcon } from './ThemeToggleIcon'
+
 export function SettingsMenu() {
   let { data: user } = useCurrentUser()
   const { theme, setTheme } = useTheme()
@@ -33,7 +35,7 @@ export function SettingsMenu() {
       id: '1',
       username: 'John Doe',
       email: 'john.doe@example.com',
-      role: 'ADMIN',
+      role: 'USER',
       createdAt: new Date(),
       lastSignIn: new Date(),
     }
@@ -46,7 +48,7 @@ export function SettingsMenu() {
           variant="ghost"
           size="icon"
           asChild
-          className="data-[state=open]:bg-accent/60 hover:bg-accent/60 cursor-pointer rounded-md border-none p-1"
+          className="data-[state=open]:bg-accent/60 hover:bg-accent/60 cursor-pointer rounded-md border-none p-1.5"
         >
           <UserInitialAvatar username={user.username} className="bg-initial-avatar size-8" />
         </Button>
@@ -80,8 +82,14 @@ export function SettingsMenu() {
                 localStorage.setItem('language', next)
               }}
             >
-              <DropdownMenuRadioItem value="en">{LANGUAGE_MAP['en']}</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="ko">{LANGUAGE_MAP['ko']}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="en">
+                <span>{LANGUAGE_MAP['en']}</span>
+                {language === 'en' && <CheckIcon className="ml-auto size-4" />}
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="ko">
+                <span>{LANGUAGE_MAP['ko']}</span>
+                {language === 'ko' && <CheckIcon className="ml-auto size-4" />}
+              </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -89,7 +97,7 @@ export function SettingsMenu() {
         {/* Theme */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <SunIcon className="size-4" />
+            <ThemeToggleIcon theme={theme} />
             <span>{t('header.settings.theme', { theme: theme.charAt(0).toUpperCase() + theme.slice(1) })}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -97,14 +105,17 @@ export function SettingsMenu() {
               <DropdownMenuRadioItem value="light">
                 <SunIcon className="size-4" />
                 <span>{t('header.settings.theme.light')}</span>
+                {theme === 'light' && <CheckIcon className="ml-auto size-4" />}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark">
                 <MoonIcon className="size-4" />
                 <span>{t('header.settings.theme.dark')}</span>
+                {theme === 'dark' && <CheckIcon className="ml-auto size-4" />}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="system">
                 <MonitorIcon className="size-4" />
                 <span>{t('header.settings.theme.system')}</span>
+                {theme === 'system' && <CheckIcon className="ml-auto size-4" />}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
