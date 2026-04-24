@@ -496,6 +496,8 @@ button {
   --color-initial-avatar: var(--orange-8);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-dropdown-pop-open: dropdown-pop-open 0.15s ease-out;
+  --animate-dropdown-pop-close: dropdown-pop-close 0.18s ease-out;
 
   @keyframes accordion-down {
     from {
@@ -515,6 +517,33 @@ button {
     to {
       height: 0;
     }
+  }
+}
+
+@keyframes dropdown-pop-open {
+  0% {
+    transform: scale(0.72);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes dropdown-pop-close {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.52;
+  }
+  100% {
+    opacity: 0.32;
+  }
+  to {
+    opacity: 0;
   }
 }
 
