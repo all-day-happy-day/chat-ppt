@@ -1,4 +1,4 @@
-import type { Role } from '@/domain/models/user'
+import type { Role, User } from '@/domain/models/user'
 import type { AuthRepository } from '@/domain/repositories/auth-repository'
 
 export class AuthUseCase {
@@ -30,5 +30,9 @@ export class AuthUseCase {
 
   async reissue(): Promise<void> {
     return this.authRepository.reissue()
+  }
+
+  async getCurrentUser(): Promise<User> {
+    return this.authRepository.getCurrentUser()
   }
 }

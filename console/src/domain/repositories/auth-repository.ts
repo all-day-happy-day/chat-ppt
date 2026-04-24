@@ -1,4 +1,4 @@
-import type { Role } from '@/domain/models/user'
+import type { Role, User } from '@/domain/models/user'
 
 export abstract class AuthRepository {
   abstract signIn(requestBody: { principal: string; password: string }): Promise<string>
@@ -7,4 +7,5 @@ export abstract class AuthRepository {
   abstract verifyPassword(requestBody: { principal: string; password: string }): Promise<void>
   abstract verify(): Promise<void>
   abstract reissue(): Promise<void>
+  abstract getCurrentUser(): Promise<User>
 }
