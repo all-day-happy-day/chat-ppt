@@ -396,7 +396,7 @@
   --foreground: var(--gray-12);
   --card: var(--gray-2);
   --card-foreground: var(--gray-12);
-  --popover: var(--gray-2);
+  --popover: var(--gray-3);
   --popover-foreground: var(--gray-12);
   --primary: var(--green-8);
   --primary-foreground: var(--gray-1);
