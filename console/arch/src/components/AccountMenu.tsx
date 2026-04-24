@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { getPrincipalDisplayInitial } from "../lib/principal-display-initial";
+import { getPrincipalDisplayInitial } from '../lib/principal-display-initial'
 
-const MENU_WIDTH_CLASS: string = "w-[min(100vw-2.5rem,248px)]";
+const MENU_WIDTH_CLASS: string = 'w-[min(100vw-2.5rem,248px)]'
 
 const UsersIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -21,7 +21,7 @@ const UsersIcon = () => (
       strokeLinejoin="round"
     />
   </svg>
-);
+)
 
 const GearIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -40,7 +40,7 @@ const GearIcon = () => (
       strokeLinejoin="round"
     />
   </svg>
-);
+)
 
 const PersonIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -59,7 +59,7 @@ const PersonIcon = () => (
       strokeLinejoin="round"
     />
   </svg>
-);
+)
 
 const SignOutIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -73,16 +73,16 @@ const SignOutIcon = () => (
     <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M21 12H9" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
-);
+)
 
 export type AccountMenuProps = {
-  principal: string;
-  isAdmin: boolean;
-  isSigningOut: boolean;
-  onUserSettings: () => void;
-  onManageUsers: () => void;
-  onSignOut: () => void;
-};
+  principal: string
+  isAdmin: boolean
+  isSigningOut: boolean
+  onUserSettings: () => void
+  onManageUsers: () => void
+  onSignOut: () => void
+}
 
 export const AccountMenu = ({
   principal,
@@ -92,69 +92,69 @@ export const AccountMenu = ({
   onManageUsers,
   onSignOut,
 }: AccountMenuProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const menuId: string = useId();
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const menuId: string = useId()
 
   const closeMenu = useCallback((): void => {
-    setIsOpen(false);
-  }, []);
+    setIsOpen(false)
+  }, [])
 
   const handleToggleOpen = useCallback((): void => {
-    setIsOpen((prev: boolean) => !prev);
-  }, []);
+    setIsOpen((prev: boolean) => !prev)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) {
-      return;
+      return
     }
     const handlePointerDown = (event: PointerEvent): void => {
-      const root: HTMLDivElement | null = rootRef.current;
+      const root: HTMLDivElement | null = rootRef.current
       if (root === null) {
-        return;
+        return
       }
       if (event.target instanceof Node && !root.contains(event.target)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
+      if (event.key === 'Escape') {
+        setIsOpen(false)
       }
-    };
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
 
-  const displayInitial: string = getPrincipalDisplayInitial(principal);
-  const atIndex: number = principal.indexOf("@");
-  const headline: string = atIndex > 0 ? principal.slice(0, Math.max(0, atIndex)) : principal;
-  const subline: string | null = atIndex > 0 ? principal : null;
+  const displayInitial: string = getPrincipalDisplayInitial(principal)
+  const atIndex: number = principal.indexOf('@')
+  const headline: string = atIndex > 0 ? principal.slice(0, Math.max(0, atIndex)) : principal
+  const subline: string | null = atIndex > 0 ? principal : null
 
   const handleUserSettingsClick = useCallback((): void => {
-    closeMenu();
-    onUserSettings();
-  }, [closeMenu, onUserSettings]);
+    closeMenu()
+    onUserSettings()
+  }, [closeMenu, onUserSettings])
 
   const handleSignOutClick = useCallback((): void => {
-    closeMenu();
-    onSignOut();
-  }, [closeMenu, onSignOut]);
+    closeMenu()
+    onSignOut()
+  }, [closeMenu, onSignOut])
 
   const handleManageUsersClick = useCallback((): void => {
-    closeMenu();
-    onManageUsers();
-  }, [closeMenu, onManageUsers]);
+    closeMenu()
+    onManageUsers()
+  }, [closeMenu, onManageUsers])
 
   return (
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/[0.12] bg-neutral-200/90 text-[12px] font-semibold text-neutral-800 outline-none transition hover:bg-neutral-300/90 focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:border-white/[0.22] dark:bg-white/[0.12] dark:text-white dark:hover:bg-white/[0.18] dark:focus-visible:ring-[#0a84ff]"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/[0.12] bg-neutral-200/90 text-[12px] font-semibold text-neutral-800 transition outline-none hover:bg-neutral-300/90 focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:border-white/[0.22] dark:bg-white/[0.12] dark:text-white dark:hover:bg-white/[0.18] dark:focus-visible:ring-[#0a84ff]"
         aria-label="Account menu"
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -226,11 +226,11 @@ export const AccountMenu = ({
               <span className="text-red-600 dark:text-red-400">
                 <SignOutIcon />
               </span>
-              {isSigningOut ? "Signing out…" : "Sign out"}
+              {isSigningOut ? 'Signing out…' : 'Sign out'}
             </button>
           </div>
         </div>
       ) : null}
     </div>
-  );
-};
+  )
+}

@@ -1,16 +1,16 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import { CreateProjectPage } from "./pages/CreateProjectPage";
-import { ManageUsersPage } from "./pages/ManageUsersPage";
-import { ProjectSettingsPage } from "./pages/ProjectSettingsPage";
-import { ProjectSongLyricsConfigurePage } from "./pages/ProjectSongLyricsConfigurePage";
-import { ProjectWorkspacePage } from "./pages/ProjectWorkspacePage";
-import { SongEditPage } from "./pages/SongEditPage";
-import { SongNewPage } from "./pages/SongNewPage";
-import { TemplateEditPage } from "./pages/TemplateEditPage";
-import { TemplateNewPage } from "./pages/TemplateNewPage";
-import { UserSettingsPage } from "./pages/UserSettingsPage";
-import { AppRoot } from "./AppRoot";
+import { CreateProjectPage } from './pages/CreateProjectPage'
+import { ManageUsersPage } from './pages/ManageUsersPage'
+import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
+import { ProjectSongLyricsConfigurePage } from './pages/ProjectSongLyricsConfigurePage'
+import { ProjectWorkspacePage } from './pages/ProjectWorkspacePage'
+import { SongEditPage } from './pages/SongEditPage'
+import { SongNewPage } from './pages/SongNewPage'
+import { TemplateEditPage } from './pages/TemplateEditPage'
+import { TemplateNewPage } from './pages/TemplateNewPage'
+import { UserSettingsPage } from './pages/UserSettingsPage'
+import { AppRoot } from './AppRoot'
 
 const App = () => {
   return (
@@ -33,7 +33,7 @@ const App = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  );
-};
+  )
+}
 
-export default App;
+export default App

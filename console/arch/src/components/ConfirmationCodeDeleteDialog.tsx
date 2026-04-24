@@ -1,24 +1,24 @@
-import { AUTH_FIELD_CLASS } from "../lib/auth-screen-classes";
+import { AUTH_FIELD_CLASS } from '../lib/auth-screen-classes'
 
-import type { ChangeEvent, ReactElement, RefObject } from "react";
+import type { ChangeEvent, ReactElement, RefObject } from 'react'
 
 export type ConfirmationCodeDeleteDialogProps = {
-  dialogRef: RefObject<HTMLDialogElement | null>;
-  title: string;
-  entityName: string;
-  description: string;
-  confirmCode: string;
-  typedConfirmCode: string;
-  onTypedConfirmChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  confirmInputId: string;
-  confirmInputName: string;
-  deleteError: string | null;
-  isDeleting: boolean;
-  confirmButtonLabel: string;
-  onClose: () => void;
-  onCancel: () => void;
-  onConfirm: () => void;
-};
+  dialogRef: RefObject<HTMLDialogElement | null>
+  title: string
+  entityName: string
+  description: string
+  confirmCode: string
+  typedConfirmCode: string
+  onTypedConfirmChange: (event: ChangeEvent<HTMLInputElement>) => void
+  confirmInputId: string
+  confirmInputName: string
+  deleteError: string | null
+  isDeleting: boolean
+  confirmButtonLabel: string
+  onClose: () => void
+  onCancel: () => void
+  onConfirm: () => void
+}
 
 export const ConfirmationCodeDeleteDialog = ({
   dialogRef,
@@ -37,11 +37,11 @@ export const ConfirmationCodeDeleteDialog = ({
   onCancel,
   onConfirm,
 }: ConfirmationCodeDeleteDialogProps): ReactElement => {
-  const isConfirmDisabled: boolean = typedConfirmCode !== confirmCode || isDeleting;
+  const isConfirmDisabled: boolean = typedConfirmCode !== confirmCode || isDeleting
   return (
     <dialog
       ref={dialogRef}
-      className="fixed left-1/2 top-1/2 z-[600] w-[min(100vw-2rem,26rem)] max-h-[min(90dvh,calc(100vh-2rem))] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-black/[0.1] bg-white p-6 text-neutral-900 shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-50 dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)]"
+      className="fixed top-1/2 left-1/2 z-[600] max-h-[min(90dvh,calc(100vh-2rem))] w-[min(100vw-2rem,26rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-black/[0.1] bg-white p-6 text-neutral-900 shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:border-white/[0.12] dark:bg-[#2c2c2e] dark:text-neutral-50 dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)]"
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">
@@ -95,10 +95,10 @@ export const ConfirmationCodeDeleteDialog = ({
             disabled={isConfirmDisabled}
             onClick={onConfirm}
           >
-            {isDeleting ? "Deleting…" : confirmButtonLabel}
+            {isDeleting ? 'Deleting…' : confirmButtonLabel}
           </button>
         </div>
       </div>
     </dialog>
-  );
-};
+  )
+}
