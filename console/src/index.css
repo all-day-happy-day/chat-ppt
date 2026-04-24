@@ -392,6 +392,7 @@
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
   --background: var(--gray-1);
+  --header: var(--gray-2);
   --foreground: var(--gray-12);
   --card: var(--gray-2);
   --card-foreground: var(--gray-12);
@@ -459,6 +460,7 @@ button {
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-header: var(--header);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
