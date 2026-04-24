@@ -2,6 +2,13 @@ export const ko_KR = {
   // Common
   'common.global.back': '뒤로가기',
 
+  // Header
+  'header.settings.settings': '설정',
+  'header.settings.manage_users': '사용자 관리',
+  'header.settings.language': '언어: {{language}}',
+  'header.settings.theme': '테마: {{theme}}',
+  'header.settings.signout': '로그아웃',
+
   // GlobalErrorPage
   'page.global_error.title': '오류가 발생',
   'page.global_error.description': '내부 오류가 발생했습니다. 관리자에게 문의해주세요.',

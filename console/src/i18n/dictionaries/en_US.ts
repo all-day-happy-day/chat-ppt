@@ -2,6 +2,13 @@ export const en_US = {
   // Common
   'common.global.back': 'Back',
 
+  // Header
+  'header.settings.settings': 'Settings',
+  'header.settings.manage_users': 'Manage Users',
+  'header.settings.language': 'Language: {{language}}',
+  'header.settings.theme': 'Theme: {{theme}}',
+  'header.settings.signout': 'Sign Out',
+
   // GlobalErrorPage
   'page.global_error.title': 'Error Occurred',
   'page.global_error.description': 'An internal error has occurred. Please contact the administrator for support.',
