@@ -1,4 +1,4 @@
-import type { PreparedBody, RequestBody } from './prepareRequestBody.type'
+import type { PreparedBody, RequestBody } from './prepare-request-body.types'
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   if (typeof value !== 'object' || value === null) return false
@@ -11,13 +11,16 @@ export function prepareRequestBody(body: RequestBody): PreparedBody {
   if (typeof FormData !== 'undefined' && body instanceof FormData) {
     return { kind: 'formData', body: body }
   }
+
   // isURLEncoded
   if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams)
     return { kind: 'urlEncoded', body: body }
+
   // isText
   if (typeof String !== 'undefined' && typeof body === 'string') {
     return { kind: 'text', body: body, contentType: 'text/plain' }
   }
+
   // isBinary
   if (
     (typeof Blob !== 'undefined' && body instanceof Blob) ||
@@ -35,10 +38,12 @@ export function prepareRequestBody(body: RequestBody): PreparedBody {
     }
     return { kind: 'binary', body: body as Blob | ArrayBuffer | ArrayBufferView<ArrayBuffer> }
   }
+
   // isStream
   if (typeof ReadableStream !== 'undefined' && body instanceof ReadableStream) {
     return { kind: 'stream', body: body }
   }
+
   // isJSON
   if (isPlainObject(body) || Array.isArray(body)) {
     return { kind: 'json', body: JSON.stringify(body), contentType: 'application/json' }

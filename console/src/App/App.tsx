@@ -2,9 +2,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
-import { RootLayout } from './layouts/RootLayout/RootLayout'
-import { GlobalErrorPage } from './pages/GlobalErrorPage/GlobalErrorPage'
-import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
+import { RootLayout } from './layouts/root-layout/RootLayout'
+import { GlobalErrorPage } from './pages/global-error-page/GlobalErrorPage'
+import { NotFoundPage } from './pages/not-found-page/NotFoundPage'
 
 export default function App() {
   return (

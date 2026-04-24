@@ -2,7 +2,7 @@ import { type JSX } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban } from 'lucide-react'
 
-import { CenteredLayout } from '@/App/layouts/CenteredLayout/CenteredLayout'
+import { CenteredLayout } from '@/App/layouts/centered-layout/CenteredLayout'
 import { BackButton } from '@/components/ui/BackButton'
 
 import '@/i18n/i18n'

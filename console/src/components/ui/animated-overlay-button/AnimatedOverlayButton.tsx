@@ -4,7 +4,7 @@ import { motion, type Transition } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
-import type { AnimatedOverlayButtonProps } from './AnimatedOverlayButton.type'
+import type { AnimatedOverlayButtonProps } from './AnimatedOverlayButton.types'
 
 export function AnimatedOverlayButton({
   children,

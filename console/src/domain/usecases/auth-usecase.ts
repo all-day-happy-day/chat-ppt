@@ -1,5 +1,5 @@
-import type { Role } from '@/domain/models/User'
-import type { AuthRepository } from '@/domain/repositories/AuthRepository'
+import type { Role } from '@/domain/models/user'
+import type { AuthRepository } from '@/domain/repositories/auth-repository'
 
 export class AuthUseCase {
   private readonly authRepository: AuthRepository

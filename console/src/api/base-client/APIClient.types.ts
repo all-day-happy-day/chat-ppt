@@ -1,4 +1,4 @@
-import type { RequestBody } from './utils/prepareRequestBody.type'
+import type { RequestBody } from './utils/prepare-request-body.types'
 
 type GetHttpMethod = 'GET' | 'DELETE'
 type PostHttpMethod = 'POST' | 'PUT' | 'PATCH'

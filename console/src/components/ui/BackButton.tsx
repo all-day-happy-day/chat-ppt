@@ -2,7 +2,7 @@ import { type JSX } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 
-import { AnimatedOverlayButton } from './AnimatedOverlayButton/AnimatedOverlayButton'
+import { AnimatedOverlayButton } from './animated-overlay-button/AnimatedOverlayButton'
 
 export function BackButton(): JSX.Element {
   const { t } = useTranslation()

@@ -1,4 +1,4 @@
-import type { Role } from '@/domain/models/User'
+import type { Role } from '@/domain/models/user'
 
 interface BaseAuthResponse {
   username: string

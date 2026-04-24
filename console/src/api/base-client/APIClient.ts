@@ -1,6 +1,6 @@
-import { prepareRequestBody } from './utils/prepareRequestBody'
-import type { PreparedBody, RequestBody } from './utils/prepareRequestBody.type'
-import type { APIRequest, APIResponse, InterceptorManager } from './APIClient.type'
+import { prepareRequestBody } from './utils/prepare-request-body'
+import type { PreparedBody, RequestBody } from './utils/prepare-request-body.types'
+import type { APIRequest, APIResponse, InterceptorManager } from './APIClient.types'
 
 export class APIClient {
   private readonly baseUrl: string

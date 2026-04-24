@@ -1,5 +1,5 @@
-import type { Role, User } from '@/domain/models/User'
-import type { UserRepository } from '@/domain/repositories/UserRepository'
+import type { Role, User } from '@/domain/models/user'
+import type { UserRepository } from '@/domain/repositories/user-repository'
 
 export class UserUseCase {
   private readonly userRepository: UserRepository

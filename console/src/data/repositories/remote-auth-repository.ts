@@ -1,8 +1,8 @@
-import type { APIResponse } from '@/api/baseClient/APIClient.type'
-import type { RequestBody } from '@/api/baseClient/utils/prepareRequestBody.type'
+import type { APIResponse } from '@/api/base-client/APIClient.types'
+import type { RequestBody } from '@/api/base-client/utils/prepare-request-body.types'
 import { httpClient } from '@/api/client'
-import type { Role } from '@/domain/models/User'
-import type { AuthRepository } from '@/domain/repositories/AuthRepository'
+import type { Role } from '@/domain/models/user'
+import type { AuthRepository } from '@/domain/repositories/auth-repository'
 
 import type {
   SignInRequest,
@@ -11,7 +11,7 @@ import type {
   SignUpRequest,
   SignUpResponse,
   VerifyPasswordRequest,
-} from './messages/RemoteAuthMessage'
+} from './messages/remote-auth-message'
 
 export class RemoteAuthRepository implements AuthRepository {
   async signIn(requestBody: { principal: string; password: string }): Promise<string> {

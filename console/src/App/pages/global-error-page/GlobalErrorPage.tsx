@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ServerCrash } from 'lucide-react'
 
-import { CenteredLayout } from '@/App/layouts/CenteredLayout/CenteredLayout'
+import { CenteredLayout } from '@/App/layouts/centered-layout/CenteredLayout'
 import { BackButton } from '@/components/ui/BackButton'
 import { useInterval } from '@/hooks/useInterval'
 

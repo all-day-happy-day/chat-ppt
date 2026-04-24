@@ -1,4 +1,4 @@
-import type { Role, User } from '@/domain/models/User'
+import type { Role, User } from '@/domain/models/user'
 
 interface BaseUserResponse {
   id: string

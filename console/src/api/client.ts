@@ -1,4 +1,4 @@
-import { APIClient } from './baseClient/APIClient'
+import { APIClient } from './base-client/APIClient'
 
 export const httpClient = new APIClient(`http://${window.location.hostname}:10537`)
 

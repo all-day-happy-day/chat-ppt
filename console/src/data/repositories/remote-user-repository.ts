@@ -1,6 +1,6 @@
 import { httpClient } from '@/api/client'
-import type { Role, User } from '@/domain/models/User'
-import type { UserRepository } from '@/domain/repositories/UserRepository'
+import type { Role, User } from '@/domain/models/user'
+import type { UserRepository } from '@/domain/repositories/user-repository'
 
 import type {
   DeleteUserResponse,
@@ -10,8 +10,8 @@ import type {
   PatchUserResponse,
   PatchUserRoleRequest,
   PatchUserRoleResponse,
-} from './messages/RemoteUserMessage'
-import { toUser } from './messages/RemoteUserMessage'
+} from './messages/remote-user-message'
+import { toUser } from './messages/remote-user-message'
 
 export class RemoteUserRepository implements UserRepository {
   async getUser(id: string): Promise<User> {

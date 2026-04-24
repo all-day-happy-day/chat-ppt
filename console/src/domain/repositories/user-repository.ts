@@ -1,4 +1,4 @@
-import type { Role, User } from '@/domain/models/User'
+import type { Role, User } from '@/domain/models/user'
 
 export abstract class UserRepository {
   abstract getUser(id: string): Promise<User>

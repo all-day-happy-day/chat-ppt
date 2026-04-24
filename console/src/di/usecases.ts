@@ -1,5 +1,5 @@
-import { AuthUseCase } from '@/domain/usecases/AuthUseCase'
-import { UserUseCase } from '@/domain/usecases/UserUseCase'
+import { AuthUseCase } from '@/domain/usecases/auth-usecase'
+import { UserUseCase } from '@/domain/usecases/user-usecase'
 
 import { authRepository, userRepository } from './repositories'
 
