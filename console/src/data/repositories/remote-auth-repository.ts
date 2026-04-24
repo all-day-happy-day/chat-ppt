@@ -1,10 +1,12 @@
 import type { APIResponse } from '@/api/base-client/APIClient.types'
 import type { RequestBody } from '@/api/base-client/utils/prepare-request-body.types'
 import { httpClient } from '@/api/client'
-import type { Role } from '@/domain/models/user'
+import type { Role, User } from '@/domain/models/user'
 import type { AuthRepository } from '@/domain/repositories/auth-repository'
 
+import { toUser } from './messages/common/base-user-response'
 import type {
+  GetCurrentUserResponse,
   SignInRequest,
   SignInResponse,
   SignOutResponse,
@@ -38,5 +40,10 @@ export class RemoteAuthRepository implements AuthRepository {
 
   async reissue(): Promise<void> {
     await httpClient.post<RequestBody, APIResponse>(`/auth/refresh`, {})
+  }
+
+  async getCurrentUser(): Promise<User> {
+    const { response } = await httpClient.get<GetCurrentUserResponse>(`/auth/me`)
+    return toUser(response)
   }
 }

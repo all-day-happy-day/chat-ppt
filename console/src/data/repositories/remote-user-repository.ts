@@ -2,6 +2,7 @@ import { httpClient } from '@/api/client'
 import type { Role, User } from '@/domain/models/user'
 import type { UserRepository } from '@/domain/repositories/user-repository'
 
+import { toUser } from './messages/common/base-user-response'
 import type {
   DeleteUserResponse,
   GetUserResponse,
@@ -11,7 +12,6 @@ import type {
   PatchUserRoleRequest,
   PatchUserRoleResponse,
 } from './messages/remote-user-message'
-import { toUser } from './messages/remote-user-message'
 
 export class RemoteUserRepository implements UserRepository {
   async getUser(id: string): Promise<User> {

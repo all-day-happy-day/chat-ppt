@@ -1,5 +1,7 @@
 import type { Role } from '@/domain/models/user'
 
+import type { BaseUserResponse } from './common/base-user-response'
+
 interface BaseAuthResponse {
   username: string
 }
@@ -32,3 +34,6 @@ export type VerifyPasswordRequest = {
 // Verify
 
 // Reissue
+
+// GetCurrentUser
+export type GetCurrentUserResponse = BaseUserResponse
