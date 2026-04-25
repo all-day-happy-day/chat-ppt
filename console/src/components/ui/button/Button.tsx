@@ -38,7 +38,7 @@ export function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }), 'relative overflow-hidden')}
+      className={cn(buttonVariants({ variant, size }), 'relative overflow-hidden', className)}
       disabled={disabled || loading}
       {...props}
     >
