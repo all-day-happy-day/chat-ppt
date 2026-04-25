@@ -26,22 +26,18 @@ import '@/i18n/i18n'
 import { ThemeToggleIcon } from './ThemeToggleIcon'
 
 export function SettingsMenu() {
-  let { data: user } = useCurrentUser()
+  const user = useCurrentUser().data ?? {
+    id: '1',
+    username: 'John Doe',
+    email: 'john.doe@example.com',
+    role: 'ADMIN',
+    createdAt: new Date(),
+    lastSignIn: new Date(),
+  }
   const { theme, setTheme } = useTheme()
   const { t, i18n } = useTranslation()
   const [language, setLanguage] = useState<string>(i18n.resolvedLanguage ?? i18n.language)
   const navigate = useNavigate()
-
-  if (!user) {
-    user = {
-      id: '1',
-      username: 'John Doe',
-      email: 'john.doe@example.com',
-      role: 'USER',
-      createdAt: new Date(),
-      lastSignIn: new Date(),
-    }
-  }
 
   return (
     <DropdownMenu>
