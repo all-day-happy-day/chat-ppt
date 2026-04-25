@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { CheckIcon, GlobeIcon, LogOutIcon, MonitorIcon, MoonIcon, SettingsIcon, SunIcon, UsersIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button/Button'
@@ -29,6 +30,7 @@ export function SettingsMenu() {
   const { theme, setTheme } = useTheme()
   const { t, i18n } = useTranslation()
   const [language, setLanguage] = useState<string>(i18n.resolvedLanguage ?? i18n.language)
+  const navigate = useNavigate()
 
   if (!user) {
     user = {
@@ -62,7 +64,7 @@ export function SettingsMenu() {
         </div>
 
         {/* Settings */}
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/settings')}>
           <SettingsIcon className="size-4" />
           <span>{t('header.settings.settings')}</span>
         </DropdownMenuItem>
