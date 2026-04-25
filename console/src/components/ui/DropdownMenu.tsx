@@ -108,6 +108,9 @@ export function DropdownMenuRadioItem({
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>) {
   return (
     <DropdownMenuPrimitive.RadioItem
+      onSelect={(e: Event) => {
+        e.preventDefault()
+      }}
       className={cn(
         'hover:bg-accent/60 hover:text-accent-foreground flex cursor-pointer flex-row items-center gap-2 rounded-lg px-2 py-1.5 pr-8 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
         className
