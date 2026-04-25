@@ -19,7 +19,7 @@ export function UserSettings() {
     id: '1',
     username: 'John Doe',
     email: 'john.doe@example.com',
-    role: 'ADMIN',
+    role: 'USER',
     createdAt: new Date(),
     lastSignIn: new Date(),
   }

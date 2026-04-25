@@ -30,7 +30,7 @@ export function SettingsMenu() {
     id: '1',
     username: 'John Doe',
     email: 'john.doe@example.com',
-    role: 'ADMIN',
+    role: 'USER',
     createdAt: new Date(),
     lastSignIn: new Date(),
   }
@@ -52,9 +52,9 @@ export function SettingsMenu() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="px-2 pt-0 pb-1">
+      <DropdownMenuContent align="end" className="rounded-xl px-1 pt-0 pb-1">
         {/* Profile */}
-        <div className="bg-accent/50 mb-1 flex scale-x-107 flex-col justify-center gap-1 rounded-t-[0.575rem] p-3 pr-24 pb-4">
+        <div className="bg-accent/50 mb-1 flex scale-x-103 flex-col justify-center gap-1 rounded-t-[0.575rem] p-3 pr-24 pb-4">
           <h1 className="text-lg font-bold">{user.username}</h1>
           <p className="text-muted-foreground text-xs">{user.email}</p>
         </div>
