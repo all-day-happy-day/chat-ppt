@@ -1,6 +1,10 @@
 export const ko_KR = {
   // Common
   'common.global.back': '뒤로가기',
+  'common.global.save': '저장',
+  'common.user.username': '사용자 이름',
+  'common.user.email': '이메일',
+  'common.user.password': '비밀번호',
 
   // Header
   'header.settings.settings': '설정',

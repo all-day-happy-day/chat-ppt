@@ -1,6 +1,10 @@
 export const en_US = {
   // Common
   'common.global.back': 'Back',
+  'common.global.save': 'Save',
+  'common.user.username': 'Username',
+  'common.user.email': 'Email',
+  'common.user.password': 'Password',
 
   // Header
   'header.settings.settings': 'Settings',
