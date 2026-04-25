@@ -411,7 +411,7 @@
   --warning: var(--yellow-9);
   --border: var(--gray-6);
   --input: var(--gray-6);
-  --ring: var(--gray-5);
+  --ring: var(--green-12);
   --chart-1: var(--teal-9);
   --chart-2: var(--teal-8);
   --chart-3: var(--teal-7);
@@ -425,6 +425,8 @@
   --sidebar-accent-foreground: var(--gray-12);
   --sidebar-border: var(--gray-6);
   --sidebar-ring: var(--teal-9);
+  --user: var(--green-8);
+  --admin: var(--brand-9);
 
   --brand: var(--brand-9);
 
@@ -444,13 +446,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-}
-
-button {
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
 }
 
 @theme inline {
@@ -494,6 +489,8 @@ button {
   --color-sidebar-ring: var(--sidebar-ring);
   --color-brand: var(--brand);
   --color-initial-avatar: var(--orange-8);
+  --color-user: var(--user);
+  --color-admin: var(--admin);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-dropdown-pop-open: dropdown-pop-open 0.15s ease-out;
@@ -570,14 +567,21 @@ button {
 
     scrollbar-width: none;
   }
-}
 
-@layer utilities {
   .favorite-icon {
     @apply fill-amber-500 stroke-amber-400 text-amber-500;
   }
 
   .unfavorite-icon {
     @apply text-muted-foreground fill-none;
+  }
+}
+
+@layer base {
+  button {
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
   }
 }
