@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
+import { UserSettings } from './authenticated/settings/UserSettings'
 import { AuthenticatedLayout } from './layouts/authenticated-layout/AuthenticatedLayout'
 import { RootLayout } from './layouts/root-layout/RootLayout'
 import { GlobalErrorPage } from './pages/global-error-page/GlobalErrorPage'
@@ -14,7 +15,10 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<RootLayout />}>
-              <Route path="/" element={<AuthenticatedLayout />} />
+              <Route path="/" element={<AuthenticatedLayout />}>
+                <Route path="/settings" element={<UserSettings />} />
+              </Route>
+
               <Route path="/error" element={<GlobalErrorPage />} />
               <Route path="/notfound" element={<NotFoundPage />} />
             </Route>
