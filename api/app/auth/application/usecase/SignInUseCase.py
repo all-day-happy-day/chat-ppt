@@ -11,8 +11,8 @@ class SignInUseCase:
         self.auth_service: AuthenticationService = auth_service
         self.user_repository: UserRepository = user_repository
 
-    def __call__(self, principal: str, secret: str) -> tuple[User, Credentials, Credentials]:
-        short_credentials, long_credentials = self.auth_service.authenticate(principal=principal, secret=secret)
+    def __call__(self, principal: str, password: str) -> tuple[User, Credentials, Credentials]:
+        short_credentials, long_credentials = self.auth_service.authenticate(principal=principal, secret=password)
         user: User = self.user_repository.get_by_id(user_id=short_credentials.user_id)
         user.last_sign_in = datetime.now(timezone.utc)
         self.user_repository.patch(user=user)
