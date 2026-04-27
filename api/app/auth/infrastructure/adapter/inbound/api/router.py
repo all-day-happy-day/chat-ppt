@@ -47,7 +47,7 @@ def signin(
     try:
         user, short_credentials, long_credentials = usecase(
             principal=request_model.principal,
-            secret=request_model.secret,
+            password=request_model.password,
         )
 
         # set refresh token cookie
