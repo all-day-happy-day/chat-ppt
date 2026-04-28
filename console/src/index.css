@@ -186,6 +186,8 @@
   --brand-a11: #d70039;
   --brand-a12: #660014f6;
 
+  --blue-1: #6d6dff;
+
   --brand-contrast: #fff;
   --brand-surface: #fff5f5cc;
   --brand-indicator: #ff3d59;
@@ -375,6 +377,8 @@
   --brand-a11: #ff8e93;
   --brand-a12: #ffd0d0;
 
+  --blue-1: #6d6dff;
+
   --brand-contrast: #fff;
   --brand-surface: #2f151580;
   --brand-indicator: #ff3d59;
@@ -398,7 +402,7 @@
   --card-foreground: var(--gray-12);
   --popover: var(--gray-3);
   --popover-foreground: var(--gray-12);
-  --primary: var(--green-8);
+  --primary: var(--blue-1);
   --primary-foreground: var(--gray-1);
   --secondary: var(--gray-3);
   --secondary-foreground: var(--gray-12);
