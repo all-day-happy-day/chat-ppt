@@ -31,6 +31,7 @@ from app.di.application.usecase import (
 )
 from app.shared.user.domain.exception import DuplicatedUser
 from app.user.domain.entity import User
+from app.user.domain.exception import UserNotFound
 from core.auth.domain.exception import AlchemyMismatch, DuplicatedPrincipal, InvalidCredentials, PrincipalNotFound
 from core.notifier import EmailNotifier
 
@@ -77,6 +78,8 @@ def signin(
     except InvalidCredentials as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except PrincipalNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UserNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
@@ -167,7 +170,7 @@ def signup(
 
 
 @router.get("/verify", response_model=VerifyTokenResponse)
-def verify_token(
+def verify_credentials(
     usecase: Annotated[VerifyCredentialsUseCase, Depends(get_verify_credentials_use_case)],
     access_token: str | None = Cookie(None),
 ):
@@ -193,7 +196,7 @@ def verify_password(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Password")
 
 
-@router.post("/refresh", status_code=status.HTTP_200_OK)
+@router.post("/reissue", status_code=status.HTTP_200_OK)
 def reissue_tokens(
     response: Response,
     usecase: Annotated[RefreshCredentialsUseCase, Depends(get_refresh_credentials_use_case)],
