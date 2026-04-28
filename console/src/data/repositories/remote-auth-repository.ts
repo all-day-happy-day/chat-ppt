@@ -35,11 +35,11 @@ export class RemoteAuthRepository implements AuthRepository {
   }
 
   async verify(): Promise<void> {
-    await httpClient.post<RequestBody, APIResponse>(`/auth/verify`, {})
+    await httpClient.get<APIResponse>(`/auth/verify`)
   }
 
   async reissue(): Promise<void> {
-    await httpClient.post<RequestBody, APIResponse>(`/auth/refresh`, {})
+    await httpClient.post<RequestBody, APIResponse>(`/auth/reissue`, {})
   }
 
   async getCurrentUser(): Promise<User> {
