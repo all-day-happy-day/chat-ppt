@@ -12,6 +12,7 @@ import {
   ThemeMenu,
 } from '@/components/common/header/dropdown-menu-settings/menus'
 import { DropdownMenuSeparator } from '@/components/ui/DropdownMenu'
+import { UserInitialAvatar } from '@/components/ui/UserInitialAvatar'
 import type { User } from '@/domain/models/user'
 import type { Theme } from '@/providers'
 
@@ -37,8 +38,10 @@ export function AuthenticatedDropdownMenu({
   signOut: () => Promise<void>
 }): React.ReactNode {
   return (
-    <DropdownMenuSettings>
-      <ProfileMenu user={user} />
+    <DropdownMenuSettings
+      triggerIcon={<UserInitialAvatar username={user.username} className="bg-initial-avatar size-8" />}
+    >
+      <ProfileMenu user={user} className="-mt-1" />
       <SettingsMenu t={t} navigate={navigate} />
       <LanguageMenu t={t} i18n={i18n} language={language} setLanguage={setLanguage} />
       <ThemeMenu t={t} theme={theme} setTheme={setTheme} />
