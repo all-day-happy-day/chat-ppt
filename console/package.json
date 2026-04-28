@@ -43,6 +43,7 @@
     "lucide-react": "^1.8.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "react-devtools": "^7.0.1",
     "react-error-boundary": "^6.1.1",
     "react-hook-form": "^7.74.0",
     "react-i18next": "^17.0.4",
