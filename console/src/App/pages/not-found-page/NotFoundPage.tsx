@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Ban } from 'lucide-react'
 
 import { CenteredLayout } from '@/App/layouts/centered-layout/CenteredLayout'
-import { BackButton } from '@/components/ui/BackButton'
 
 import '@/i18n/i18n'
 
@@ -20,7 +19,6 @@ export function NotFoundPage(): JSX.Element {
         <p className="text-foreground/80 z-10 w-full text-center text-xl font-semibold wrap-break-word">
           {t('page.not_found.description')}
         </p>
-        <BackButton />
       </div>
     </CenteredLayout>
   )
