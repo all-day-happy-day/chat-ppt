@@ -47,7 +47,7 @@
   --green-9: #00ff2a;
   --green-10: #00f410;
   --green-11: #16871d;
-  --green-12: #1a471a;
+  --green-12: #246424;
 
   --green-a1: #00cc0005;
   --green-a2: #00c0000c;
@@ -549,9 +549,9 @@ body {
 }
 
 @layer base {
-  * {
+  /* * {
     @apply border-border outline-ring/50;
-  }
+  } */
 
   body {
     @apply bg-background text-foreground;
