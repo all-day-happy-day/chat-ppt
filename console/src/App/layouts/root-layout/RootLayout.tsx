@@ -15,7 +15,7 @@ export function RootLayout() {
   })
 
   return (
-    <div className="bg-color-background flex h-dvh flex-row overflow-x-hidden">
+    <div className="bg-color-background flex h-dvh w-screen flex-row overflow-x-hidden">
       <Suspense>
         <ErrorBoundary fallback={<GlobalErrorPage />}>
           <Outlet />
