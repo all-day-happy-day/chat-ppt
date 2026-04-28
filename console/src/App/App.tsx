@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
-import { UserSettings } from './authenticated/settings/UserSettings'
 import { AuthenticatedLayout } from './layouts/authenticated-layout/AuthenticatedLayout'
 import { RootLayout } from './layouts/root-layout/RootLayout'
 import { UnauthenticatedLayout } from './layouts/unauthenticated-layout/UnauthenticatedLayout'
@@ -14,6 +13,9 @@ import { SignUp } from './unauthenticated/sign-up/SignUp'
 const IndexPage = lazy(() => import('./pages/index-page/IndexPage').then((module) => ({ default: module.IndexPage })))
 const NotFoundPage = lazy(() =>
   import('./pages/not-found-page/NotFoundPage').then((module) => ({ default: module.NotFoundPage }))
+)
+const UserSettings = lazy(() =>
+  import('./authenticated/settings/UserSettings').then((module) => ({ default: module.UserSettings }))
 )
 
 export default function App() {
