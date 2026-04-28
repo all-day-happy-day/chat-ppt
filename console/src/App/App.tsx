@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
@@ -5,8 +6,15 @@ import { QueryClientProvider, ThemeProvider } from '@/providers'
 import { UserSettings } from './authenticated/settings/UserSettings'
 import { AuthenticatedLayout } from './layouts/authenticated-layout/AuthenticatedLayout'
 import { RootLayout } from './layouts/root-layout/RootLayout'
+import { UnauthenticatedLayout } from './layouts/unauthenticated-layout/UnauthenticatedLayout'
 import { GlobalErrorPage } from './pages/global-error-page/GlobalErrorPage'
-import { NotFoundPage } from './pages/not-found-page/NotFoundPage'
+import { SignIn } from './unauthenticated/sign-in/SignIn'
+import { SignUp } from './unauthenticated/sign-up/SignUp'
+
+const IndexPage = lazy(() => import('./pages/index-page/IndexPage').then((module) => ({ default: module.IndexPage })))
+const NotFoundPage = lazy(() =>
+  import('./pages/not-found-page/NotFoundPage').then((module) => ({ default: module.NotFoundPage }))
+)
 
 export default function App() {
   return (
@@ -15,12 +23,19 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<RootLayout />}>
-              <Route path="/" element={<AuthenticatedLayout />}>
+              <Route index element={<IndexPage />} />
+
+              <Route element={<AuthenticatedLayout />}>
                 <Route path="/settings" element={<UserSettings />} />
               </Route>
 
+              <Route path="/" element={<UnauthenticatedLayout />}>
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+              </Route>
+
               <Route path="/error" element={<GlobalErrorPage />} />
-              <Route path="/notfound" element={<NotFoundPage />} />
+              <Route path="/*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </BrowserRouter>
