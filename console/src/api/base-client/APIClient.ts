@@ -70,6 +70,7 @@ export class APIClient {
       credentials: 'include',
       ...(preparedRequestBody ? { body: preparedRequestBody.body } : {}),
     })
+    if (!fetchResponse.ok) throw new Error(`Failed to fetch data: ${fetchResponse.statusText}`)
 
     const contentType: string = fetchResponse.headers.get('content-type') ?? ''
 
