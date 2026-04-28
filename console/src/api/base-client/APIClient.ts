@@ -67,6 +67,7 @@ export class APIClient {
     const fetchResponse: Response = await fetch(requestUrl, {
       method: request.method,
       headers: fetchHeaders,
+      credentials: 'include',
       ...(preparedRequestBody ? { body: preparedRequestBody.body } : {}),
     })
 
