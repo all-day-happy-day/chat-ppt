@@ -1,15 +1,40 @@
-import { Logo } from './logo/Logo'
-import { SettingsMenu } from './settings-menu/SettingsMenu'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+
+import { useGetCurrentUser, useSignOut } from '@/api/query/auth.query'
+import { BaseHeader } from '@/components/common/header/BaseHeader'
+import type { User } from '@/domain/models/user'
+import { getQueryData } from '@/lib/utils'
+import { useTheme } from '@/providers'
+
+import { AuthenticatedDropdownMenu } from './AuthenticatedDropdownMenu'
 
 export function Header() {
+  const { t, i18n } = useTranslation()
+  const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
+  const { mutateAsync: signOut } = useSignOut()
+  const user = getQueryData<User>(useGetCurrentUser())
+  const [language, setLanguage] = useState<string>(i18n.resolvedLanguage ?? i18n.language)
+
+  if (user === undefined) return null
+
   return (
-    <header className="bg-header shadow-accent/80 flex h-(--header-height) min-h-(--header-height) w-full items-center justify-between border-b border-none px-4 shadow-lg">
+    <BaseHeader>
       <div className="flex items-center">
-        <Logo />
+        <AuthenticatedDropdownMenu
+          t={t}
+          i18n={i18n}
+          language={language}
+          setLanguage={setLanguage}
+          theme={theme}
+          setTheme={setTheme}
+          user={user}
+          navigate={navigate}
+          signOut={signOut}
+        />
       </div>
-      <div className="flex items-center">
-        <SettingsMenu />
-      </div>
-    </header>
+    </BaseHeader>
   )
 }
