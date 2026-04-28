@@ -1,10 +1,18 @@
 export const en_US = {
   // Common
+  'common.global.welcome': 'Welcome to ChatPPT',
   'common.global.back': 'Back',
   'common.global.save': 'Save',
   'common.user.username': 'Username',
   'common.user.email': 'Email',
   'common.user.password': 'Password',
+  'common.user.change_password': 'Change Password',
+  'common.auth.dont_have_an_account': "Don't have an account?",
+  'common.auth.already_have_an_account': 'Already have an account?',
+  'common.global.email_or_username': 'Email or Username',
+  'common.global.password': 'Password',
+  'common.global.sign_in': 'Sign In',
+  'common.global.sign_up': 'Sign Up',
 
   // Header
   'header.settings.settings': 'Settings',

@@ -1,10 +1,18 @@
 export const ko_KR = {
   // Common
+  'common.global.welcome': 'ChatPPT에 오신 것을 환영합니다',
   'common.global.back': '뒤로가기',
   'common.global.save': '저장',
   'common.user.username': '사용자 이름',
   'common.user.email': '이메일',
   'common.user.password': '비밀번호',
+  'common.user.change_password': '비밀번호 변경',
+  'common.auth.dont_have_an_account': '계정이 없으신가요?',
+  'common.auth.already_have_an_account': '이미 계정이 있으신가요?',
+  'common.global.email_or_username': '이메일 또는 사용자 이름',
+  'common.global.password': '비밀번호',
+  'common.global.sign_in': '로그인',
+  'common.global.sign_up': '회원가입',
 
   // Header
   'header.settings.settings': '설정',
