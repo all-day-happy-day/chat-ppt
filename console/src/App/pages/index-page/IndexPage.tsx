@@ -1,17 +1,25 @@
+import { useNavigate } from 'react-router-dom'
+
+import { useVerifyAccessToken } from '@/api/query/auth.query'
 import { Spinner } from '@/components/ui/spinner/Spinner'
-import { authUseCase } from '@/di/usecases'
 import { useMount } from '@/hooks/useMount'
+import { getQueryData } from '@/lib/utils'
 
 export function IndexPage() {
+  const navigate = useNavigate()
+  const verifyToken = useVerifyAccessToken()
+
   useMount(() => {
-    authUseCase
-      .verify()
-      .then(() => {
-        window.location.href = '/settings'
-      })
-      .catch(() => {
-        window.location.href = '/signin'
-      })
+    try {
+      const verified = getQueryData<boolean>(verifyToken)
+      if (verified || verified !== undefined) {
+        navigate('/settings')
+      } else {
+        navigate('/signin')
+      }
+    } catch {
+      navigate('/signin')
+    }
   })
 
   return (
