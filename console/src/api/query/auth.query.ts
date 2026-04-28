@@ -49,14 +49,14 @@ export function useVerifyAccessToken() {
   return useQuery({
     queryKey: QUERY_KEY.AUTH.VERIFY,
     retry: false,
-    queryFn: () => {
+    queryFn: async () => {
       try {
-        authUseCase.verify()
+        await authUseCase.verify()
         return true
       } catch {
         try {
-          authUseCase.reissue()
-          authUseCase.verify()
+          await authUseCase.reissue()
+          await authUseCase.verify()
           return true
         } catch {
           throw new Error('Failed to verify access token')
