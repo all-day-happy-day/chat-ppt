@@ -8,6 +8,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/DropdownMenu'
+import { cn } from '@/lib/utils'
 import type { Theme } from '@/providers'
 
 import type { TFunction } from 'i18next'
@@ -21,20 +22,22 @@ export function ThemeMenu({ t, theme, setTheme }: { t: TFunction; theme: Theme; 
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
         <DropdownMenuRadioGroup value={theme} onValueChange={(next: string) => setTheme(next as Theme)}>
-          <DropdownMenuRadioItem value="light">
+          <DropdownMenuRadioItem value="light" className="items-stretch">
+            <CheckIcon className={cn('size-4', theme === 'light' ? 'opacity-100' : 'opacity-0')} />
             <SunIcon className="size-4" />
             <span>{t('header.settings.theme.light')}</span>
-            {theme === 'light' && <CheckIcon className="ml-auto size-4" />}
           </DropdownMenuRadioItem>
+
           <DropdownMenuRadioItem value="dark">
+            <CheckIcon className={cn('size-4', theme === 'dark' ? 'opacity-100' : 'opacity-0')} />
             <MoonIcon className="size-4" />
             <span>{t('header.settings.theme.dark')}</span>
-            {theme === 'dark' && <CheckIcon className="ml-auto size-4" />}
           </DropdownMenuRadioItem>
+
           <DropdownMenuRadioItem value="system">
+            <CheckIcon className={cn('size-4', theme === 'system' ? 'opacity-100' : 'opacity-0')} />
             <MonitorIcon className="size-4" />
             <span>{t('header.settings.theme.system')}</span>
-            {theme === 'system' && <CheckIcon className="ml-auto size-4" />}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuSubContent>

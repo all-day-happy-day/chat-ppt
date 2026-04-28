@@ -25,7 +25,7 @@ export function DropdownMenuSubTrigger({ ...props }: React.ComponentProps<typeof
 }
 
 export function DropdownMenuSubContent({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
-  return <DropdownMenuPrimitive.SubContent {...props} />
+  return <DropdownMenuPrimitive.SubContent className="w-max min-w-40" {...props} />
 }
 
 export function DropdownMenuContent({
@@ -38,7 +38,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 w-56 min-w-40 rounded-lg shadow-md',
+          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 w-max min-w-40 rounded-lg shadow-md',
           className
         )}
         {...props}
@@ -57,7 +57,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        'focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+        'focus:bg-accent whitespace-nowrapfocus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
         inset && 'pl-8',
         className
       )}
@@ -112,7 +112,7 @@ export function DropdownMenuRadioItem({
         e.preventDefault()
       }}
       className={cn(
-        'hover:bg-accent/60 hover:text-accent-foreground flex cursor-pointer flex-row items-center gap-2 rounded-lg px-2 py-1.5 pr-8 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+        'hover:bg-accent/60 hover:text-accent-foreground flex cursor-pointer flex-row items-center gap-2 rounded-lg px-2 py-1.5 pr-8 text-sm whitespace-nowrap outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
         className
       )}
       {...props}

@@ -8,6 +8,7 @@ import {
   DropdownMenuSubTrigger,
 } from '@/components/ui/DropdownMenu'
 import { LANGUAGE_MAP } from '@/i18n/settings'
+import { cn } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
@@ -41,12 +42,12 @@ export function LanguageMenu({
           }}
         >
           <DropdownMenuRadioItem value="en">
+            <CheckIcon className={cn('size-4', language === 'en' ? 'opacity-100' : 'opacity-0')} />
             <span>{LANGUAGE_MAP['en']}</span>
-            {language === 'en' && <CheckIcon className="ml-auto size-4" />}
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="ko">
+            <CheckIcon className={cn('size-4', language === 'ko' ? 'opacity-100' : 'opacity-0')} />
             <span>{LANGUAGE_MAP['ko']}</span>
-            {language === 'ko' && <CheckIcon className="ml-auto size-4" />}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuSubContent>
