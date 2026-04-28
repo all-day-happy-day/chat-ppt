@@ -38,7 +38,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 min-w-40 rounded-lg shadow-md',
+          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 w-56 min-w-40 rounded-lg shadow-md',
           className
         )}
         {...props}
