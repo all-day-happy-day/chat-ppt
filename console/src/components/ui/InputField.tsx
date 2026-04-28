@@ -1,34 +1,32 @@
 import { cn } from '@/lib/utils'
 
-export function InputField({
-  id,
+import type { FieldValues, Path, UseFormRegister } from 'react-hook-form'
+
+export function InputField<T extends FieldValues>({
+  register,
   name,
   label,
-  type,
-  defaultValue,
   className,
+  placeholder,
+  required = true,
+  type,
 }: {
-  id: string
-  name: string
-  label: string
-  type: string
-  defaultValue: string
+  register: UseFormRegister<T>
+  name: Path<T>
+  label?: string
   className?: string
+  placeholder?: string
+  required?: boolean
+  type?: string
 }) {
   return (
-    <div className="flex flex-col items-start gap-2">
-      <label htmlFor="username" className="text-muted-foreground pl-0.5 text-sm font-medium">
-        {label}
-      </label>
+    <div className={cn('flex w-full flex-col items-start gap-2', className)}>
+      {label && <label className="text-muted-foreground pl-0.5 text-sm font-medium">{label}</label>}
       <input
-        id={id}
-        name={name}
-        type={type}
-        defaultValue={defaultValue}
-        className={cn(
-          'border-input bg-background focus:ring-ring w-fit rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none',
-          className
-        )}
+        placeholder={placeholder}
+        {...register(name, { required: required })}
+        type={type ?? 'text'}
+        className="border-input bg-background focus:border-ring h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:placeholder:text-transparent"
       />
     </div>
   )
