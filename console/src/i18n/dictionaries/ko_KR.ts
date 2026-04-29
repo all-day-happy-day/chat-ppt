@@ -21,6 +21,12 @@ export const ko_KR = {
   'common.global.new_password_confirmed': '새 비밀번호가 확인되었습니다',
   'common.global.password_changed': '비밀번호가 성공적으로 변경되었습니다',
 
+  // Home
+  'home.profile': '프로필',
+  'home.projects': '프로젝트',
+  'home.templates': '템플릿',
+  'home.songs': '찬양 곡',
+
   // Header
   'header.settings.settings': '설정',
   'header.settings.manage_users': '사용자 관리',

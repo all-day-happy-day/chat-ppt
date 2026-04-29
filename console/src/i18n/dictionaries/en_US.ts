@@ -21,6 +21,12 @@ export const en_US = {
   'common.global.new_password_confirmed': 'New password confirmed',
   'common.global.password_changed': 'Password changed successfully',
 
+  // Home
+  'home.profile': 'Profile',
+  'home.projects': 'Projects',
+  'home.templates': 'Templates',
+  'home.songs': 'Songs',
+
   // Header
   'header.settings.settings': 'Settings',
   'header.settings.manage_users': 'Users Management',
