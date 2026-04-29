@@ -13,7 +13,7 @@ export function IndexPage() {
     if (verifyToken.isPending) return
 
     if (verifyToken.isSuccess && verifyToken.data === true) {
-      void navigate('/settings')
+      void navigate('/home')
       return
     }
     if (verifyToken.isError) {
