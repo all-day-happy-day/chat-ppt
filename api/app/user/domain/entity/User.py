@@ -10,7 +10,6 @@ class User(BaseModel):
     id: ULID = Field(default_factory=lambda: ULID())
     email: EmailStr
     username: str
-    password: str
     created_at: datetime
     updated_at: datetime
     last_sign_in: datetime | None = Field(default=None)

@@ -13,7 +13,6 @@ class UserMapper:
             id=ULID.from_str(alchemy_entity.id),
             email=alchemy_entity.email,
             username=alchemy_entity.username,
-            password=alchemy_entity.password,
             created_at=alchemy_entity.created_at.replace(tzinfo=timezone.utc),
             updated_at=alchemy_entity.updated_at.replace(tzinfo=timezone.utc),
             last_sign_in=(
@@ -30,7 +29,6 @@ class UserMapper:
             id=str(domain_entity.id),
             email=domain_entity.email,
             username=domain_entity.username,
-            password=domain_entity.password,
             created_at=domain_entity.created_at,
             updated_at=domain_entity.updated_at,
             last_sign_in=domain_entity.last_sign_in,
