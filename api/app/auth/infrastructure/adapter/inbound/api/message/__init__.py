@@ -1,4 +1,6 @@
 from .GetCurrentUserResponse import GetCurrentUserResponse
+from .PatchPasswordRequest import PatchPasswordRequest
+from .PatchPasswordResponse import PatchPasswordResponse
 from .SignInRequest import SignInRequest
 from .SignInResponse import SignInResponse
 from .SignOutResponse import SignOutResponse
@@ -9,6 +11,8 @@ from .VerifyTokenResponse import VerifyTokenResponse
 
 __all__ = [
     "GetCurrentUserResponse",
+    "PatchPasswordRequest",
+    "PatchPasswordResponse",
     "SignInRequest",
     "SignInResponse",
     "SignOutResponse",
