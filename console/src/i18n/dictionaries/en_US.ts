@@ -13,6 +13,13 @@ export const en_US = {
   'common.global.password': 'Password',
   'common.global.sign_in': 'Sign In',
   'common.global.sign_up': 'Sign Up',
+  'common.global.password_mismatch': 'Password does not match',
+  'common.global.password_too_short': 'Password must be at least {{minLength}} characters',
+  'common.global.wrong_password': 'Wrong password',
+  'common.global.password_verified': 'Password verified',
+  'common.global.new_password_verified': 'You can use this password',
+  'common.global.new_password_confirmed': 'New password confirmed',
+  'common.global.password_changed': 'Password changed successfully',
 
   // Header
   'header.settings.settings': 'Settings',

@@ -13,6 +13,13 @@ export const ko_KR = {
   'common.global.password': '비밀번호',
   'common.global.sign_in': '로그인',
   'common.global.sign_up': '회원가입',
+  'common.global.password_mismatch': '비밀번호가 일치하지 않습니다',
+  'common.global.password_too_short': '비밀번호는 {{minLength}}자 이상이어야 합니다',
+  'common.global.wrong_password': '비밀번호가 일치하지 않습니다',
+  'common.global.password_verified': '비밀번호가 일치합니다',
+  'common.global.new_password_verified': '이 비밀번호를 사용할 수 있습니다',
+  'common.global.new_password_confirmed': '새 비밀번호가 확인되었습니다',
+  'common.global.password_changed': '비밀번호가 성공적으로 변경되었습니다',
 
   // Header
   'header.settings.settings': '설정',
