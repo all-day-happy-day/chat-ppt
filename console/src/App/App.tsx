@@ -15,7 +15,7 @@ const NotFoundPage = lazy(() =>
   import('./pages/not-found-page/NotFoundPage').then((module) => ({ default: module.NotFoundPage }))
 )
 const UserSettings = lazy(() =>
-  import('./authenticated/settings/UserSettings').then((module) => ({ default: module.UserSettings }))
+  import('./authenticated/settings/user-settings/UserSettings').then((module) => ({ default: module.UserSettings }))
 )
 
 export default function App() {
