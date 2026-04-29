@@ -39,7 +39,7 @@ export function AuthenticatedDropdownMenu({
 }): React.ReactNode {
   return (
     <DropdownMenuSettings
-      triggerIcon={<UserInitialAvatar username={user.username} className="bg-initial-avatar size-8" />}
+      triggerIcon={<UserInitialAvatar username={user.username} className="bg-initial-avatar size-7" />}
     >
       <ProfileMenu user={user} className="-mt-1" />
       <SettingsMenu t={t} navigate={navigate} />

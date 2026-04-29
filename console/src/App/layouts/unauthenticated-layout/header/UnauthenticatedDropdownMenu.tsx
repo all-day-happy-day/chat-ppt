@@ -22,7 +22,7 @@ export function UnauthenticatedDropdownMenu({
   setTheme: (theme: Theme) => void
 }): React.ReactNode {
   return (
-    <DropdownMenuSettings triggerIcon={<MenuIcon className="size-4" />}>
+    <DropdownMenuSettings triggerIcon={<MenuIcon className="size-6" />}>
       <LanguageMenu t={t} i18n={i18n} language={language} setLanguage={setLanguage} />
       <ThemeMenu t={t} theme={theme} setTheme={setTheme} />
     </DropdownMenuSettings>

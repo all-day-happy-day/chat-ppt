@@ -23,7 +23,7 @@ export function DropdownMenuSettings({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="rounded-xl px-1 py-1">
+      <DropdownMenuContent align="end" className="w-[200px] rounded-xl px-1 py-1">
         {children}
       </DropdownMenuContent>
     </DropdownMenu>
