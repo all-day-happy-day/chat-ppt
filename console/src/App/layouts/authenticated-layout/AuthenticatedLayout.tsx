@@ -1,22 +1,19 @@
 import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 
-import { Header } from './header/Header'
+import { CenteredLayout } from '../centered-layout/CenteredLayout'
 
-import type { CSSProperties } from 'react'
+import { Header } from './header/Header'
 
 export function AuthenticatedLayout() {
   return (
     <Suspense>
-      <main
-        className="relative flex h-full w-full flex-col overflow-y-scroll"
-        style={{ '--header-height': '48px' } as CSSProperties}
-      >
+      <CenteredLayout>
         <Header />
-        <div className="flex-1">
+        <div className="scrollbar-hide flex w-full flex-1 items-center justify-center overflow-y-scroll">
           <Outlet />
         </div>
-      </main>
+      </CenteredLayout>
     </Suspense>
   )
 }
