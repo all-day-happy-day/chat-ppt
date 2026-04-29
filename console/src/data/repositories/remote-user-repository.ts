@@ -24,7 +24,7 @@ export class RemoteUserRepository implements UserRepository {
     return response.map((user) => toUser(user))
   }
 
-  async patchUser(id: string, requestBody: { email?: string; username?: string; password?: string }): Promise<User> {
+  async patchUser(id: string, requestBody: { email?: string; username?: string }): Promise<User> {
     const { response } = await httpClient.patch<PatchUserRequest, PatchUserResponse>(`/user/${id}`, requestBody)
     return toUser(response)
   }

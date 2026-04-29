@@ -7,6 +7,8 @@ import type { AuthRepository } from '@/domain/repositories/auth-repository'
 import { toUser } from './messages/common/base-user-response'
 import type {
   GetCurrentUserResponse,
+  PatchPasswordRequest,
+  PatchPasswordResponse,
   SignInRequest,
   SignInResponse,
   SignOutResponse,
@@ -45,5 +47,13 @@ export class RemoteAuthRepository implements AuthRepository {
   async getCurrentUser(): Promise<User> {
     const { response } = await httpClient.get<GetCurrentUserResponse>(`/auth/me`)
     return toUser(response)
+  }
+
+  async patchPassword(id: string, requestBody: { password: string }): Promise<string> {
+    const { response } = await httpClient.patch<PatchPasswordRequest, PatchPasswordResponse>(
+      `/auth/password/${id}`,
+      requestBody
+    )
+    return response.username
   }
 }

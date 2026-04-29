@@ -8,4 +8,5 @@ export abstract class AuthRepository {
   abstract verify(): Promise<void>
   abstract reissue(): Promise<void>
   abstract getCurrentUser(): Promise<User>
+  abstract patchPassword(id: string, requestBody: { password: string }): Promise<string>
 }

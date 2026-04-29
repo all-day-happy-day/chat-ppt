@@ -35,4 +35,8 @@ export class AuthUseCase {
   async getCurrentUser(): Promise<User> {
     return this.authRepository.getCurrentUser()
   }
+
+  async patchPassword(id: string, requestBody: { password: string }): Promise<string> {
+    return this.authRepository.patchPassword(id, requestBody)
+  }
 }

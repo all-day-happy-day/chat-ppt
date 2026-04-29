@@ -12,7 +12,6 @@ export type GetUsersResponse = BaseUserResponse[]
 export type PatchUserRequest = {
   email?: string
   username?: string
-  password?: string
 }
 export type PatchUserResponse = BaseUserResponse
 

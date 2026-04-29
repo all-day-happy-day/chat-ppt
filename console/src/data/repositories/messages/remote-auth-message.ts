@@ -37,3 +37,9 @@ export type VerifyPasswordRequest = {
 
 // GetCurrentUser
 export type GetCurrentUserResponse = BaseUserResponse
+
+// PatchPassword
+export type PatchPasswordRequest = {
+  password: string
+}
+export type PatchPasswordResponse = BaseAuthResponse

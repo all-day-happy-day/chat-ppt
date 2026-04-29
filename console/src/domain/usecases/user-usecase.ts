@@ -16,7 +16,7 @@ export class UserUseCase {
     return this.userRepository.getUsers()
   }
 
-  async patchUser(id: string, requestBody: { email?: string; username?: string; password?: string }): Promise<User> {
+  async patchUser(id: string, requestBody: { email?: string; username?: string }): Promise<User> {
     return this.userRepository.patchUser(id, requestBody)
   }
 
