@@ -2,8 +2,10 @@ import os
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Response, status
+from ulid import ULID
 
 from app.auth.application.usecase import (
+    PatchPasswordUseCase,
     RefreshCredentialsUseCase,
     SignInUseCase,
     SignOutUseCase,
@@ -13,6 +15,8 @@ from app.auth.application.usecase import (
 )
 from app.auth.infrastructure.adapter.inbound.api.message import (
     GetCurrentUserResponse,
+    PatchPasswordRequest,
+    PatchPasswordResponse,
     SignInRequest,
     SignInResponse,
     SignOutResponse,
@@ -22,6 +26,7 @@ from app.auth.infrastructure.adapter.inbound.api.message import (
     VerifyTokenResponse,
 )
 from app.di.application.usecase import (
+    get_patch_password_use_case,
     get_refresh_credentials_use_case,
     get_sign_in_use_case,
     get_sign_out_use_case,
@@ -245,6 +250,23 @@ def get_current_user(
         if not access_token:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing access token")
         return GetCurrentUserResponse.from_user_entity(user=usecase(raw_short_lived_credentials=access_token))
+    except InvalidCredentials as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except AlchemyMismatch as e:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(e))
+
+
+@router.patch("/password/{user_id}", status_code=status.HTTP_200_OK)
+def patch_password(
+    user_id: ULID,
+    request_model: PatchPasswordRequest,
+    usecase: Annotated[PatchPasswordUseCase, Depends(get_patch_password_use_case)],
+):
+    try:
+        user: User = usecase(user_id=user_id, password=request_model.password)
+        return PatchPasswordResponse.from_user_entity(user=user)
+    except UserNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except InvalidCredentials as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except AlchemyMismatch as e:

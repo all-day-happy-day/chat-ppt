@@ -1,6 +1,7 @@
 from fastapi import Depends
 
 from app.auth.application.usecase import (
+    PatchPasswordUseCase,
     RefreshCredentialsUseCase,
     SignInUseCase,
     SignOutUseCase,
@@ -113,6 +114,16 @@ def get_update_user_role_use_case(
 
 
 # Auth
+def get_patch_password_use_case(
+    principal_repository: PrincipalRepository = Depends(get_principal_repository),
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_hasher: PasswordHasher = Depends(get_password_hasher),
+) -> PatchPasswordUseCase:
+    return PatchPasswordUseCase(
+        principal_repository=principal_repository, user_repository=user_repository, password_hasher=password_hasher
+    )
+
+
 def get_sign_in_use_case(
     auth_service: AuthenticationService = Depends(get_authentication_service),
     user_repository: UserRepository = Depends(get_user_repository),
