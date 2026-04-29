@@ -30,7 +30,7 @@ export function InputField<T extends FieldValues>({
         placeholder={placeholder}
         {...register(name, { required: required, ...registerOptions })}
         type={type ?? 'text'}
-        className="border-input bg-background focus:border-ring h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:placeholder:text-transparent"
+        className="border-input bg-background focus:border-ring focus:placeholder:text-secondary-foreground/20 h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none"
       />
     </div>
   )
