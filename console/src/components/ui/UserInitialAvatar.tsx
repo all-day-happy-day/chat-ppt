@@ -11,7 +11,7 @@ export function UserInitialAvatar({ username, className }: UserInitialAvatarProp
   return (
     <div
       className={cn(
-        'bg-muted text-foreground inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold',
+        'bg-muted text-foreground inline-flex size-9 items-center justify-center rounded-full text-xs font-semibold',
         className
       )}
       aria-label={`User avatar: ${username}`}
