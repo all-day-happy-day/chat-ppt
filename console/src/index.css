@@ -398,7 +398,7 @@
   --background: var(--gray-1);
   --header: var(--gray-2);
   --foreground: var(--gray-12);
-  --card: var(--gray-2);
+  --card: var(--gray-3);
   --card-foreground: var(--gray-12);
   --popover: var(--gray-3);
   --popover-foreground: var(--gray-12);
@@ -578,6 +578,10 @@ body {
 
   .unfavorite-icon {
     @apply text-muted-foreground fill-none;
+  }
+
+  tr.group:hover + tr .content-table-row-border {
+    border-top-color: transparent;
   }
 }
 
