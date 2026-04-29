@@ -1,10 +1,13 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
+import { usePatchPassword, useVerifyPassword } from '@/api/query/auth.query'
 import { usePatchUser } from '@/api/query/user.query'
 import { ActionButton } from '@/components/common/action-button/ActionButton'
+import { Button } from '@/components/ui/button/Button'
 import { Card } from '@/components/ui/Card'
 import { InputField } from '@/components/ui/InputField'
 import type { Role, User } from '@/domain/models/user'
@@ -12,7 +15,8 @@ import { cn, getQueryData } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
-import type { UserSettingsForm } from './UserSettings.types'
+import { ChangePassword } from './change-password/ChangePassword'
+import type { UserSettingsForm } from './user-settings.types'
 
 const ROLE_TEXT_CLASS: Record<Role, string> = {
   ADMIN: 'text-admin',
@@ -22,6 +26,8 @@ const ROLE_TEXT_CLASS: Record<Role, string> = {
 export function UserSettings() {
   const { t } = useTranslation()
   const patchUser = usePatchUser()
+  const verifyPassword = useVerifyPassword()
+  const patchPassword = usePatchPassword()
 
   const { register, handleSubmit, reset } = useForm<UserSettingsForm>({
     defaultValues: {
@@ -39,16 +45,24 @@ export function UserSettings() {
       password: '',
     })
   }, [user, reset])
-  const onSubmit = (data: UserSettingsForm) => {
+  const onSubmit = async (data: UserSettingsForm) => {
     if (!user) return
-    patchUser.mutate({
+    await patchUser.mutateAsync({
       id: user.id,
       requestBody: {
         username: data.username,
         email: data.email,
-        // password: data.password,
       },
     })
+  }
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false)
+  const handleChangePassword = async (newPassword: string): Promise<void> => {
+    if (!user) return
+    console.log('newPassword: ', newPassword)
+    await patchPassword.mutateAsync({ id: user.id, requestBody: { password: newPassword } })
+    await verifyPassword.mutateAsync({ principal: user.username, password: newPassword })
+    toast.success(t('common.global.password_changed'))
   }
 
   if (user === undefined) return null
@@ -87,22 +101,31 @@ export function UserSettings() {
                 className="w-xs max-md:w-full"
               />
             </div>
-            <div className="flex flex-col items-start gap-6">
-              <p className="text-destructive text-2xl font-semibold">{t('common.user.change_password')}</p>
-              <InputField
-                register={register}
-                name="password"
-                label={t('common.user.password')}
-                className="w-xs max-md:w-full"
-                required={false}
-              />
-            </div>
             <div className="flex w-full flex-row items-center justify-end gap-2 max-md:justify-center">
               <ActionButton type="submit" label={t('common.global.save')} />
             </div>
           </form>
+          <div className="border-secondary flex flex-col items-start gap-8 border-t pt-8">
+            <p className="text-2xl font-semibold">{t('common.user.change_password')}</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="text-destructive"
+            >
+              {t('common.user.change_password')}
+            </Button>
+          </div>
         </div>
       </div>
+      {isPasswordModalOpen && (
+        <ChangePassword
+          onOpenChange={setIsPasswordModalOpen}
+          principal={user.username} // principal: username
+          onSubmitPasswordChange={handleChangePassword}
+        />
+      )}
     </Suspense>
   )
 }
