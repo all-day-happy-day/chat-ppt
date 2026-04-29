@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
+import { Home } from './authenticated/home/Home'
 import { AuthenticatedLayout } from './layouts/authenticated-layout/AuthenticatedLayout'
 import { RootLayout } from './layouts/root-layout/RootLayout'
 import { UnauthenticatedLayout } from './layouts/unauthenticated-layout/UnauthenticatedLayout'
@@ -29,6 +30,7 @@ export default function App() {
 
               <Route element={<AuthenticatedLayout />}>
                 <Route path="/settings" element={<UserSettings />} />
+                <Route path="/home" element={<Home />} />
               </Route>
 
               <Route path="/" element={<UnauthenticatedLayout />}>
