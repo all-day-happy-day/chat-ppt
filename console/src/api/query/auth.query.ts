@@ -81,3 +81,12 @@ export function useGetCurrentUser() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }
+
+export function usePatchPassword() {
+  const mutation = useMutation({
+    mutationFn: ({ id, requestBody }: { id: string; requestBody: { password: string } }) =>
+      authUseCase.patchPassword(id, requestBody),
+  })
+
+  return mutation
+}

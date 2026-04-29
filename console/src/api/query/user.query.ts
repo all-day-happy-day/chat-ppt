@@ -23,13 +23,8 @@ export function usePatchUser() {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: ({
-      id,
-      requestBody,
-    }: {
-      id: string
-      requestBody: { email?: string; username?: string; password?: string }
-    }) => userUseCase.patchUser(id, requestBody),
+    mutationFn: ({ id, requestBody }: { id: string; requestBody: { email?: string; username?: string } }) =>
+      userUseCase.patchUser(id, requestBody),
     onSuccess: async (_, { id }) => {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY.AUTH.ME })
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY.USER.GETS })
