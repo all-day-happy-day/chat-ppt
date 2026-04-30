@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 
-import type { HomeCardProps } from './homd-card.types'
+import type { HomeCardProps } from './home-card.types'
 
 export function HomeCard({ title, icon, children }: HomeCardProps & { children?: React.ReactNode }) {
   return (
