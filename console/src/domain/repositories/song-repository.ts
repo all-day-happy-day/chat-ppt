@@ -1,0 +1,16 @@
+import type { Song } from '@/domain/models/song'
+import type { Lyrics } from '@/domain/valueobjects/lyrics'
+
+export abstract class SongRepository {
+  abstract listSongs(params: { title: string }): Promise<Song[]>
+  abstract listAllSongs(): Promise<Song[]>
+  abstract scrapeLyrics(requestBody: {
+    title: string
+    artist?: string | null
+    overwrite?: boolean
+  }): Promise<{ song: Song; lyrics: Lyrics }>
+  abstract getLyrics(songId: string): Promise<{ songId: string; lyrics: Lyrics }>
+  abstract patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song>
+  abstract patchLyrics(songId: string, requestBody: { lyrics: Lyrics['lyrics'] }): Promise<Lyrics>
+  abstract deleteSong(songId: string): Promise<void>
+}
