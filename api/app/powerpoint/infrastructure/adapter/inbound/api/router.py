@@ -85,13 +85,14 @@ async def update_template(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.patch("/template/name", status_code=status.HTTP_200_OK, response_model=ChangeTemplateNameResponse)
+@router.patch("/template/name/{template_id}", status_code=status.HTTP_200_OK, response_model=ChangeTemplateNameResponse)
 def change_template_name(
+    template_id: ULID,
     request_model: ChangeTemplateNameRequest,
     usecase: Annotated[ChangeTemplateNameUseCase, Depends(get_change_template_name_use_case)],
 ):
     try:
-        template_file, template = usecase(template_id=request_model.template_id, new_name=request_model.new_name)
+        template_file, template = usecase(template_id=template_id, new_name=request_model.new_name)
         return ChangeTemplateNameResponse.from_domain_entity(template_file=template_file, template=template)
     except TemplateNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
