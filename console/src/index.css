@@ -580,7 +580,7 @@ body {
     @apply text-muted-foreground fill-none;
   }
 
-  tr.group:hover + tr .content-table-row-border {
+  .content-table-row.group:hover + .content-table-row .content-table-row-border {
     border-top-color: transparent;
   }
 }
