@@ -24,34 +24,47 @@ export class APIClient {
     }
   }
 
-  async get<TResponse>(url: string, headers?: HeadersInit): Promise<APIResponse<TResponse>> {
-    return this.request<TResponse>({ url: url, method: 'GET', headers: headers })
+  async get<TResponse>(
+    url: string,
+    headers?: HeadersInit,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
+  ): Promise<APIResponse<TResponse>> {
+    return this.request<TResponse>({ url: url, method: 'GET', headers: headers }, params)
   }
 
   async post<TRequestBody extends RequestBody, TResponse>(
     url: string,
     body: TRequestBody,
-    headers?: HeadersInit
+    headers?: HeadersInit,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
   ): Promise<APIResponse<TResponse>> {
-    return this.request<TResponse>({ url: url, method: 'POST', headers: headers, body: body })
+    return this.request<TResponse>({ url: url, method: 'POST', headers: headers, body: body }, params)
   }
 
   async patch<TRequestBody extends RequestBody, TResponse>(
     url: string,
     body: TRequestBody,
-    headers?: HeadersInit
+    headers?: HeadersInit,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
   ): Promise<APIResponse<TResponse>> {
-    return this.request<TResponse>({ url: url, method: 'PATCH', headers: headers, body: body })
+    return this.request<TResponse>({ url: url, method: 'PATCH', headers: headers, body: body }, params)
   }
 
-  async delete<TResponse>(url: string, headers?: HeadersInit): Promise<APIResponse<TResponse>> {
-    return this.request<TResponse>({ url: url, method: 'DELETE', headers: headers })
+  async delete<TResponse>(
+    url: string,
+    headers?: HeadersInit,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
+  ): Promise<APIResponse<TResponse>> {
+    return this.request<TResponse>({ url: url, method: 'DELETE', headers: headers }, params)
   }
 
-  private async request<TResponse = unknown>(request: APIRequest): Promise<APIResponse<TResponse>> {
+  private async request<TResponse = unknown>(
+    request: APIRequest,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
+  ): Promise<APIResponse<TResponse>> {
     request = this.requestInterceptors.reduce((acc, interceptor) => interceptor(acc), request)
 
-    const requestUrl: string = this.buildRequestUrl(request.url)
+    const requestUrl: string = this.buildRequestUrl(request.url, params)
 
     const preparedRequestBody: PreparedBody | undefined =
       'body' in request ? prepareRequestBody(request.body) : undefined
@@ -95,8 +108,15 @@ export class APIClient {
     return response
   }
 
-  private buildRequestUrl(url: string): string {
+  private buildRequestUrl(
+    url: string,
+    params?: string | URLSearchParams | Record<string, string> | string[][] | undefined
+  ): string {
     const normalizedUrl: string = url.startsWith('/') ? url.slice(1) : url
-    return `${this.baseUrl}/${normalizedUrl}`
+    if (params) {
+      return `${this.baseUrl}/${normalizedUrl}?${new URLSearchParams(params).toString()}`
+    } else {
+      return `${this.baseUrl}/${normalizedUrl}`
+    }
   }
 }
