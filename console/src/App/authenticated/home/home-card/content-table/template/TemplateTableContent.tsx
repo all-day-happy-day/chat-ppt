@@ -21,7 +21,7 @@ export function TemplateItem({ template }: { template: TemplateResponse | null }
           </>
         )}
       </div>
-      <div className="flex flex-col items-end justify-center">
+      <div className="flex h-full flex-col items-end justify-start pt-4">
         {template && <div className="text-muted-foreground text-sm">{formatDate(new Date(template.createdAt))}</div>}
       </div>
     </div>
