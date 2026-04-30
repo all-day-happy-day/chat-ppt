@@ -27,8 +27,8 @@ export interface Template {
   userId: string
   name: string
   slideSize: Size
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   layouts: Layout[]
 }
 

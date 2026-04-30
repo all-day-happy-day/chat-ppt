@@ -1,8 +1,28 @@
-import type { Layout, Template, TemplateFile } from '@/domain/models/powerpoint'
+import type { Layout } from '@/domain/models/powerpoint'
 
+export interface ApiTemplateResponse {
+  template_id: string
+  user_id: string
+  name: string
+  created_at: string
+  updated_at: string
+}
 interface BaseTemplateResponse {
-  templateFile: TemplateFile
-  template: Template
+  templateId: string
+  userId: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+export function fromApiResponse(apiTemplateResponse: ApiTemplateResponse): BaseTemplateResponse {
+  return {
+    templateId: apiTemplateResponse.template_id,
+    userId: apiTemplateResponse.user_id,
+    name: apiTemplateResponse.name,
+    createdAt: apiTemplateResponse.created_at,
+    updatedAt: apiTemplateResponse.updated_at,
+  }
 }
 
 // ReadTemplates
@@ -31,10 +51,7 @@ export type ChangeTemplateNameResponse = BaseTemplateResponse
 export type DeleteTemplateResponse = void
 
 // ListTemplates
-export type ListTemplatesResponse = {
-  templateFiles: TemplateFile[]
-  templates: Template[]
-}
+export type ListTemplatesResponse = BaseTemplateResponse[]
 
 // ListLayouts
 export type ListLayoutsResponse = { layouts: Layout[] }

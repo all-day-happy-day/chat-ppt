@@ -1,6 +1,7 @@
 import type { PowerpointRepository } from '@/domain/repositories/powerpoint-repository'
 
-import type { Layout, Template, TemplateFile } from '../models/powerpoint'
+import type { Layout } from '../models/powerpoint'
+import type { TemplateResponse } from '../repositories/powerpoint-repository'
 
 export class PowerpointUseCase {
   private readonly powerpointRepository: PowerpointRepository
@@ -8,19 +9,11 @@ export class PowerpointUseCase {
     this.powerpointRepository = powerpointRepository
   }
 
-  async readTemplate(requestBody: {
-    file: File
-    userId: string
-    templateName: string
-  }): Promise<{ templateFile: TemplateFile; template: Template }> {
+  async readTemplate(requestBody: { file: File; userId: string; templateName: string }): Promise<TemplateResponse> {
     return this.powerpointRepository.readTemplate(requestBody)
   }
 
-  async updateTemplate(requestBody: {
-    file: File
-    userId: string
-    templateId: string
-  }): Promise<{ templateFile: TemplateFile; template: Template }> {
+  async updateTemplate(requestBody: { file: File; userId: string; templateId: string }): Promise<TemplateResponse> {
     return this.powerpointRepository.updateTemplate(requestBody)
   }
 
@@ -29,7 +22,7 @@ export class PowerpointUseCase {
     requestBody: {
       newName: string
     }
-  ): Promise<{ templateFile: TemplateFile; template: Template }> {
+  ): Promise<TemplateResponse> {
     return this.powerpointRepository.changeTemplateName(templateId, requestBody)
   }
 
@@ -37,7 +30,7 @@ export class PowerpointUseCase {
     return this.powerpointRepository.deleteTemplate(templateId)
   }
 
-  async listTemplates(userId: string): Promise<{ templateFiles: TemplateFile[]; templates: Template[] }> {
+  async listTemplates(userId: string): Promise<TemplateResponse[]> {
     return this.powerpointRepository.listTemplates(userId)
   }
 

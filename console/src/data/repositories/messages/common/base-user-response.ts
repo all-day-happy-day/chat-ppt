@@ -5,8 +5,8 @@ export interface BaseUserResponse {
   username: string
   email: string
   role: Role
-  createdAt: Date
-  lastSignIn: Date | null
+  createdAt: string
+  lastSignIn: string | null
 }
 
 export function toUser(response: BaseUserResponse): User {
@@ -15,7 +15,7 @@ export function toUser(response: BaseUserResponse): User {
     username: response.username,
     email: response.email,
     role: response.role,
-    createdAt: response.createdAt,
-    lastSignIn: response.lastSignIn,
+    createdAt: new Date(response.createdAt),
+    lastSignIn: response.lastSignIn ? new Date(response.lastSignIn) : null,
   }
 }
