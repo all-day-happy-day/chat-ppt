@@ -4,14 +4,14 @@ import type { ContentTableProps, TableRowProps } from './content-table-types'
 
 const TableRow = ({ content, icon, borderTop = true }: TableRowProps) => {
   return (
-    <tr className="group">
-      <td
+    <div className="content-table-row group flex min-h-0 min-w-0 flex-1 basis-0 flex-col">
+      <div
         data-slot="table-row"
-        className="hover:bg-accent/30 active:bg-accent/20 active:**:text-muted-foreground/70 rounded-xl px-4 transition-colors"
+        className="hover:bg-accent/30 active:bg-accent/20 active:**:text-muted-foreground/70 flex min-h-0 flex-1 flex-row rounded-xl px-4 transition-all duration-0"
       >
         <TableRowContainer content={content} icon={icon} borderTop={borderTop} />
-      </td>
-    </tr>
+      </div>
+    </div>
   )
 }
 
@@ -35,12 +35,10 @@ export function TableRowContent() {}
 
 export function ContentTable({ contents, icons }: ContentTableProps) {
   return (
-    <table className="h-full w-full">
-      <tbody>
-        <TableRow content={contents[0]} icon={icons ? icons[0] : null} borderTop={false} />
-        <TableRow content={contents[1]} icon={icons ? icons[1] : null} borderTop={true} />
-        <TableRow content={contents[2]} icon={icons ? icons[2] : null} borderTop={true} />
-      </tbody>
-    </table>
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
+      <TableRow content={contents[0]} icon={icons ? icons[0] : null} borderTop={false} />
+      <TableRow content={contents[1]} icon={icons ? icons[1] : null} borderTop={true} />
+      <TableRow content={contents[2]} icon={icons ? icons[2] : null} borderTop={true} />
+    </div>
   )
 }
