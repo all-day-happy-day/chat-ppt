@@ -21,8 +21,8 @@ const TableRowContainer = ({ content, icon, borderTop = true }: TableRowProps) =
       <div className="flex">{icon && icon}</div>
       <div
         className={cn(
-          'content-table-row-border flex h-full w-full flex-row items-center',
-          borderTop && 'border-border border-t group-hover:border-t-transparent'
+          'content-table-row-border flex h-full w-full flex-row items-center border-t border-transparent',
+          borderTop && 'border-border group-hover:border-t-transparent'
         )}
       >
         {content}
