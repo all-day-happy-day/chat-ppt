@@ -63,6 +63,7 @@ export function useListTemplates(userId: string) {
   return useQuery({
     queryKey: QUERY_KEY.POWERPOINT.LIST_ALL,
     queryFn: () => powerpointUseCase.listTemplates(userId),
+    enabled: userId !== null && userId !== '',
   })
 }
 
