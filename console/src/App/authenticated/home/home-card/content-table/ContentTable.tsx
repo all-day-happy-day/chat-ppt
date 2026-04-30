@@ -5,7 +5,10 @@ import type { ContentTableProps, TableRowProps } from './content-table-types'
 const TableRow = ({ content, icon, borderTop = true }: TableRowProps) => {
   return (
     <tr className="group">
-      <td data-slot="table-row" className="hover:bg-accent/30 active:bg-accent/20 rounded-xl px-4">
+      <td
+        data-slot="table-row"
+        className="hover:bg-accent/30 active:bg-accent/20 active:**:text-muted-foreground/70 rounded-xl px-4 transition-colors"
+      >
         <TableRowContainer content={content} icon={icon} borderTop={borderTop} />
       </td>
     </tr>
