@@ -9,6 +9,7 @@ export function useGetUser(id: string) {
   return useQuery({
     queryKey: QUERY_KEY.USER.GET(id),
     queryFn: () => userUseCase.getUser(id),
+    enabled: !!id,
   })
 }
 
