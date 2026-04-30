@@ -16,12 +16,9 @@ export function Home() {
       <div className="flex h-full w-full flex-col items-center justify-center">
         <div className="flex h-full w-full flex-col items-center justify-center gap-16">
           <div className="scrollbar-hide flex h-fit w-full max-w-[1200px] flex-row flex-wrap items-center justify-center gap-16 overflow-y-scroll p-16">
-            <HomeCard title={t('home.profile')}></HomeCard>
+            <HomeCard title={t('home.profile')} header={false}></HomeCard>
             <HomeCard title={t('home.projects')}>
-              <ContentTable
-                contents={[null, null, null]}
-                // icons={[<div>Icon1</div>, <div>Icon2</div>, <div>Icon3</div>]}
-              />
+              <ContentTable contents={[null, null, null]} />
             </HomeCard>
             <HomeCard title={t('home.templates')}>
               <ContentTable {...TemplateContentTableProps()} />
