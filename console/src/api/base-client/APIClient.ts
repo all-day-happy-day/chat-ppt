@@ -1,3 +1,6 @@
+import type { Input } from '@/lib/utils'
+import { snakeToCamel } from '@/lib/utils'
+
 import { prepareRequestBody } from './utils/prepare-request-body'
 import type { PreparedBody, RequestBody } from './utils/prepare-request-body.types'
 import type { APIRequest, APIResponse, InterceptorManager } from './APIClient.types'
@@ -94,16 +97,18 @@ export class APIClient {
       parsedBody = await fetchResponse.text()
     }
 
-    let response: APIResponse<TResponse> = {
+    let apiResponse: APIResponse<TResponse> = {
       response: parsedBody as TResponse,
       requestUrl: requestUrl,
       status: fetchResponse.status,
       status_message: fetchResponse.statusText,
     }
-    response = this.responseInterceptors.reduce<APIResponse<TResponse>>(
+    apiResponse = this.responseInterceptors.reduce<APIResponse<TResponse>>(
       (acc, interceptor) => interceptor(acc) as APIResponse<TResponse>,
-      response
+      apiResponse
     )
+    const response: APIResponse<TResponse> = apiResponse
+    response.response = snakeToCamel<TResponse>(response.response as Input)
 
     return response
   }
