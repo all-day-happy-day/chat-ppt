@@ -19,7 +19,7 @@ export function SongItem({ song }: { song: Song }) {
   )
 }
 
-export function SongsContentTableProps(): ContentTableProps {
+export function SongContentTableProps(): ContentTableProps {
   const listAllSongs = useListAllSongs()
 
   let songs = getQueryData(listAllSongs)
