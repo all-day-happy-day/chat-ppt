@@ -1,3 +1,4 @@
+import camelcaseKeys from 'camelcase-keys'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -20,7 +21,7 @@ export function getUserInitials(username: string): string {
   }
 }
 
-// Query / Mutation
+// Query & Mutation
 export type QueryDataState<TData, TError = DefaultError> =
   | { kind: 'pending' }
   | { kind: 'error'; error: TError }
@@ -77,4 +78,10 @@ export function formatDate(date: Date): string {
   const minutes: string = String(date.getMinutes()).padStart(2, '0')
   const seconds: string = String(date.getSeconds()).padStart(2, '0')
   return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`
+}
+
+// Map snake_case to camelCase
+export type Input = Record<string, unknown> | readonly Record<string, unknown>[]
+export function snakeToCamel<TCamel>(data: Input): TCamel {
+  return camelcaseKeys(data, { deep: true }) as TCamel
 }
