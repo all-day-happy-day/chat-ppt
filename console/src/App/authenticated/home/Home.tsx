@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import '@/i18n/i18n'
 
 import { ContentTable } from './home-card/content-table/ContentTable'
+import { SongsContentTableProps } from './home-card/content-table/songs/SongsTableContent'
 import { HomeCard } from './home-card/HomeCard'
 
 export function Home() {
@@ -22,7 +23,9 @@ export function Home() {
               />
             </HomeCard>
             <HomeCard title={t('home.templates')}></HomeCard>
-            <HomeCard title={t('home.songs')}></HomeCard>
+            <HomeCard title={t('home.songs')}>
+              <ContentTable {...SongsContentTableProps()} />
+            </HomeCard>
           </div>
         </div>
       </div>
