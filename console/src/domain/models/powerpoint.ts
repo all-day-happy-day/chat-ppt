@@ -3,8 +3,8 @@ import type { ColorConfig, Position, Size } from '@/domain/valueobjects/powerpoi
 
 export interface Shape {
   id: string
-  layout_id: string
-  shape_id: number
+  layoutId: string
+  shapeId: number
   size: Size
   position: Position
   name: string
@@ -16,25 +16,25 @@ export interface Shape {
 
 export interface Layout {
   id: string
-  template_id: string
+  templateId: string
   name: string
   shapes: Shape[]
-  background_color: ColorConfig
+  backgroundColor: ColorConfig
 }
 
 export interface Template {
   id: string
-  user_id: string
+  userId: string
   name: string
-  slide_size: Size
-  created_at: Date
-  updated_at: Date
+  slideSize: Size
+  createdAt: Date
+  updatedAt: Date
   layouts: Layout[]
 }
 
 export interface TemplateFile {
-  template_id: string
-  user_id: string
+  templateId: string
+  userId: string
   path: string
   size: number
 }
