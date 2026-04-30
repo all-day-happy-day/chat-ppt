@@ -45,4 +45,7 @@ export const en_US = {
   //NotFoundPage
   'page.not_found.title': 'Page Not Found',
   'page.not_found.description': 'The page you are looking for does not exist.',
+
+  // Song
+  'song.no_artist': 'No Artist',
 } as const

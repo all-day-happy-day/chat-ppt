@@ -45,4 +45,7 @@ export const ko_KR = {
   // NotFoundPage
   'page.not_found.title': '페이지를 찾을 수 없습니다.',
   'page.not_found.description': '존재하지 않는 페이지입니다.',
+
+  // Song
+  'song.no_artist': '아티스트 없음',
 } as const
