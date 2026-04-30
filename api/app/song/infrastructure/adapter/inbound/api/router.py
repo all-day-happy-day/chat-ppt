@@ -32,6 +32,7 @@ from app.song.infrastructure.adapter.inbound.api.message import (
     PatchLyricsResponse,
     PatchSongRequest,
     PatchSongResponse,
+    ScrapeLyricsRequest,
     ScrapeLyricsResponse,
 )
 
@@ -53,15 +54,15 @@ def list_all_songs(usecase: Annotated[ListAllSongsUseCase, Depends(get_list_all_
     return GetSongsResponse(songs=songs)
 
 
-@router.get("/lyrics/scrape", status_code=status.HTTP_200_OK, response_model=ScrapeLyricsResponse)
+@router.post("/lyrics/scrape", status_code=status.HTTP_200_OK, response_model=ScrapeLyricsResponse)
 def scrape_lyrics(
+    request_model: ScrapeLyricsRequest,
     usecase: Annotated[ScrapeLyricsUseCase, Depends(get_scrape_lyrics_use_case)],
-    title: Annotated[str, Query(...)],
-    artist: Annotated[str | None, Query(...)] = None,
-    overwrite: Annotated[bool, Query(...)] = False,
 ):
     try:
-        song, lyrics = usecase(title=title, artist=artist, overwrite=overwrite)
+        song, lyrics = usecase(
+            title=request_model.title, artist=request_model.artist, overwrite=request_model.overwrite
+        )
         return ScrapeLyricsResponse(song=song, lyrics=lyrics)
     except FailedToFetch as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

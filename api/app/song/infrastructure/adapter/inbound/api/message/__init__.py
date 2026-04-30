@@ -4,6 +4,7 @@ from .PatchLyricsRequest import PatchLyricsRequest
 from .PatchLyricsResponse import PatchLyricsResponse
 from .PatchSongRequest import PatchSongRequest
 from .PatchSongResponse import PatchSongResponse
+from .ScrapeLyricsRequest import ScrapeLyricsRequest
 from .ScrapeLyricsResponse import ScrapeLyricsResponse
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "PatchLyricsResponse",
     "PatchSongRequest",
     "PatchSongResponse",
+    "ScrapeLyricsRequest",
     "ScrapeLyricsResponse",
 ]
