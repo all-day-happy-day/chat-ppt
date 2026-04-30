@@ -8,8 +8,10 @@ import '@/i18n/i18n'
 
 import type { ContentTableProps } from '../content-table-types'
 
-export function SongItem({ song }: { song: Song }) {
+export function SongItem({ song }: { song: Song | null }) {
   const { t } = useTranslation()
+
+  if (!song) return null
 
   return (
     <div className="flex h-full w-full flex-col items-start justify-center gap-1">
@@ -33,7 +35,7 @@ export function SongContentTableProps(): ContentTableProps {
   }
 
   return {
-    contents: [<SongItem song={songs[0]} />, <SongItem song={songs[1]} />, <SongItem song={songs[2]} />],
+    contents: [<SongItem song={songs[0]} />, <SongItem song={songs[1]} />, null],
     // icons: [<div>Icon1</div>, <div>Icon2</div>, <div>Icon3</div>],
   }
 }
