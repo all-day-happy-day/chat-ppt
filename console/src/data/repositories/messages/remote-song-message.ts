@@ -1,5 +1,5 @@
 import type { Song } from '@/domain/models/song'
-import type { Lyrics, LyricsPart } from '@/domain/valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
 interface BaseLyricsResponse {
   song: Song

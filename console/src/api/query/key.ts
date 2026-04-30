@@ -12,4 +12,8 @@ export const QUERY_KEY = Object.freeze({
     LIST_ALL: ['song', 'list', 'all'] as const,
     GET_LYRICS: (songId: string) => ['song', 'lyrics', 'get', songId] as const,
   },
+  POWERPOINT: {
+    LIST_ALL: ['powerpoint', 'list', 'all'] as const,
+    LIST_LAYOUTS: (templateId: string) => ['powerpoint', 'list', 'layouts', templateId] as const,
+  },
 } as const)

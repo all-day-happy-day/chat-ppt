@@ -1,7 +1,7 @@
 import { httpClient } from '@/api/client'
 import type { Song } from '@/domain/models/song'
 import type { SongRepository } from '@/domain/repositories/song-repository'
-import type { Lyrics, LyricsPart } from '@/domain/valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
 import type {
   GetLyricsResponse,

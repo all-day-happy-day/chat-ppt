@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { songUseCase } from '@/di/usecases'
-import type { LyricsPart } from '@/domain/valueobjects/lyrics'
+import type { LyricsPart } from '@/domain/valueobjects/song'
 
 import { QUERY_KEY } from './key'
 

@@ -1,6 +1,6 @@
 import type { Song } from '../models/song'
 import type { SongRepository } from '../repositories/song-repository'
-import type { Lyrics, LyricsPart } from '../valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '../valueobjects/song'
 
 export class SongUseCase {
   private readonly songRepository: SongRepository
