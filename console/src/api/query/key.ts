@@ -16,4 +16,8 @@ export const QUERY_KEY = Object.freeze({
     LIST_ALL: ['powerpoint', 'list', 'all'] as const,
     LIST_LAYOUTS: (templateId: string) => ['powerpoint', 'list', 'layouts', templateId] as const,
   },
+  PROJECT: {
+    GET_ALL: (userId: string) => ['project', 'get', 'all', userId] as const,
+    GET_ALL_CONTAINERS: (projectId: string) => ['project', 'get', 'all', 'containers', projectId] as const,
+  },
 } as const)
