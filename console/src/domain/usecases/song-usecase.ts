@@ -1,6 +1,6 @@
 import type { Song } from '../models/song'
 import type { SongRepository } from '../repositories/song-repository'
-import type { Lyrics } from '../valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '../valueobjects/lyrics'
 
 export class SongUseCase {
   private readonly songRepository: SongRepository
@@ -33,7 +33,7 @@ export class SongUseCase {
     return this.songRepository.patchSong(songId, requestBody)
   }
 
-  async patchLyrics(songId: string, requestBody: { lyrics: Lyrics['lyrics'] }): Promise<Lyrics> {
+  async patchLyrics(songId: string, requestBody: { lyrics: LyricsPart[] }): Promise<Lyrics> {
     return this.songRepository.patchLyrics(songId, requestBody)
   }
 

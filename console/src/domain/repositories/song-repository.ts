@@ -1,5 +1,5 @@
 import type { Song } from '@/domain/models/song'
-import type { Lyrics } from '@/domain/valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '@/domain/valueobjects/lyrics'
 
 export abstract class SongRepository {
   abstract listSongs(params: { title: string }): Promise<Song[]>
@@ -11,6 +11,6 @@ export abstract class SongRepository {
   }): Promise<{ song: Song; lyrics: Lyrics }>
   abstract getLyrics(songId: string): Promise<{ songId: string; lyrics: Lyrics }>
   abstract patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song>
-  abstract patchLyrics(songId: string, requestBody: { lyrics: Lyrics['lyrics'] }): Promise<Lyrics>
+  abstract patchLyrics(songId: string, requestBody: { lyrics: LyricsPart[] }): Promise<Lyrics>
   abstract deleteSong(songId: string): Promise<void>
 }

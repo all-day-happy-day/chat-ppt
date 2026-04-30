@@ -1,7 +1,7 @@
 import { httpClient } from '@/api/client'
 import type { Song } from '@/domain/models/song'
 import type { SongRepository } from '@/domain/repositories/song-repository'
-import type { Lyrics } from '@/domain/valueobjects/lyrics'
+import type { Lyrics, LyricsPart } from '@/domain/valueobjects/lyrics'
 
 import type {
   GetLyricsResponse,
@@ -48,7 +48,7 @@ export class RemoteSongRepository implements SongRepository {
     return response.song
   }
 
-  async patchLyrics(songId: string, requestBody: { lyrics: Lyrics['lyrics'] }): Promise<Lyrics> {
+  async patchLyrics(songId: string, requestBody: { lyrics: LyricsPart[] }): Promise<Lyrics> {
     const { response } = await httpClient.patch<PatchLyricsRequest, PatchLyricsResponse>(
       `/song/lyrics/${songId}`,
       requestBody
