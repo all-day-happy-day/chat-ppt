@@ -23,13 +23,13 @@ export function Home() {
             <HomeCard title={t('home.profile')} header={false} onClick={() => navigate('/settings')}>
               <ProfileCard />
             </HomeCard>
-            <HomeCard title={t('home.projects')}>
+            <HomeCard title={t('home.projects')} onClick={() => navigate('/projects')}>
               <ContentTable {...ProjectContentTableProps()} />
             </HomeCard>
-            <HomeCard title={t('home.templates')}>
+            <HomeCard title={t('home.templates')} onClick={() => navigate('/templates')}>
               <ContentTable {...TemplateContentTableProps()} />
             </HomeCard>
-            <HomeCard title={t('home.songs')}>
+            <HomeCard title={t('home.songs')} onClick={() => navigate('/songs')}>
               <ContentTable {...SongContentTableProps()} />
             </HomeCard>
           </div>
