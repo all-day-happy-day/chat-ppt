@@ -7,7 +7,7 @@ const TableRow = ({ content, icon, borderTop = true }: TableRowProps) => {
     <div className="content-table-row group flex min-h-0 min-w-0 flex-1 basis-0 flex-col">
       <div
         data-slot="table-row"
-        className="hover:bg-accent/30 active:bg-accent/20 active:**:text-muted-foreground/70 flex min-h-0 flex-1 flex-row rounded-xl px-4 transition-all duration-0"
+        className="hover:bg-accent/30 active:bg-accent/20 active:**:text-muted-foreground/70 flex min-h-0 flex-1 flex-row rounded-xl px-4 transition-all"
       >
         <TableRowContainer content={content} icon={icon} borderTop={borderTop} />
       </div>

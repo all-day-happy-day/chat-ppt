@@ -70,7 +70,7 @@ export function UserSettings() {
   return (
     <Suspense>
       <div className="flex w-full flex-col items-center justify-center">
-        <div className="flex w-2xl flex-col gap-16 pt-16 max-md:w-fit">
+        <div className="flex w-2xl flex-col gap-12 pt-16 max-md:w-fit">
           <div className="flex flex-row justify-start border-b pb-4">
             <p className="text-3xl font-semibold">{t('header.settings.settings')}</p>
           </div>
@@ -84,7 +84,7 @@ export function UserSettings() {
             </Card>
           </div>
           <form
-            className="flex w-full flex-col items-start gap-16 max-md:items-center"
+            className="flex w-full flex-col items-start gap-12 max-md:items-center"
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="flex flex-col items-start justify-between gap-6">
