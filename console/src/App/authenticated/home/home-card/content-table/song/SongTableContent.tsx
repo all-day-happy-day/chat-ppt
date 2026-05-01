@@ -35,7 +35,7 @@ export function SongContentTableProps(): ContentTableProps {
   }
 
   return {
-    contents: [<SongItem song={songs[0]} />, <SongItem song={songs[1]} />, null],
+    contents: [<SongItem song={songs[0]} />, <SongItem song={songs[1]} />, <SongItem song={songs[2]} />],
     // icons: [<div>Icon1</div>, <div>Icon2</div>, <div>Icon3</div>],
   }
 }

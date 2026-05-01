@@ -13,7 +13,7 @@ export const QUERY_KEY = Object.freeze({
     GET_LYRICS: (songId: string) => ['song', 'lyrics', 'get', songId] as const,
   },
   POWERPOINT: {
-    LIST_ALL: ['powerpoint', 'list', 'all'] as const,
+    LIST_ALL: (userId: string) => ['powerpoint', 'list', 'all', userId] as const,
     LIST_LAYOUTS: (templateId: string) => ['powerpoint', 'list', 'layouts', templateId] as const,
   },
   PROJECT: {
