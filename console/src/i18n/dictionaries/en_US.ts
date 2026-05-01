@@ -20,6 +20,7 @@ export const en_US = {
   'common.global.new_password_verified': 'You can use this password',
   'common.global.new_password_confirmed': 'New password confirmed',
   'common.global.password_changed': 'Password changed successfully',
+  'common.global.no_content': 'No content',
 
   // Home
   'home.profile': 'Profile',
@@ -48,4 +49,13 @@ export const en_US = {
 
   // Song
   'song.no_artist': 'No Artist',
+
+  // Lists
+  'list.name': 'Name',
+  'list.username': 'Username',
+  'list.created_at': 'Created At',
+  'list.updated_at': 'Updated At',
+  'list.template_name': 'Template Name',
+  'list.title': 'Title',
+  'list.artist': 'Artist',
 } as const

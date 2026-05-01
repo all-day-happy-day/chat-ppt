@@ -20,12 +20,13 @@ export const ko_KR = {
   'common.global.new_password_verified': '이 비밀번호를 사용할 수 있습니다',
   'common.global.new_password_confirmed': '새 비밀번호가 확인되었습니다',
   'common.global.password_changed': '비밀번호가 성공적으로 변경되었습니다',
+  'common.global.no_content': '내용 없음',
 
   // Home
   'home.profile': '프로필',
   'home.projects': '프로젝트',
   'home.templates': '템플릿',
-  'home.songs': '찬양 곡',
+  'home.songs': '곡',
 
   // Header
   'header.settings.settings': '설정',
@@ -48,4 +49,13 @@ export const ko_KR = {
 
   // Song
   'song.no_artist': '아티스트 없음',
+
+  // Lists
+  'list.name': '이름',
+  'list.username': '사용자 이름',
+  'list.created_at': '생성 일시',
+  'list.updated_at': '수정 일시',
+  'list.template_name': '템플릿 이름',
+  'list.title': '제목',
+  'list.artist': '아티스트',
 } as const
