@@ -39,7 +39,7 @@ export function TemplateContentTableProps(): ContentTableProps {
   if (templates.length >= 3) {
     templates = templates.slice(0, 3)
   } else {
-    const emptyTemplates: TemplateResponse[] = Array(3 - templates.length).fill(null)
+    const emptyTemplates = Array(3 - templates.length).fill(null)
     templates = templates.concat(emptyTemplates)
   }
 

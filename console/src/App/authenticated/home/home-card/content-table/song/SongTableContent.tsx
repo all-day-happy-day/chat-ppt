@@ -30,7 +30,7 @@ export function SongContentTableProps(): ContentTableProps {
   if (songs.length >= 3) {
     songs = songs.slice(0, 3)
   } else {
-    const emptySongs: Song[] = Array(3 - songs.length).fill(null)
+    const emptySongs = Array(3 - songs.length).fill(null)
     songs = songs.concat(emptySongs)
   }
 
