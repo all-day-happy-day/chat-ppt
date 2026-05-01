@@ -10,7 +10,7 @@ export function AuthenticatedLayout() {
     <Suspense>
       <CenteredLayout>
         <Header />
-        <div className="scrollbar-hide flex w-full flex-1 items-center justify-center overflow-y-scroll">
+        <div className="scrollbar-hide mt-8 mb-12 flex w-full flex-1 items-center justify-center overflow-y-scroll">
           <Outlet />
         </div>
       </CenteredLayout>
