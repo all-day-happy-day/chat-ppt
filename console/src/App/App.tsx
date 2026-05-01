@@ -4,6 +4,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider, ThemeProvider } from '@/providers'
 
 import { Home } from './authenticated/home/Home'
+import { ProjectListPage } from './authenticated/list-pages/ProjectListPage'
+import { SongListPage } from './authenticated/list-pages/SongListPage'
+import { TemplateListPage } from './authenticated/list-pages/TemplateListPage'
 import { AuthenticatedLayout } from './layouts/authenticated-layout/AuthenticatedLayout'
 import { RootLayout } from './layouts/root-layout/RootLayout'
 import { UnauthenticatedLayout } from './layouts/unauthenticated-layout/UnauthenticatedLayout'
@@ -29,8 +32,11 @@ export default function App() {
               <Route index element={<IndexPage />} />
 
               <Route element={<AuthenticatedLayout />}>
-                <Route path="/settings" element={<UserSettings />} />
                 <Route path="/home" element={<Home />} />
+                <Route path="/settings" element={<UserSettings />} />
+                <Route path="/projects" element={<ProjectListPage />} />
+                <Route path="/songs" element={<SongListPage />} />
+                <Route path="/templates" element={<TemplateListPage />} />
               </Route>
 
               <Route path="/" element={<UnauthenticatedLayout />}>
