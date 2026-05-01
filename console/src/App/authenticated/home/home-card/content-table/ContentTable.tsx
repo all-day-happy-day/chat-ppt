@@ -35,7 +35,12 @@ export function TableRowContent() {}
 
 export function ContentTable({ contents, icons }: ContentTableProps) {
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
+    <div
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+      className="flex h-full min-h-0 w-full min-w-0 flex-col"
+    >
       <TableRow content={contents[0]} icon={icons ? icons[0] : null} borderTop={false} />
       <TableRow content={contents[1]} icon={icons ? icons[1] : null} borderTop={true} />
       <TableRow content={contents[2]} icon={icons ? icons[2] : null} borderTop={true} />
