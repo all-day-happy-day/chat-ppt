@@ -14,6 +14,7 @@ import type {
   UpdateTemplateRequest,
   UpdateTemplateResponse,
 } from './messages/remote-powerpoint-message'
+import { toTemplateResponse } from './messages/remote-powerpoint-message'
 
 export class RemotePowerpointRepository implements PowerpointRepository {
   async readTemplate(requestBody: { file: File; userId: string; templateName: string }): Promise<TemplateResponse> {
@@ -21,7 +22,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
       `/powerpoint/template/read`,
       requestBody
     )
-    return response
+    return toTemplateResponse(response)
   }
 
   async updateTemplate(requestBody: { file: File; userId: string; templateId: string }): Promise<TemplateResponse> {
@@ -29,7 +30,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
       `/powerpoint/template/${requestBody.templateId}`,
       requestBody
     )
-    return response
+    return toTemplateResponse(response)
   }
 
   async changeTemplateName(templateId: string, requestBody: { newName: string }): Promise<TemplateResponse> {
@@ -37,7 +38,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
       `/powerpoint/template/name/${templateId}`,
       requestBody
     )
-    return response
+    return toTemplateResponse(response)
   }
 
   async deleteTemplate(templateId: string): Promise<void> {
@@ -46,7 +47,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
 
   async listTemplates(userId: string): Promise<TemplateResponse[]> {
     const { response } = await httpClient.get<ListTemplatesResponse>(`/powerpoint/template/list/${userId}`)
-    return response
+    return response.map((template) => toTemplateResponse(template))
   }
 
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {

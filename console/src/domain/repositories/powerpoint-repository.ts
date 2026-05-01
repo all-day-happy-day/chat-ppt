@@ -4,8 +4,8 @@ export interface TemplateResponse {
   templateId: string
   userId: string
   name: string
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export abstract class PowerpointRepository {
