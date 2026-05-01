@@ -76,8 +76,7 @@ export function formatDate(date: Date): string {
   const year: number = date.getFullYear()
   const hours: string = String(date.getHours()).padStart(2, '0')
   const minutes: string = String(date.getMinutes()).padStart(2, '0')
-  const seconds: string = String(date.getSeconds()).padStart(2, '0')
-  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`
+  return `${month}/${day}/${year} ${hours}:${minutes}`
 }
 
 // Map snake_case to camelCase
