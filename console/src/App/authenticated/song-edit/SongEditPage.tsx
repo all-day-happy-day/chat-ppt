@@ -35,7 +35,7 @@ const LyricPartEditor = ({
   return (
     <div className="border-border flex w-full flex-col gap-2 rounded-lg border p-4">
       <div className="flex flex-row items-start justify-between gap-2">
-        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Part name</span>
+        <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Part name</span>
         <Button
           type="button"
           variant="outline"
@@ -59,7 +59,7 @@ const LyricPartEditor = ({
       />
       <label
         htmlFor={`${partId}-text`}
-        className="text-muted-foreground mt-2 text-xs font-medium uppercase tracking-wide"
+        className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase"
       >
         Lyrics
       </label>
@@ -115,10 +115,7 @@ const SongEditContent = ({ song, songId, initialParts }: SongEditContentProps): 
   }
 
   const addPart = (): void => {
-    setParts((prev: EditableLyricsPart[]) => [
-      ...prev,
-      { part: '', lyrics: '', clientId: crypto.randomUUID() },
-    ])
+    setParts((prev: EditableLyricsPart[]) => [...prev, { part: '', lyrics: '', clientId: crypto.randomUUID() }])
   }
 
   const handleSave = (): void => {
@@ -132,8 +129,8 @@ const SongEditContent = ({ song, songId, initialParts }: SongEditContentProps): 
       <div className="mb-6 flex w-full justify-start">
         <button
           type="button"
-          onClick={(): void => navigate('/songs')}
-          className="text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1.5 bg-transparent p-0 text-sm font-medium outline-none focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2"
+          onClick={(): void | Promise<void> => navigate('/songs')}
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex cursor-pointer items-center gap-1.5 bg-transparent p-0 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           <ArrowLeftIcon aria-hidden className="size-4 shrink-0" />
           Song list
@@ -206,9 +203,7 @@ export function SongEditPage(): React.ReactElement | null {
   }
 
   if (lyricsQuery.isError) {
-    return (
-      <div className="text-destructive text-center text-sm">Could not load song lyrics. Try again later.</div>
-    )
+    return <div className="text-destructive text-center text-sm">Could not load song lyrics. Try again later.</div>
   }
 
   if (lyricsQuery.data === undefined) {

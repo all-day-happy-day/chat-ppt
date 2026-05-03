@@ -1,19 +1,37 @@
 import type { Song } from '@/domain/models/song'
 import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
+export type SongWire = {
+  id: string
+  title: string
+  artist: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export function toSong(wire: SongWire): Song {
+  return {
+    id: wire.id,
+    title: wire.title,
+    artist: wire.artist,
+    ...(wire.createdAt !== undefined ? { createdAt: new Date(wire.createdAt) } : {}),
+    ...(wire.updatedAt !== undefined ? { updatedAt: new Date(wire.updatedAt) } : {}),
+  }
+}
+
 interface BaseLyricsResponse {
-  song: Song
+  song: SongWire
   lyrics: Lyrics
 }
 
 // ListSongs
 export type ListSongsResponse = {
-  songs: Song[]
+  songs: SongWire[]
 }
 
 // ListAllSongs
 export type ListAllSongsResponse = {
-  songs: Song[]
+  songs: SongWire[]
 }
 
 // ScrapeLyrics
@@ -33,7 +51,7 @@ export type PatchSongRequest = {
   artist?: string | null | undefined
 }
 export type PatchSongResponse = {
-  song: Song
+  song: SongWire
 }
 
 // PatchLyrics
@@ -45,3 +63,12 @@ export type PatchLyricsResponse = {
 }
 
 // DeleteSong
+
+/** `Page[GetSongsResponse]`: each item is one `GetSongsResponse` (typically one song per item). */
+export type SongPageResponse = {
+  items: ListSongsResponse[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}

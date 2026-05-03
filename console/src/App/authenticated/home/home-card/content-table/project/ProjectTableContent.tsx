@@ -1,9 +1,9 @@
 import { useGetCurrentUser } from '@/api/query/auth.query'
-import { useGetProjects } from '@/api/query/project.query'
+import { useGetProjectsPartial } from '@/api/query/project.query'
 import { useGetUser } from '@/api/query/user.query'
+import { HOME_CARD_PREVIEW_LIMIT } from '@/domain/list-query'
 import type { Project } from '@/domain/models/project'
-import { getQueryData } from '@/lib/utils'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getQueryData } from '@/lib/utils'
 
 import type { ContentTableProps } from '../content-table-types'
 
@@ -28,27 +28,28 @@ export function ProjectItem({ project }: { project: Project | null }) {
   )
 }
 
+function padPreviewSlots<T>(items: readonly T[], slotCount: number): (T | null)[] {
+  const padded: (T | null)[] = [...items]
+  while (padded.length < slotCount) {
+    padded.push(null)
+  }
+  return padded.slice(0, slotCount)
+}
+
 export function ProjectContentTableProps(): ContentTableProps {
   const currentUser = getQueryData(useGetCurrentUser())
-  const listProjects = useGetProjects(currentUser?.id ?? '')
-  let projects = getQueryData(listProjects)
+  const partial = useGetProjectsPartial(currentUser?.id ?? '', HOME_CARD_PREVIEW_LIMIT)
 
   if (!currentUser) return { contents: [null, null, null] }
-  if (!projects) return { contents: [null, null, null] }
+  if (partial.isLoading || partial.data === undefined) return { contents: [null, null, null] }
 
-  if (projects.length >= 3) {
-    projects = projects.slice(0, 3)
-  } else {
-    const emptyProjects = Array(3 - projects.length).fill(null)
-    projects = projects.concat(emptyProjects)
-  }
+  const projects: (Project | null)[] = padPreviewSlots(partial.data, HOME_CARD_PREVIEW_LIMIT)
 
   return {
     contents: [
-      <ProjectItem project={projects[0]} />,
-      <ProjectItem project={projects[1]} />,
-      <ProjectItem project={projects[2]} />,
+      <ProjectItem key="p0" project={projects[0]} />,
+      <ProjectItem key="p1" project={projects[1]} />,
+      <ProjectItem key="p2" project={projects[2]} />,
     ],
-    // icons: [<div>Icon1</div>, <div>Icon2</div>, <div>Icon3</div>],
   }
 }

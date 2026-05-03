@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-import { useListAllSongs } from '@/api/query/song.query'
+import { useListSongsPartial } from '@/api/query/song.query'
+import { HOME_CARD_PREVIEW_LIMIT } from '@/domain/list-query'
 import type { Song } from '@/domain/models/song'
-import { cn, getQueryData } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
@@ -32,21 +33,28 @@ export function SongItem({ song }: { song: Song | null }) {
   )
 }
 
+function padPreviewSlots<T>(items: readonly T[], slotCount: number): (T | null)[] {
+  const padded: (T | null)[] = [...items]
+  while (padded.length < slotCount) {
+    padded.push(null)
+  }
+  return padded.slice(0, slotCount)
+}
+
 export function SongContentTableProps(): ContentTableProps {
-  const listAllSongs = useListAllSongs()
+  const partial = useListSongsPartial(HOME_CARD_PREVIEW_LIMIT)
 
-  let songs = getQueryData(listAllSongs)
-  if (!songs) return { contents: [null, null, null] }
-
-  if (songs.length >= 3) {
-    songs = songs.slice(0, 3)
-  } else {
-    const emptySongs = Array(3 - songs.length).fill(null)
-    songs = songs.concat(emptySongs)
+  if (partial.isLoading || partial.data === undefined) {
+    return { contents: [null, null, null] }
   }
 
+  const songs: (Song | null)[] = padPreviewSlots(partial.data, HOME_CARD_PREVIEW_LIMIT)
+
   return {
-    contents: [<SongItem song={songs[0]} />, <SongItem song={songs[1]} />, <SongItem song={songs[2]} />],
-    // icons: [<div>Icon1</div>, <div>Icon2</div>, <div>Icon3</div>],
+    contents: [
+      <SongItem key="s0" song={songs[0]} />,
+      <SongItem key="s1" song={songs[1]} />,
+      <SongItem key="s2" song={songs[2]} />,
+    ],
   }
 }

@@ -1,9 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { songUseCase } from '@/di/usecases'
+import type { PagingQuery } from '@/domain/list-query'
 import type { LyricsPart } from '@/domain/valueobjects/song'
 
 import { QUERY_KEY } from './key'
+
+function invalidateSongLists(queryClient: ReturnType<typeof useQueryClient>): void {
+  queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST_ALL })
+  queryClient.invalidateQueries({ queryKey: ['song', 'page'] })
+  queryClient.invalidateQueries({ queryKey: ['song', 'partial'] })
+}
 
 export function useListSongs(params: { title: string }) {
   return useQuery({
@@ -19,6 +26,21 @@ export function useListAllSongs() {
   })
 }
 
+export function useListSongsPage(query: PagingQuery) {
+  return useQuery({
+    queryKey: QUERY_KEY.SONG.PAGE(query.page, query.size, query.sort),
+    queryFn: () => songUseCase.listSongsPage(query),
+  })
+}
+
+export function useListSongsPartial(size: number) {
+  return useQuery({
+    queryKey: QUERY_KEY.SONG.PARTIAL(size),
+    queryFn: () => songUseCase.listSongsPartial(size),
+    enabled: size > 0,
+  })
+}
+
 export function useScrapeLyrics() {
   const queryClient = useQueryClient()
 
@@ -27,7 +49,7 @@ export function useScrapeLyrics() {
       songUseCase.scrapeLyrics(requestBody),
     onSuccess: (_, requestBody) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST(requestBody.title) })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST_ALL })
+      invalidateSongLists(queryClient)
     },
   })
 }
@@ -52,7 +74,7 @@ export function usePatchSong() {
       requestBody: { title?: string; artist?: string | null }
     }) => songUseCase.patchSong(songId, requestBody),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST_ALL })
+      invalidateSongLists(queryClient)
     },
   })
 }
@@ -75,7 +97,7 @@ export function useDeleteSong() {
   return useMutation({
     mutationFn: (songId: string) => songUseCase.deleteSong(songId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST_ALL })
+      invalidateSongLists(queryClient)
     },
   })
 }

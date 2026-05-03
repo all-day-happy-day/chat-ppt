@@ -1,4 +1,5 @@
 import { httpClient } from '@/api/client'
+import { buildPagingSearchParams, type PageResult, type PagingQuery } from '@/domain/list-query'
 import type { PartRequestBody, Project, ProjectContainer } from '@/domain/models/project'
 import type { ProjectRepository } from '@/domain/repositories/project-repository'
 
@@ -12,18 +13,52 @@ import type {
   ExportPPTRequest,
   ExportPPTResponse,
   GetProjectContainersResponse,
+  GetProjectsPartialResponse,
   GetProjectsResponse,
   PatchProjectContainerRequest,
   PatchProjectContainerResponse,
   PatchProjectRequest,
   PatchProjectResponse,
+  ProjectPageResponse,
 } from './messages/remote-project-message'
 import { toProject, toProjectContainer } from './messages/remote-project-message'
+
+/** `GET /project/{userId}/page?page&size&sort` */
+const projectPagePath = (userId: string): string => `/project/${userId}/page`
+
+/** `GET /project/{userId}/partial?size=` */
+const projectPartialPath = (userId: string): string => `/project/${userId}/partial`
 
 export class RemoteProjectRepository implements ProjectRepository {
   async getProjects(userId: string): Promise<Project[]> {
     const { response } = await httpClient.get<GetProjectsResponse>(`/project/${userId}`)
     return response.map((project) => toProject(project))
+  }
+
+  async getProjectsPage(userId: string, query: PagingQuery): Promise<PageResult<Project>> {
+    const { response } = await httpClient.get<ProjectPageResponse>(
+      projectPagePath(userId),
+      undefined,
+      buildPagingSearchParams(query)
+    )
+    return {
+      items: response.items.map((row) => toProject(row)),
+      page: response.page,
+      size: response.size,
+      totalItems: response.totalItems,
+      totalPages: response.totalPages,
+    }
+  }
+
+  async getProjectsPartial(userId: string, size: number): Promise<Project[]> {
+    const params: URLSearchParams = new URLSearchParams()
+    params.set('size', String(size))
+    const { response } = await httpClient.get<GetProjectsPartialResponse>(
+      projectPartialPath(userId),
+      undefined,
+      params
+    )
+    return response.map((row) => toProject(row))
   }
 
   async createProject(requestBody: { templateId: string; userId: string; name: string }): Promise<Project> {

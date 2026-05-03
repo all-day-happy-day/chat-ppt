@@ -1,7 +1,10 @@
+import type { PageResult, PagingQuery } from '../list-query'
 import type { PartRequestBody, Project, ProjectContainer } from '../models/project'
 
 export abstract class ProjectRepository {
   abstract getProjects(userId: string): Promise<Project[]>
+  abstract getProjectsPage(userId: string, query: PagingQuery): Promise<PageResult<Project>>
+  abstract getProjectsPartial(userId: string, size: number): Promise<Project[]>
   abstract createProject(requestBody: { templateId: string; userId: string; name: string }): Promise<Project>
   abstract patchProject(
     projectId: string,

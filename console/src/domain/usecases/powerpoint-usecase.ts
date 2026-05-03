@@ -1,5 +1,6 @@
 import type { PowerpointRepository } from '@/domain/repositories/powerpoint-repository'
 
+import type { PageResult, PagingQuery } from '../list-query'
 import type { Layout } from '../models/powerpoint'
 import type { TemplateResponse } from '../repositories/powerpoint-repository'
 
@@ -32,6 +33,14 @@ export class PowerpointUseCase {
 
   async listTemplates(userId: string): Promise<TemplateResponse[]> {
     return this.powerpointRepository.listTemplates(userId)
+  }
+
+  async listTemplatesPage(userId: string, query: PagingQuery): Promise<PageResult<TemplateResponse>> {
+    return this.powerpointRepository.listTemplatesPage(userId, query)
+  }
+
+  async listTemplatesPartial(userId: string, size: number): Promise<TemplateResponse[]> {
+    return this.powerpointRepository.listTemplatesPartial(userId, size)
   }
 
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {

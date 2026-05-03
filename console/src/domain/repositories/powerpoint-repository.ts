@@ -1,3 +1,4 @@
+import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { Layout } from '@/domain/models/powerpoint'
 
 export interface TemplateResponse {
@@ -19,5 +20,7 @@ export abstract class PowerpointRepository {
   ): Promise<TemplateResponse>
   abstract deleteTemplate(templateId: string): Promise<void>
   abstract listTemplates(userId: string): Promise<TemplateResponse[]>
+  abstract listTemplatesPage(userId: string, query: PagingQuery): Promise<PageResult<TemplateResponse>>
+  abstract listTemplatesPartial(userId: string, size: number): Promise<TemplateResponse[]>
   abstract listLayouts(templateId: string): Promise<{ layouts: Layout[] }>
 }

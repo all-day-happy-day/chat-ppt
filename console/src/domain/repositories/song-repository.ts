@@ -1,9 +1,12 @@
+import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { Song } from '@/domain/models/song'
 import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
 export abstract class SongRepository {
   abstract listSongs(params: { title: string }): Promise<Song[]>
   abstract listAllSongs(): Promise<Song[]>
+  abstract listSongsPage(query: PagingQuery): Promise<PageResult<Song>>
+  abstract listSongsPartial(size: number): Promise<Song[]>
   abstract scrapeLyrics(requestBody: {
     title: string
     artist?: string | null

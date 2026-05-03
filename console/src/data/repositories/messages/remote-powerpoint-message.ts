@@ -35,9 +35,9 @@ export type UpdateTemplateRequest = {
 }
 export type UpdateTemplateResponse = BaseTemplateResponse
 
-// ChangeTemplateName
+// ChangeTemplateName — JSON body keys match FastAPI/Pydantic (snake_case).
 export type ChangeTemplateNameRequest = {
-  newName: string
+  new_name: string
 }
 export type ChangeTemplateNameResponse = BaseTemplateResponse
 
@@ -46,6 +46,14 @@ export type DeleteTemplateResponse = void
 
 // ListTemplates
 export type ListTemplatesResponse = BaseTemplateResponse[]
+
+export type TemplatePageResponse = {
+  items: BaseTemplateResponse[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}
 
 // ListLayouts
 export type ListLayoutsResponse = { layouts: Layout[] }

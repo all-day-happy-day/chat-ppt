@@ -1,3 +1,4 @@
+import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { ProjectRepository } from '@/domain/repositories/project-repository'
 
 import type { PartRequestBody, Project, ProjectContainer } from '../models/project'
@@ -11,6 +12,14 @@ export class ProjectUseCase {
 
   async getProjects(userId: string): Promise<Project[]> {
     return this.projectRepository.getProjects(userId)
+  }
+
+  async getProjectsPage(userId: string, query: PagingQuery): Promise<PageResult<Project>> {
+    return this.projectRepository.getProjectsPage(userId, query)
+  }
+
+  async getProjectsPartial(userId: string, size: number): Promise<Project[]> {
+    return this.projectRepository.getProjectsPartial(userId, size)
   }
 
   async createProject(requestBody: { templateId: string; userId: string; name: string }): Promise<Project> {

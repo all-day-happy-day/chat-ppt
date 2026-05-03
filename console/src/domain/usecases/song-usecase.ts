@@ -1,3 +1,4 @@
+import type { PageResult, PagingQuery } from '../list-query'
 import type { Song } from '../models/song'
 import type { SongRepository } from '../repositories/song-repository'
 import type { Lyrics, LyricsPart } from '../valueobjects/song'
@@ -15,6 +16,14 @@ export class SongUseCase {
 
   async listAllSongs(): Promise<Song[]> {
     return this.songRepository.listAllSongs()
+  }
+
+  async listSongsPage(query: PagingQuery): Promise<PageResult<Song>> {
+    return this.songRepository.listSongsPage(query)
+  }
+
+  async listSongsPartial(size: number): Promise<Song[]> {
+    return this.songRepository.listSongsPartial(size)
   }
 
   async scrapeLyrics(requestBody: {

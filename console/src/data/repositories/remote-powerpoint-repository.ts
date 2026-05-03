@@ -1,7 +1,7 @@
 import { httpClient } from '@/api/client'
+import { buildPagingSearchParams, type PageResult, type PagingQuery } from '@/domain/list-query'
 import type { Layout } from '@/domain/models/powerpoint'
-import type { PowerpointRepository } from '@/domain/repositories/powerpoint-repository'
-import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
+import type { PowerpointRepository, TemplateResponse } from '@/domain/repositories/powerpoint-repository'
 
 import type {
   ChangeTemplateNameRequest,
@@ -11,10 +11,17 @@ import type {
   ListTemplatesResponse,
   ReadTemplateRequest,
   ReadTemplateResponse,
+  TemplatePageResponse,
   UpdateTemplateRequest,
   UpdateTemplateResponse,
 } from './messages/remote-powerpoint-message'
 import { toTemplateResponse } from './messages/remote-powerpoint-message'
+
+/** `GET /powerpoint/template/list/page/{user_id}` */
+const templateListPagePath = (userId: string): string => `/powerpoint/template/list/page/${userId}`
+
+/** `GET /powerpoint/template/partial/{user_id}?size=` */
+const templatePartialPath = (userId: string): string => `/powerpoint/template/partial/${userId}`
 
 export class RemotePowerpointRepository implements PowerpointRepository {
   async readTemplate(requestBody: { file: File; userId: string; templateName: string }): Promise<TemplateResponse> {
@@ -36,7 +43,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   async changeTemplateName(templateId: string, requestBody: { newName: string }): Promise<TemplateResponse> {
     const { response } = await httpClient.patch<ChangeTemplateNameRequest, ChangeTemplateNameResponse>(
       `/powerpoint/template/name/${templateId}`,
-      requestBody
+      { new_name: requestBody.newName }
     )
     return toTemplateResponse(response)
   }
@@ -48,6 +55,28 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   async listTemplates(userId: string): Promise<TemplateResponse[]> {
     const { response } = await httpClient.get<ListTemplatesResponse>(`/powerpoint/template/list/${userId}`)
     return response.map((template) => toTemplateResponse(template))
+  }
+
+  async listTemplatesPage(userId: string, query: PagingQuery): Promise<PageResult<TemplateResponse>> {
+    const { response } = await httpClient.get<TemplatePageResponse>(
+      templateListPagePath(userId),
+      undefined,
+      buildPagingSearchParams(query)
+    )
+    return {
+      items: response.items.map((row) => toTemplateResponse(row)),
+      page: response.page,
+      size: response.size,
+      totalItems: response.totalItems,
+      totalPages: response.totalPages,
+    }
+  }
+
+  async listTemplatesPartial(userId: string, size: number): Promise<TemplateResponse[]> {
+    const params: URLSearchParams = new URLSearchParams()
+    params.set('size', String(size))
+    const { response } = await httpClient.get<ListTemplatesResponse>(templatePartialPath(userId), undefined, params)
+    return response.map((row) => toTemplateResponse(row))
   }
 
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {

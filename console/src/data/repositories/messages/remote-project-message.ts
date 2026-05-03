@@ -93,3 +93,16 @@ export type ExportPPTRequest = {
   savePath: string
 }
 export type ExportPPTResponse = string
+
+// Paged list / partial (response keys are camelCase after httpClient snakeToCamel)
+
+export type ProjectPageResponse = {
+  items: BaseProjectResponse[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}
+
+/** `GET /project/{userId}/partial?size=` → `list[GetProjectResponse]` */
+export type GetProjectsPartialResponse = BaseProjectResponse[]

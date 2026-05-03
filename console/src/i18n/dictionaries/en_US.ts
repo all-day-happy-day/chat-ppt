@@ -32,11 +32,12 @@ export const en_US = {
   'header.settings.settings': 'Settings',
   'header.settings.manage_users': 'Users Management',
   'header.settings.language': 'Language: {{language}}',
-  'header.settings.theme': 'Theme: {{theme}}',
+  'header.settings.theme': '{{theme}} theme',
+  'header.settings.theme.toggle': 'Theme: {{theme}}',
   'header.settings.signout': 'Sign Out',
-  'header.settings.theme.light': 'Light Theme',
-  'header.settings.theme.dark': 'Dark Theme',
-  'header.settings.theme.system': 'System Theme',
+  'header.settings.theme.light': 'Light',
+  'header.settings.theme.dark': 'Dark',
+  'header.settings.theme.system': 'System',
 
   // GlobalErrorPage
   'page.global_error.title': 'Error Occurred',
@@ -59,4 +60,5 @@ export const en_US = {
   'list.template_name': 'Template Name',
   'list.title': 'Title',
   'list.artist': 'Artist',
+  'list.open_song_row': 'Open song to edit: {{title}}',
 } as const

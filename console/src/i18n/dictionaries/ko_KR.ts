@@ -32,11 +32,12 @@ export const ko_KR = {
   'header.settings.settings': '설정',
   'header.settings.manage_users': '사용자 관리',
   'header.settings.language': '언어: {{language}}',
-  'header.settings.theme': '테마: {{theme}}',
+  'header.settings.theme': '{{theme}} 테마',
+  'header.settings.theme.toggle': '테마: {{theme}}',
   'header.settings.signout': '로그아웃',
-  'header.settings.theme.light': '라이트 테마',
-  'header.settings.theme.dark': '다크 테마',
-  'header.settings.theme.system': '시스템 테마',
+  'header.settings.theme.light': '라이트',
+  'header.settings.theme.dark': '다크',
+  'header.settings.theme.system': '시스템',
 
   // GlobalErrorPage
   'page.global_error.title': '오류가 발생',
@@ -59,4 +60,5 @@ export const ko_KR = {
   'list.template_name': '템플릿 이름',
   'list.title': '제목',
   'list.artist': '아티스트',
+  'list.open_song_row': '편집하려면 열기: {{title}}',
 } as const

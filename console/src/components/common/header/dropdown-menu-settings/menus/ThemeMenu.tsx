@@ -18,26 +18,26 @@ export function ThemeMenu({ t, theme, setTheme }: { t: TFunction; theme: Theme; 
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
         <ThemeToggleIcon theme={theme} />
-        <span>{t('header.settings.theme', { theme: theme.charAt(0).toUpperCase() + theme.slice(1) })}</span>
+        <span>{t('header.settings.theme.toggle', { theme: t(`header.settings.theme.${theme}`) })}</span>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
         <DropdownMenuRadioGroup value={theme} onValueChange={(next: string) => setTheme(next as Theme)}>
           <DropdownMenuRadioItem value="light" className="items-stretch">
             <CheckIcon className={cn('size-4', theme === 'light' ? 'opacity-100' : 'opacity-0')} />
             <SunIcon className="size-4" />
-            <span>{t('header.settings.theme.light')}</span>
+            <span>{t('header.settings.theme', { theme: t('header.settings.theme.light') })}</span>
           </DropdownMenuRadioItem>
 
           <DropdownMenuRadioItem value="dark">
             <CheckIcon className={cn('size-4', theme === 'dark' ? 'opacity-100' : 'opacity-0')} />
             <MoonIcon className="size-4" />
-            <span>{t('header.settings.theme.dark')}</span>
+            <span>{t('header.settings.theme', { theme: t('header.settings.theme.dark') })}</span>
           </DropdownMenuRadioItem>
 
           <DropdownMenuRadioItem value="system">
             <CheckIcon className={cn('size-4', theme === 'system' ? 'opacity-100' : 'opacity-0')} />
             <MonitorIcon className="size-4" />
-            <span>{t('header.settings.theme.system')}</span>
+            <span>{t('header.settings.theme', { theme: t('header.settings.theme.system') })}</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuSubContent>
