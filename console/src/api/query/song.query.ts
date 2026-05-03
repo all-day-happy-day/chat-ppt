@@ -45,8 +45,12 @@ export function useScrapeLyrics() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (requestBody: { title: string; artist?: string | null; overwrite?: boolean }) =>
-      songUseCase.scrapeLyrics(requestBody),
+    mutationFn: (requestBody: {
+      userId: string
+      title: string
+      artist?: string | null
+      overwrite?: boolean
+    }) => songUseCase.scrapeLyrics(requestBody),
     onSuccess: (_, requestBody) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY.SONG.LIST(requestBody.title) })
       invalidateSongLists(queryClient)
@@ -71,7 +75,7 @@ export function usePatchSong() {
       requestBody,
     }: {
       songId: string
-      requestBody: { title?: string; artist?: string | null }
+      requestBody: { userId: string; title?: string; artist?: string | null }
     }) => songUseCase.patchSong(songId, requestBody),
     onSuccess: () => {
       invalidateSongLists(queryClient)

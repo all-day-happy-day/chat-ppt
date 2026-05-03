@@ -62,6 +62,7 @@ export class RemoteSongRepository implements SongRepository {
   }
 
   async scrapeLyrics(requestBody: {
+    userId: string
     title: string
     artist?: string | null
     overwrite?: boolean
@@ -78,7 +79,10 @@ export class RemoteSongRepository implements SongRepository {
     return { song: toSong(response.song), lyrics: response.lyrics }
   }
 
-  async patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song> {
+  async patchSong(
+    songId: string,
+    requestBody: { userId: string; title?: string; artist?: string | null }
+  ): Promise<Song> {
     const { response } = await httpClient.patch<PatchSongRequest, PatchSongResponse>(`/song/${songId}`, requestBody)
     return toSong(response.song)
   }

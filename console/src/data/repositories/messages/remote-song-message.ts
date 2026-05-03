@@ -5,8 +5,9 @@ export type SongWire = {
   id: string
   title: string
   artist: string | null
-  createdAt?: string
-  updatedAt?: string
+  userId: string
+  createdAt: string
+  updatedAt: string
 }
 
 export function toSong(wire: SongWire): Song {
@@ -14,8 +15,9 @@ export function toSong(wire: SongWire): Song {
     id: wire.id,
     title: wire.title,
     artist: wire.artist,
-    ...(wire.createdAt !== undefined ? { createdAt: new Date(wire.createdAt) } : {}),
-    ...(wire.updatedAt !== undefined ? { updatedAt: new Date(wire.updatedAt) } : {}),
+    userId: wire.userId,
+    createdAt: new Date(wire.createdAt),
+    updatedAt: new Date(wire.updatedAt),
   }
 }
 
@@ -36,6 +38,7 @@ export type ListAllSongsResponse = {
 
 // ScrapeLyrics
 export type ScrapeLyricsRequest = {
+  userId: string
   title: string
   artist?: string | null
   overwrite?: boolean
@@ -47,6 +50,7 @@ export type GetLyricsResponse = BaseLyricsResponse
 
 // PatchSong
 export type PatchSongRequest = {
+  userId: string
   title?: string | undefined
   artist?: string | null | undefined
 }

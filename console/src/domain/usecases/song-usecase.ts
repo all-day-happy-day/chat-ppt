@@ -27,6 +27,7 @@ export class SongUseCase {
   }
 
   async scrapeLyrics(requestBody: {
+    userId: string
     title: string
     artist?: string | null
     overwrite?: boolean
@@ -38,7 +39,10 @@ export class SongUseCase {
     return this.songRepository.getLyrics(songId)
   }
 
-  async patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song> {
+  async patchSong(
+    songId: string,
+    requestBody: { userId: string; title?: string; artist?: string | null }
+  ): Promise<Song> {
     return this.songRepository.patchSong(songId, requestBody)
   }
 

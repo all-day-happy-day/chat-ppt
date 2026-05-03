@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from ulid import ULID
 
 from app.shared.song.domain.valueobject import Lyrics, LyricsPart
@@ -18,7 +20,7 @@ class ScrapeLyricsUseCase:
         self.song_repository: SongRepository = song_repository
         self.lyrics_fetcher_service: LyricsFetcherService = lyrics_fetcher_service
 
-    def __call__(self, title: str, artist: str | None, overwrite: bool = False) -> tuple[Song, Lyrics]:
+    def __call__(self, title: str, user_id: ULID, artist: str | None, overwrite: bool = False) -> tuple[Song, Lyrics]:
         try:
             song: Song = self.song_repository.get_by_title_and_artist(title=title, artist=artist)
             if not overwrite:
@@ -30,7 +32,15 @@ class ScrapeLyricsUseCase:
 
         _, artist_found, lyrics_text = self.lyrics_fetcher_service.fetch(title=title, artist=artist)
 
-        song_entity: Song = Song(id=ULID(), title=title, artist=artist if artist else artist_found)
+        now: datetime = datetime.now(tz=timezone.utc)
+        song_entity: Song = Song(
+            id=ULID(),
+            title=title,
+            artist=artist if artist else artist_found,
+            user_id=user_id,
+            created_at=now,
+            updated_at=now,
+        )
         self.song_repository.save(song=song_entity)
 
         lyrics_entity: Lyrics = Lyrics(song_id=song_entity.id, lyrics=[LyricsPart(part="Default", lyrics=lyrics_text)])

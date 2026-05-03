@@ -66,7 +66,10 @@ def scrape_lyrics(
 ):
     try:
         song, lyrics = usecase(
-            title=request_model.title, artist=request_model.artist, overwrite=request_model.overwrite
+            title=request_model.title,
+            artist=request_model.artist,
+            overwrite=request_model.overwrite,
+            user_id=request_model.user_id,
         )
         return ScrapeLyricsResponse(song=song, lyrics=lyrics)
     except FailedToFetch as e:

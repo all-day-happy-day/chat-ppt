@@ -165,9 +165,7 @@ export function SongListPage(): ReactElement | null {
                           <td className="max-w-0 truncate px-4 py-1 align-middle">
                             {song.artist ?? t('song.no_artist')}
                           </td>
-                          <td className="max-w-0 truncate px-4 py-1 align-middle">
-                            {song.createdAt !== undefined ? formatDate(song.createdAt) : '—'}
-                          </td>
+                          <td className="max-w-0 truncate px-4 py-1 align-middle">{formatDate(song.createdAt)}</td>
                         </>
                       )}
                     </tr>

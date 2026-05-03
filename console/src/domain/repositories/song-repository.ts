@@ -8,12 +8,16 @@ export abstract class SongRepository {
   abstract listSongsPage(query: PagingQuery): Promise<PageResult<Song>>
   abstract listSongsPartial(size: number): Promise<Song[]>
   abstract scrapeLyrics(requestBody: {
+    userId: string
     title: string
     artist?: string | null
     overwrite?: boolean
   }): Promise<{ song: Song; lyrics: Lyrics }>
   abstract getLyrics(songId: string): Promise<{ song: Song; lyrics: Lyrics }>
-  abstract patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song>
+  abstract patchSong(
+    songId: string,
+    requestBody: { userId: string; title?: string; artist?: string | null }
+  ): Promise<Song>
   abstract patchLyrics(songId: string, requestBody: { lyrics: LyricsPart[] }): Promise<Lyrics>
   abstract deleteSong(songId: string): Promise<void>
 }
