@@ -8,6 +8,7 @@ from pptx.presentation import Presentation
 from pptx.shapes.autoshape import Shape as AutoShape
 from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
+from pptx.shapes.picture import Picture
 from pptx.slide import SlideLayout
 from pptx.util import Length
 from ulid import ULID
@@ -16,7 +17,7 @@ from app.powerpoint.domain.entity import Layout, Shape, Template, TemplateFile
 from app.powerpoint.domain.enum import ShapeType
 from app.powerpoint.domain.exception import InvalidFileReadRequest, SlideSizeNotDefined
 from app.powerpoint.domain.service.TemplateReadService import TemplateReadService
-from app.powerpoint.domain.valueobject import ColorConfig, Position, Size
+from app.powerpoint.domain.valueobject import ColorConfig, ImageData, Position, Size
 from app.powerpoint.infrastructure.util.PPTXColor import (
     _ThemeColor,
     resolve_layout_background_color,
@@ -84,6 +85,11 @@ class PPTXTemplateReadService(TemplateReadService):
                 raise ValueError("Theme color is not defined")
             fill_color: ColorConfig = resolve_shape_fill_color(shape=shape, theme_color=self.theme_color)
 
+            image_data: ImageData | None = None
+            if self._get_shape_type(shape=shape) == ShapeType.IMAGE:
+                assert isinstance(shape, Picture)
+                image_data = ImageData(data=shape.image.blob, ext=shape.image.ext, byte_length=len(shape.image.blob))
+
             shape_list.append(
                 Shape(
                     id=ULID(),
@@ -96,6 +102,7 @@ class PPTXTemplateReadService(TemplateReadService):
                     placeholder=shape.is_placeholder,
                     type=self._get_shape_type(shape=shape),
                     fill_color=fill_color,
+                    image=image_data,
                 )
             )
         else:
@@ -109,6 +116,7 @@ class PPTXTemplateReadService(TemplateReadService):
         for shape in slide_layout.shapes:
             shape_list.extend(self._get_shape_element(shape=shape, layout_id=layout_id))
         self.theme_color = None
+
         return Layout(
             id=layout_id,
             template_id=template_id,
@@ -165,3 +173,10 @@ class PPTXTemplateReadService(TemplateReadService):
             size=Path(ppt_path).stat().st_size,
         )
         return template_file, template
+
+
+if __name__ == "__main__":
+    service: PPTXTemplateReadService = PPTXTemplateReadService()
+    template_file, template = service.read(
+        user_id=ULID(), ppt_path="./thepureum-template.pptx", template_name="thepureum"
+    )

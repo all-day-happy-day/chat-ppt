@@ -4,7 +4,7 @@ from ulid import ULID
 
 from app.powerpoint.domain.entity import Shape
 from app.powerpoint.domain.enum import ShapeType
-from app.powerpoint.domain.valueobject import ColorConfig, Position, Size
+from app.powerpoint.domain.valueobject import ColorConfig, ImageData, Position, Size
 from app.powerpoint.infrastructure.repository.shape.entity import ShapeAlchemyEntity
 
 
@@ -22,6 +22,7 @@ class ShapeMapper:
             placeholder=alchemy_entity.placeholder,
             type=ShapeType(alchemy_entity.type),
             fill_color=ColorConfig(**json.loads(alchemy_entity.fill_color)),
+            image=ImageData(**json.loads(alchemy_entity.image)) if alchemy_entity.image else None,
         )
 
     @staticmethod
@@ -37,4 +38,5 @@ class ShapeMapper:
             placeholder=domain_entity.placeholder,
             type=domain_entity.type,
             fill_color=domain_entity.fill_color.model_dump_json(),
+            image=domain_entity.image.model_dump_json() if domain_entity.image else None,
         )
