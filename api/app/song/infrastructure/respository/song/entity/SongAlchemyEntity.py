@@ -1,4 +1,6 @@
-from sqlalchemy import String
+from datetime import datetime, timezone
+
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.db.db import Base
@@ -10,3 +12,10 @@ class SongAlchemyEntity(Base):
     id: Mapped[str] = mapped_column(String(36), nullable=False, index=True, primary_key=True, unique=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     artist: Mapped[str] = mapped_column(String(255), nullable=True)
+    user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=datetime.now(tz=timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=datetime.now(tz=timezone.utc)
+    )

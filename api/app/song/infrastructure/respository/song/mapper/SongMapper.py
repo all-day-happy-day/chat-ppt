@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from ulid import ULID
 
 from app.song.domain.entity import Song
@@ -11,6 +13,9 @@ class SongMapper:
             id=ULID.from_str(alchemy_entity.id),
             title=alchemy_entity.title,
             artist=alchemy_entity.artist,
+            user_id=ULID.from_str(alchemy_entity.user_id),
+            created_at=alchemy_entity.created_at.replace(tzinfo=timezone.utc),
+            updated_at=alchemy_entity.updated_at.replace(tzinfo=timezone.utc),
         )
 
     @staticmethod
@@ -19,4 +24,7 @@ class SongMapper:
             id=str(domain_entity.id),
             title=domain_entity.title,
             artist=domain_entity.artist,
+            user_id=str(domain_entity.user_id),
+            created_at=domain_entity.created_at,
+            updated_at=domain_entity.updated_at,
         )
