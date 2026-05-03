@@ -1,3 +1,5 @@
+import { camelToSnake, type OutgoingJson } from '@/lib/utils'
+
 import type { PreparedBody, RequestBody } from './prepare-request-body.types'
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
@@ -44,9 +46,10 @@ export function prepareRequestBody(body: RequestBody): PreparedBody {
     return { kind: 'stream', body: body }
   }
 
-  // isJSON
+  // isJSON (API expects snake_case keys; app uses camelCase — mirror of response `snakeToCamel`)
   if (isPlainObject(body) || Array.isArray(body)) {
-    return { kind: 'json', body: JSON.stringify(body), contentType: 'application/json' }
+    const wire: unknown = camelToSnake(body as OutgoingJson)
+    return { kind: 'json', body: JSON.stringify(wire), contentType: 'application/json' }
   }
 
   throw new Error('Unsupported body type')

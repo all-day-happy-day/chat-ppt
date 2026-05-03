@@ -1,5 +1,6 @@
 import camelcaseKeys from 'camelcase-keys'
 import { type ClassValue, clsx } from 'clsx'
+import decamelizeKeys from 'decamelize-keys'
 import { twMerge } from 'tailwind-merge'
 
 import type { DefaultError, UseMutationResult, UseQueryResult } from '@tanstack/react-query'
@@ -79,8 +80,15 @@ export function formatDate(date: Date): string {
   return `${month}/${day}/${year} ${hours}:${minutes}`
 }
 
-// Map snake_case to camelCase
+// Map snake_case JSON ↔ camelCase in app code
 export type Input = Record<string, unknown> | readonly Record<string, unknown>[]
 export function snakeToCamel<TCamel>(data: Input): TCamel {
   return camelcaseKeys(data, { deep: true }) as TCamel
+}
+
+/** Outgoing JSON bodies: keys become snake_case for the API (symmetric with {@link snakeToCamel}). */
+export type OutgoingJson = Record<string, unknown> | readonly unknown[]
+
+export function camelToSnake<TSnake>(data: OutgoingJson): TSnake {
+  return decamelizeKeys(data as Record<string, unknown> | readonly unknown[], { deep: true }) as TSnake
 }
