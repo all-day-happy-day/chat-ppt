@@ -36,6 +36,7 @@ export function useGetLyrics(songId: string) {
   return useQuery({
     queryKey: QUERY_KEY.SONG.GET_LYRICS(songId),
     queryFn: () => songUseCase.getLyrics(songId),
+    enabled: songId.length > 0,
   })
 }
 

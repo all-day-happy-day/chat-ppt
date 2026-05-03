@@ -21,6 +21,12 @@ const NotFoundPage = lazy(() =>
 const UserSettings = lazy(() =>
   import('./authenticated/settings/user-settings/UserSettings').then((module) => ({ default: module.UserSettings }))
 )
+const ManageUser = lazy(() =>
+  import('./authenticated/settings/manage-users/ManageUser').then((module) => ({ default: module.ManageUser }))
+)
+const SongEditPage = lazy(() =>
+  import('./authenticated/song-edit/SongEditPage').then((module) => ({ default: module.SongEditPage }))
+)
 
 export default function App() {
   return (
@@ -34,8 +40,10 @@ export default function App() {
               <Route element={<AuthenticatedLayout />}>
                 <Route path="/home" element={<Home />} />
                 <Route path="/settings" element={<UserSettings />} />
+                <Route path="/settings/users" element={<ManageUser />} />
                 <Route path="/projects" element={<ProjectListPage />} />
                 <Route path="/songs" element={<SongListPage />} />
+                <Route path="/songs/:songId/edit" element={<SongEditPage />} />
                 <Route path="/templates" element={<TemplateListPage />} />
               </Route>
 

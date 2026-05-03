@@ -8,7 +8,7 @@ export function UnauthenticatedLayout() {
   return (
     <CenteredLayout>
       <Header />
-      <div className="scrollbar-hide mt-8 mb-12 flex w-full flex-1 items-center justify-center overflow-y-scroll">
+      <div className="scrollbar-hide mt-8 mb-12 flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain">
         <Outlet />
       </div>
     </CenteredLayout>

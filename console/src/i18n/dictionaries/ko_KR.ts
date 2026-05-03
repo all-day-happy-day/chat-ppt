@@ -54,6 +54,7 @@ export const ko_KR = {
   'list.name': '이름',
   'list.username': '사용자 이름',
   'list.created_at': '생성 일시',
+  'list.last_signin': '마지막 로그인',
   'list.updated_at': '수정 일시',
   'list.template_name': '템플릿 이름',
   'list.title': '제목',

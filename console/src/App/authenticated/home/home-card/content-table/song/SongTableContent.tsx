@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 import { useListAllSongs } from '@/api/query/song.query'
 import type { Song } from '@/domain/models/song'
-import { getQueryData } from '@/lib/utils'
+import { cn, getQueryData } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
@@ -10,14 +11,24 @@ import type { ContentTableProps } from '../content-table-types'
 
 export function SongItem({ song }: { song: Song | null }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   if (!song) return null
 
   return (
-    <div className="flex h-full w-full flex-col items-start justify-center gap-1">
+    <button
+      type="button"
+      onClick={(): void => {
+        navigate(`/songs/${song.id}/edit`)
+      }}
+      className={cn(
+        'flex h-full w-full flex-col items-start justify-center gap-1 rounded-lg text-left outline-none',
+        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2'
+      )}
+    >
       <div className="text-semibold text-md">{song.title}</div>
       <div className="text-muted-foreground text-sm">{song.artist ? song.artist : t('song.no_artist')}</div>
-    </div>
+    </button>
   )
 }
 

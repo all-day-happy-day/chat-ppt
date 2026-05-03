@@ -9,7 +9,7 @@ export abstract class SongRepository {
     artist?: string | null
     overwrite?: boolean
   }): Promise<{ song: Song; lyrics: Lyrics }>
-  abstract getLyrics(songId: string): Promise<{ songId: string; lyrics: Lyrics }>
+  abstract getLyrics(songId: string): Promise<{ song: Song; lyrics: Lyrics }>
   abstract patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song>
   abstract patchLyrics(songId: string, requestBody: { lyrics: LyricsPart[] }): Promise<Lyrics>
   abstract deleteSong(songId: string): Promise<void>

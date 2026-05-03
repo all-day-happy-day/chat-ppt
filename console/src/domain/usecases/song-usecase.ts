@@ -25,7 +25,7 @@ export class SongUseCase {
     return this.songRepository.scrapeLyrics(requestBody)
   }
 
-  async getLyrics(songId: string): Promise<{ songId: string; lyrics: Lyrics }> {
+  async getLyrics(songId: string): Promise<{ song: Song; lyrics: Lyrics }> {
     return this.songRepository.getLyrics(songId)
   }
 

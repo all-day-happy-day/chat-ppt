@@ -38,9 +38,9 @@ export class RemoteSongRepository implements SongRepository {
     return { song: response.song, lyrics: response.lyrics }
   }
 
-  async getLyrics(songId: string): Promise<{ songId: string; lyrics: Lyrics }> {
+  async getLyrics(songId: string): Promise<{ song: Song; lyrics: Lyrics }> {
     const { response } = await httpClient.get<GetLyricsResponse>(`/song/lyrics/get/${songId}`)
-    return { songId, lyrics: response.lyrics }
+    return { song: response.song, lyrics: response.lyrics }
   }
 
   async patchSong(songId: string, requestBody: { title?: string; artist?: string | null }): Promise<Song> {

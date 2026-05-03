@@ -48,7 +48,7 @@ export function AuthenticatedDropdownMenu({
       <DropdownMenuSeparator />
       {user.role === 'ADMIN' && (
         <>
-          <ManageUsersMenu t={t} />
+          <ManageUsersMenu t={t} navigate={navigate} />
           <DropdownMenuSeparator />
         </>
       )}

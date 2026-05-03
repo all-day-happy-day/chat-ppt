@@ -34,7 +34,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   }
 
   async changeTemplateName(templateId: string, requestBody: { newName: string }): Promise<TemplateResponse> {
-    const { response } = await httpClient.post<ChangeTemplateNameRequest, ChangeTemplateNameResponse>(
+    const { response } = await httpClient.patch<ChangeTemplateNameRequest, ChangeTemplateNameResponse>(
       `/powerpoint/template/name/${templateId}`,
       requestBody
     )

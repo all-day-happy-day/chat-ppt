@@ -53,7 +53,8 @@ export const en_US = {
   // Lists
   'list.name': 'Name',
   'list.username': 'Username',
-  'list.created_at': 'Created At',
+  'list.created_at': 'Created at',
+  'list.last_signin': 'Last sign-in',
   'list.updated_at': 'Updated At',
   'list.template_name': 'Template Name',
   'list.title': 'Title',

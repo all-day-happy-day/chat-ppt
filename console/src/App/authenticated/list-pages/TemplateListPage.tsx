@@ -1,40 +1,238 @@
+import * as React from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
-import { useListTemplates } from '@/api/query/powerpoint.query'
+import { useChangeTemplateName, useListTemplates } from '@/api/query/powerpoint.query'
 import { useGetUsers } from '@/api/query/user.query'
-import { BaseListLayout } from '@/App/layouts/base-list-layout/BaseListLayout'
-import { formatDate, getQueryData } from '@/lib/utils'
+import {
+  BASE_LIST_PAGE_SIZE,
+  BaseListFooter,
+  BaseListHeader,
+} from '@/App/layouts/base-list-layout/BaseListLayout'
+import type { User } from '@/domain/models/user'
+import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
+import { cn, formatDate, getQueryData } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
-export function TemplateListPage() {
-  const { t } = useTranslation()
+const MIN_BODY_ROW_PX: number = 36
 
-  const currentUser = getQueryData(useGetCurrentUser())
-  const users = getQueryData(useGetUsers())
-  const templates = getQueryData(useListTemplates(currentUser?.id ?? ''))
+interface TemplateRow {
+  readonly template: TemplateResponse
+  readonly user: User
+}
 
-  if (!currentUser) return null
-  if (!users) return null
-  if (!templates) return null
+interface TemplateNameCellProps {
+  readonly template: TemplateResponse
+  readonly onCommit: (args: { templateId: string; newName: string }) => void
+  readonly isSaving: boolean
+}
 
-  const contents: Record<string, unknown>[] = templates.map((template) => {
-    const user = users.find((user) => user.id === template.userId)
-    if (!user) throw new Error('User not found')
+const TemplateNameCell = ({ template, onCommit, isSaving }: TemplateNameCellProps): React.ReactElement => {
+  const [value, setValue] = React.useState<string>(template.name)
 
-    return {
-      [t('list.name')]: template.name,
-      [t('list.username')]: user.username,
-      [t('list.created_at')]: formatDate(template.createdAt),
-      [t('list.updated_at')]: formatDate(template.updatedAt),
+  const commitIfChanged = (): void => {
+    const trimmed: string = value.trim()
+    if (trimmed === '' || trimmed === template.name) {
+      setValue(template.name)
+      return
     }
-  })
+    onCommit({ templateId: template.templateId, newName: trimmed })
+  }
+
+  const handleBlur = (): void => {
+    commitIfChanged()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      e.preventDefault()
+      e.currentTarget.blur()
+    }
+  }
+
   return (
-    <BaseListLayout
-      title={t('home.templates')}
-      headers={[t('list.name'), t('list.username'), t('list.created_at'), t('list.updated_at')]}
-      contents={contents}
+    <input
+      type="text"
+      disabled={isSaving}
+      value={value}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+        setValue(e.target.value)
+      }}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      onClick={(e: React.MouseEvent<HTMLInputElement>): void => {
+        e.stopPropagation()
+      }}
+      className={cn(
+        'border-input bg-background focus:border-ring text-foreground mx-2 box-border w-64 max-w-[calc(100%-1rem)] shrink rounded-none border px-2 py-1 text-sm leading-snug outline-none',
+        isSaving && 'opacity-60'
+      )}
     />
+  )
+}
+
+interface TemplateListTableProps {
+  readonly headers: readonly string[]
+  readonly rows: readonly TemplateRow[]
+  readonly changeTemplateName: ReturnType<typeof useChangeTemplateName>
+}
+
+const TemplateListTable = ({
+  headers,
+  rows,
+  changeTemplateName,
+}: TemplateListTableProps): React.ReactElement => {
+  const tableRef: React.RefObject<HTMLTableElement | null> = React.useRef<HTMLTableElement | null>(null)
+  const theadRef: React.RefObject<HTMLTableSectionElement | null> = React.useRef<HTMLTableSectionElement | null>(
+    null
+  )
+  const [bodyRowHeightPx, setBodyRowHeightPx] = React.useState<number>(MIN_BODY_ROW_PX)
+
+  React.useLayoutEffect((): void | (() => void) => {
+    const tableEl: HTMLTableElement | null = tableRef.current
+    const theadEl: HTMLTableSectionElement | null = theadRef.current
+    if (tableEl === null || theadEl === null) {
+      return
+    }
+
+    const compute = (): void => {
+      const availablePx: number = Math.max(0, tableEl.clientHeight - theadEl.offsetHeight)
+      const perRow: number = Math.floor(availablePx / BASE_LIST_PAGE_SIZE)
+      setBodyRowHeightPx(Math.max(MIN_BODY_ROW_PX, perRow))
+    }
+
+    compute()
+    const ro: ResizeObserver = new ResizeObserver(compute)
+    ro.observe(tableEl)
+    return (): void => {
+      ro.disconnect()
+    }
+  }, [])
+
+  const trHeightStyle: React.CSSProperties = React.useMemo((): React.CSSProperties => {
+    return {
+      height: bodyRowHeightPx,
+      minHeight: bodyRowHeightPx,
+      boxSizing: 'border-box',
+    }
+  }, [bodyRowHeightPx])
+
+  const colCount: number = headers.length
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden p-4">
+      <table ref={tableRef} className="h-full min-h-0 w-full table-fixed border-collapse">
+        <thead ref={theadRef} className="text-md">
+          <tr>
+            {headers.map((header: string) => (
+              <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left" key={header}>
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="text-muted-foreground text-[14px]">
+          {Array.from({ length: BASE_LIST_PAGE_SIZE }, (_: unknown, rowIndex: number) => {
+            const row: TemplateRow | undefined = rows[rowIndex]
+            const rowKey: string =
+              row !== undefined ? row.template.templateId : `placeholder-${String(rowIndex)}`
+            return (
+              <tr
+                key={rowKey}
+                style={trHeightStyle}
+                className="border-border hover:bg-border active:bg-secondary border-y align-middle"
+              >
+                {row === undefined ? (
+                  <td colSpan={colCount} className="align-middle" />
+                ) : (
+                  <>
+                    <td className="max-w-0 px-4 py-1 align-middle">
+                      <TemplateNameCell
+                        key={`${row.template.templateId}\0${row.template.name}`}
+                        template={row.template}
+                        isSaving={
+                          changeTemplateName.isPending &&
+                          changeTemplateName.variables?.templateId === row.template.templateId
+                        }
+                        onCommit={(args): void => {
+                          changeTemplateName.mutate({
+                            templateId: args.templateId,
+                            requestBody: { newName: args.newName },
+                          })
+                        }}
+                      />
+                    </td>
+                    <td className="max-w-0 truncate px-4 py-1 align-middle">{row.user.username}</td>
+                    <td className="max-w-0 truncate px-4 py-1 align-middle">
+                      {formatDate(row.template.createdAt)}
+                    </td>
+                    <td className="max-w-0 truncate px-4 py-1 align-middle">
+                      {formatDate(row.template.updatedAt)}
+                    </td>
+                  </>
+                )}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+export function TemplateListPage(): React.ReactElement | null {
+  const { t } = useTranslation()
+  const [page, setPage] = useState<number>(1)
+  const changeTemplateName: ReturnType<typeof useChangeTemplateName> = useChangeTemplateName()
+
+  const currentUser: User | undefined = getQueryData(useGetCurrentUser())
+  const users: User[] | undefined = getQueryData(useGetUsers())
+  const templates: TemplateResponse[] | undefined = getQueryData(useListTemplates(currentUser?.id ?? ''))
+
+  const allRows: TemplateRow[] = useMemo((): TemplateRow[] => {
+    if (currentUser === undefined || users === undefined || templates === undefined) {
+      return []
+    }
+    return templates.map((template: TemplateResponse): TemplateRow => {
+      const user: User | undefined = users.find((u: User) => u.id === template.userId)
+      if (user === undefined) throw new Error('User not found')
+      return { template, user }
+    })
+  }, [currentUser, templates, users])
+
+  const total: number = allRows.length
+  const totalPages: number = Math.max(1, Math.ceil(total / BASE_LIST_PAGE_SIZE))
+  const safePage: number = Math.min(page, totalPages)
+
+  const pagedRows: TemplateRow[] = useMemo((): TemplateRow[] => {
+    const start: number = (safePage - 1) * BASE_LIST_PAGE_SIZE
+    return allRows.slice(start, start + BASE_LIST_PAGE_SIZE)
+  }, [allRows, safePage])
+
+  const headers: string[] = [t('list.name'), t('list.username'), t('list.created_at'), t('list.updated_at')]
+
+  if (currentUser === undefined || users === undefined || templates === undefined) {
+    return null
+  }
+
+  return (
+    <div className="scrollbar-hide flex h-full min-h-0 w-full min-w-fit flex-col overflow-hidden px-48 pt-8">
+      <BaseListHeader title={t('home.templates')} />
+      <div className="min-h-0 flex-1">
+        {allRows.length > 0 ? (
+          <TemplateListTable headers={headers} rows={pagedRows} changeTemplateName={changeTemplateName} />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center p-4">
+            <div className="text-muted-foreground text-center text-sm">{t('common.global.no_content')}</div>
+          </div>
+        )}
+      </div>
+      <BaseListFooter
+        pagination={{ page, pageSize: BASE_LIST_PAGE_SIZE, total }}
+        onPageChange={setPage}
+      />
+    </div>
   )
 }

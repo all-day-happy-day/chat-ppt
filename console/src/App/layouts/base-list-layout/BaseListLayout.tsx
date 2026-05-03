@@ -1,15 +1,27 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from '@/components/ui/button/Button'
+
 import '@/i18n/i18n'
 
-const ITEMS_PER_PAGE: number = 10
+/** Rows per page in the list table and default page size for paginated APIs. */
+export const BASE_LIST_PAGE_SIZE: number = 10
+
 const MIN_BODY_ROW_PX: number = 36
+
+export interface BaseListPagination {
+  readonly page: number
+  readonly pageSize: number
+  readonly total: number
+}
 
 export interface BaseListContentsProps {
   title: string
   headers: string[]
   contents: Record<string, unknown>[]
+  pagination?: BaseListPagination
+  onPageChange?: (page: number) => void
 }
 
 export function BaseListTitle({ title }: { title: string }) {
@@ -24,7 +36,7 @@ export function BaseListHeader({ title }: { title: string }) {
   )
 }
 
-export function BaseListContent({ headers, contents }: BaseListContentsProps) {
+export function BaseListContent({ headers, contents }: Pick<BaseListContentsProps, 'headers' | 'contents'>) {
   const { t } = useTranslation()
 
   const tableRef = React.useRef<HTMLTableElement | null>(null)
@@ -40,7 +52,7 @@ export function BaseListContent({ headers, contents }: BaseListContentsProps) {
 
     const compute = (): void => {
       const availablePx: number = Math.max(0, tableEl.clientHeight - theadEl.offsetHeight)
-      const perRow: number = Math.floor(availablePx / ITEMS_PER_PAGE)
+      const perRow: number = Math.floor(availablePx / BASE_LIST_PAGE_SIZE)
       setBodyRowHeightPx(Math.max(MIN_BODY_ROW_PX, perRow))
     }
 
@@ -74,7 +86,7 @@ export function BaseListContent({ headers, contents }: BaseListContentsProps) {
             </tr>
           </thead>
           <tbody className="text-muted-foreground text-[14px]">
-            {Array.from({ length: ITEMS_PER_PAGE }, (_: unknown, rowIndex: number) => {
+            {Array.from({ length: BASE_LIST_PAGE_SIZE }, (_: unknown, rowIndex: number) => {
               const row: Record<string, unknown> | undefined = contents[rowIndex]
               return (
                 <tr
@@ -105,22 +117,69 @@ export function BaseListContent({ headers, contents }: BaseListContentsProps) {
   )
 }
 
-export function BaseListFooter() {
+interface BaseListFooterProps {
+  readonly pagination?: BaseListPagination
+  readonly onPageChange?: (page: number) => void
+}
+
+export function BaseListFooter({ pagination, onPageChange }: BaseListFooterProps): React.ReactElement {
+  if (pagination === undefined || onPageChange === undefined) {
+    return <div className="h-[80px] w-full shrink-0 p-4" aria-hidden />
+  }
+
+  const totalPages: number = Math.max(1, Math.ceil(pagination.total / pagination.pageSize))
+  const currentPage: number = Math.min(pagination.page, totalPages)
+  const canGoPrev: boolean = currentPage > 1
+  const canGoNext: boolean = currentPage < totalPages
+  const rangeStart: number = pagination.total === 0 ? 0 : (currentPage - 1) * pagination.pageSize + 1
+  const rangeEnd: number = Math.min(currentPage * pagination.pageSize, pagination.total)
+
   return (
-    <div className="flex h-[80px] w-full p-4">
-      <div className="border-border w-full border text-center">TBU</div>
+    <div className="border-border flex h-[80px] w-full shrink-0 flex-row flex-wrap items-center justify-between gap-3 border-t px-4 py-3">
+      <span className="text-muted-foreground text-sm">
+        {pagination.total === 0
+          ? 'No items'
+          : `Showing ${String(rangeStart)}–${String(rangeEnd)} of ${String(pagination.total)}`}
+      </span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground text-sm">
+          Page {String(currentPage)} / {String(totalPages)}
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!canGoPrev}
+          onClick={(): void => {
+            onPageChange(currentPage - 1)
+          }}
+        >
+          Previous
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!canGoNext}
+          onClick={(): void => {
+            onPageChange(currentPage + 1)
+          }}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   )
 }
 
-export function BaseListLayout({ title, headers, contents }: BaseListContentsProps) {
+export function BaseListLayout({ title, headers, contents, pagination, onPageChange }: BaseListContentsProps) {
   return (
     <div className="scrollbar-hide flex h-full min-h-0 w-full min-w-fit flex-col overflow-hidden px-48 pt-8">
       <BaseListHeader title={title} />
       <div className="min-h-0 flex-1">
-        <BaseListContent title={title} headers={headers} contents={contents} />
+        <BaseListContent headers={headers} contents={contents} />
       </div>
-      <BaseListFooter />
+      <BaseListFooter pagination={pagination} onPageChange={onPageChange} />
     </div>
   )
 }

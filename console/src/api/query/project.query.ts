@@ -34,15 +34,11 @@ export function usePatchProject() {
       requestBody,
     }: {
       projectId: string
-      requestBody: {
-        projectId: string
-        name: string | null
-        templateId: string | null
-        parts: PartRequestBody[] | null
-      }
+      userId: string
+      requestBody: { name: string | null; templateId: string | null; parts: PartRequestBody[] | null }
     }) => projectUseCase.patchProject(projectId, requestBody),
-    onSuccess: (_, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL(projectId) })
+    onSuccess: (_, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL(userId) })
     },
   })
 }
@@ -51,9 +47,9 @@ export function useDeleteProject() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (projectId: string) => projectUseCase.deleteProject(projectId),
-    onSuccess: (_, projectId) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL(projectId) })
+    mutationFn: ({ projectId }: { projectId: string; userId: string }) => projectUseCase.deleteProject(projectId),
+    onSuccess: (_, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL(userId) })
     },
   })
 }
