@@ -10,6 +10,8 @@ from app.di.application.usecase import (
     get_delete_project_container_use_case,
     get_delete_project_use_case,
     get_export_ppt_use_case,
+    get_get_paged_projects_use_case,
+    get_get_partial_projects_use_case,
     get_get_project_containers_use_case,
     get_get_projects_use_case,
     get_patch_project_container_use_case,
@@ -22,6 +24,8 @@ from app.project.application.usecase import (
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
     ExportPPTUseCase,
+    GetPagedProjectsUseCase,
+    GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
     PatchProjectContainerUseCase,
@@ -47,6 +51,7 @@ from app.project.infrastructure.adapter.inbound.api.message import (
     PatchProjectRequest,
     PatchProjectResponse,
 )
+from app.shared.page import Page, PagingOptions
 from app.shared.song.domain.exception import DuplicatedPartName
 
 router: APIRouter = APIRouter(tags=["Project"])
@@ -91,6 +96,32 @@ def delete_project(project_id: ULID, usecase: Annotated[DeleteProjectUseCase, De
         usecase(project_id=project_id)
     except ProjectNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/{user_id}/page", status_code=status.HTTP_200_OK, response_model=Page[GetProjectResponse])
+def get_paged_projects(
+    user_id: ULID,
+    paging_options: Annotated[PagingOptions, Depends()],
+    usecase: Annotated[GetPagedProjectsUseCase, Depends(get_get_paged_projects_use_case)],
+):
+    projects: Page[Project] = usecase(user_id=user_id, paging_options=paging_options)
+    return Page(
+        items=[GetProjectResponse.from_domain_entity(project) for project in projects.items],
+        page=projects.page,
+        size=projects.size,
+        total_items=projects.total_items,
+        total_pages=projects.total_pages,
+    )
+
+
+@router.get("/{user_id}/partial", status_code=status.HTTP_200_OK, response_model=list[GetProjectResponse])
+def get_partial_projects(
+    user_id: ULID,
+    size: int,
+    usecase: Annotated[GetPartialProjectsUseCase, Depends(get_get_partial_projects_use_case)],
+):
+    projects: list[Project] = usecase(user_id=user_id, size=size)
+    return [GetProjectResponse.from_domain_entity(project) for project in projects]
 
 
 # Project Container

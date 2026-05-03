@@ -6,17 +6,22 @@ from ulid import ULID
 from app.di.application.usecase import (
     get_delete_song_use_case,
     get_get_lyrics_use_case,
+    get_get_paged_songs_use_case,
+    get_get_partial_songs_use_case,
     get_get_songs_use_case,
     get_list_all_songs_use_case,
     get_patch_lyrics_use_case,
     get_patch_song_use_case,
     get_scrape_lyrics_use_case,
 )
+from app.shared.page import Page, PagingOptions
 from app.shared.song.domain.exception import DuplicatedPartName
 from app.shared.song.domain.valueobject import Lyrics
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
+    GetPagedSongsUseCase,
+    GetPartialSongsUseCase,
     GetSongsUseCase,
     ListAllSongsUseCase,
     PatchLyricsUseCase,
@@ -118,3 +123,27 @@ def delete_song(song_id: ULID, usecase: Annotated[DeleteSongUseCase, Depends(get
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except LyricsNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/list-songs/page", status_code=status.HTTP_200_OK, response_model=Page[GetSongsResponse])
+def get_paged_songs(
+    paging_options: Annotated[PagingOptions, Depends()],
+    usecase: Annotated[GetPagedSongsUseCase, Depends(get_get_paged_songs_use_case)],
+):
+    songs: Page[Song] = usecase(paging_options=paging_options)
+    return Page(
+        items=[GetSongsResponse(songs=[song]) for song in songs.items],
+        page=songs.page,
+        size=songs.size,
+        total_items=songs.total_items,
+        total_pages=songs.total_pages,
+    )
+
+
+@router.get("/list-songs/partial", status_code=status.HTTP_200_OK, response_model=GetSongsResponse)
+def get_partial_songs(
+    size: int,
+    usecase: Annotated[GetPartialSongsUseCase, Depends(get_get_partial_songs_use_case)],
+):
+    songs: list[Song] = usecase(size=size)
+    return GetSongsResponse(songs=songs)

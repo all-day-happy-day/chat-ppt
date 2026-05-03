@@ -8,6 +8,7 @@ from app.di.application.usecase import (
     get_delete_template_use_case,
     get_get_layouts_use_case,
     get_get_paged_templates_by_user_id_use_case,
+    get_get_partial_templates_use_case,
     get_get_templates_by_user_id_use_case,
     get_read_template_use_case,
     get_update_template_use_case,
@@ -17,6 +18,7 @@ from app.powerpoint.application.usecase import (
     DeleteTemplateUseCase,
     GetLayoutsUseCase,
     GetPagedTemplatesByUserIDUseCase,
+    GetPartialTemplatesUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
@@ -122,6 +124,18 @@ def get_template_list(
     ]
 
 
+@router.get("/template/layouts/{template_id}", status_code=status.HTTP_200_OK, response_model=list[GetLayoutResponse])
+def get_layouts(template_id: ULID, usecase: Annotated[GetLayoutsUseCase, Depends(get_get_layouts_use_case)]):
+    try:
+        template: Template = usecase(template_id=template_id)
+        return [
+            GetLayoutResponse.from_domain_entity(layout=layout, slide_size=template.slide_size)
+            for layout in template.layouts
+        ]
+    except TemplateNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
 @router.get("/template/list/page/{user_id}", status_code=status.HTTP_200_OK, response_model=Page[GetTemplateResponse])
 def get_paged_template_list(
     user_id: ULID,
@@ -141,13 +155,14 @@ def get_paged_template_list(
     )
 
 
-@router.get("/template/layouts/{template_id}", status_code=status.HTTP_200_OK, response_model=list[GetLayoutResponse])
-def get_layouts(template_id: ULID, usecase: Annotated[GetLayoutsUseCase, Depends(get_get_layouts_use_case)]):
-    try:
-        template: Template = usecase(template_id=template_id)
-        return [
-            GetLayoutResponse.from_domain_entity(layout=layout, slide_size=template.slide_size)
-            for layout in template.layouts
-        ]
-    except TemplateNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+@router.get("/template/partial/{user_id}", status_code=status.HTTP_200_OK, response_model=list[GetTemplateResponse])
+def get_partial_templates(
+    user_id: ULID,
+    size: int,
+    usecase: Annotated[GetPartialTemplatesUseCase, Depends(get_get_partial_templates_use_case)],
+):
+    templates, template_files = usecase(user_id=user_id, size=size)
+    return [
+        GetTemplateResponse.from_domain_entity(template=template, template_file=template_file)
+        for template, template_file in zip(templates, template_files)
+    ]

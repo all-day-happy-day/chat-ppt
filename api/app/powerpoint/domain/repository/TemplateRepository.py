@@ -26,3 +26,7 @@ class TemplateRepository(ABC):
     @abstractmethod
     def get_all_paged_by_user_id(self, user_id: ULID, paging_options: PagingOptions) -> Page[Template]:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_partial_ordered_by_created_at(self, user_id: ULID, size: int) -> list[Template]:
+        raise NotImplementedError

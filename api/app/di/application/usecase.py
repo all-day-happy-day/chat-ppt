@@ -36,6 +36,7 @@ from app.powerpoint.application.usecase import (
     DeleteTemplateUseCase,
     GetLayoutsUseCase,
     GetPagedTemplatesByUserIDUseCase,
+    GetPartialTemplatesUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
@@ -48,6 +49,8 @@ from app.project.application.usecase import (
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
     ExportPPTUseCase,
+    GetPagedProjectsUseCase,
+    GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
     InsertPartUseCase,
@@ -59,6 +62,8 @@ from app.project.domain.service import PresentationService
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
+    GetPagedSongsUseCase,
+    GetPartialSongsUseCase,
     GetSongsUseCase,
     ListAllSongsUseCase,
     PatchLyricsUseCase,
@@ -224,6 +229,18 @@ def get_list_all_songs_use_case(
     return ListAllSongsUseCase(song_repository=song_repository)
 
 
+def get_get_partial_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetPartialSongsUseCase:
+    return GetPartialSongsUseCase(song_repository=song_repository)
+
+
+def get_get_paged_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetPagedSongsUseCase:
+    return GetPagedSongsUseCase(song_repository=song_repository)
+
+
 def get_patch_lyrics_use_case(
     lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
 ) -> PatchLyricsUseCase:
@@ -267,6 +284,15 @@ def get_delete_template_use_case(
         template_file_storage_service=template_file_storage_service,
         template_file_repository=template_file_repository,
         template_repository=template_repository,
+    )
+
+
+def get_get_partial_templates_use_case(
+    template_repository: TemplateRepository = Depends(get_template_repository),
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+) -> GetPartialTemplatesUseCase:
+    return GetPartialTemplatesUseCase(
+        template_repository=template_repository, template_file_repository=template_file_repository
     )
 
 
@@ -349,6 +375,18 @@ def get_delete_project_use_case(
     project_repository: ProjectRepository = Depends(get_project_repository),
 ) -> DeleteProjectUseCase:
     return DeleteProjectUseCase(project_repository=project_repository)
+
+
+def get_get_paged_projects_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> GetPagedProjectsUseCase:
+    return GetPagedProjectsUseCase(project_repository=project_repository)
+
+
+def get_get_partial_projects_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> GetPartialProjectsUseCase:
+    return GetPartialProjectsUseCase(project_repository=project_repository)
 
 
 def get_get_project_containers_use_case(
