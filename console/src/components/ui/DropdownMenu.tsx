@@ -38,7 +38,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 w-max min-w-40 rounded-lg shadow-md',
+          'bg-popover text-popover-foreground origin-(var(--radix-dropdown-menu-content-transform-origin)) data-[state=open]:animate-dropdown-pop-open data-[state=closed]:animate-dropdown-pop-close z-50 w-max min-w-40 cursor-pointer rounded-lg shadow-md',
           className
         )}
         {...props}
@@ -57,7 +57,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        'focus:bg-accent whitespace-nowrapfocus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+        'focus:bg-accent whitespace-nowrapfocus:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50',
         inset && 'pl-8',
         className
       )}

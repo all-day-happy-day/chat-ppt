@@ -5,7 +5,7 @@ export function ProfileMenu({ user, className }: { user: User; className?: strin
   return (
     <div
       className={cn(
-        'bg-accent/50 mb-1 flex scale-x-103 flex-col justify-center gap-1 rounded-t-[0.75rem] p-3 pr-24 pb-4',
+        'bg-accent/50 mb-1 flex scale-x-103 cursor-default flex-col justify-center gap-1 rounded-t-[0.75rem] p-3 pr-24 pb-4',
         className
       )}
     >
