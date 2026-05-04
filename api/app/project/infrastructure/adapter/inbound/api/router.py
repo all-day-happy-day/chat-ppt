@@ -52,7 +52,6 @@ from app.project.infrastructure.adapter.inbound.api.message import (
     PatchProjectResponse,
 )
 from app.shared.page import Page, PagingOptions
-from app.shared.song.domain.exception import DuplicatedPartName
 
 router: APIRouter = APIRouter(tags=["Project"])
 
@@ -86,8 +85,8 @@ def patch_project(
         command: PatchProjectCommand = PatchProjectCommand.model_validate(request_model.model_dump(mode="json"))
         project: Project = usecase(project_id=project_id, command=command)
         return PatchProjectResponse.from_domain_entity(project)
-    except DuplicatedPartName as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ProjectNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -162,7 +161,7 @@ def patch_project_container(
         )
         project_container: ProjectContainer = usecase(project_container_id=project_container_id, command=command)
         return PatchProjectContainerResponse.from_domain_entity(project_container)
-    except DuplicatedPartName as e:
+    except ProjectContainerNotFound as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
