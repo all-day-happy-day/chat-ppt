@@ -72,7 +72,7 @@ function LyricsTextDialog({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4" role="presentation">
       <div className="absolute inset-0 bg-black/50" role="presentation" onClick={onClose} />
       <div
         role="dialog"
@@ -89,7 +89,7 @@ function LyricsTextDialog({
         </h2>
         <pre
           id={bodyId}
-          className="text-muted-foreground mt-3 max-h-[24rem] overflow-y-auto whitespace-pre-wrap break-words text-sm"
+          className="text-muted-foreground mt-3 max-h-96 overflow-y-auto text-sm wrap-break-word whitespace-pre-wrap"
         >
           {body}
         </pre>
@@ -100,7 +100,7 @@ function LyricsTextDialog({
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   )
 }
 
@@ -164,7 +164,7 @@ function RefineCatalogSearchDialog({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4" role="presentation">
       <div className="absolute inset-0 bg-black/50" role="presentation" onClick={onCancel} />
       <div
         role="dialog"
@@ -209,8 +209,7 @@ function RefineCatalogSearchDialog({
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor={refineArtistInputId} className="text-muted-foreground text-sm font-medium">
-              {artistLabel}{' '}
-              <span className="text-muted-foreground/80 font-normal">{artistHint}</span>
+              {artistLabel} <span className="text-muted-foreground/80 font-normal">{artistHint}</span>
             </label>
             <input
               id={refineArtistInputId}
@@ -235,7 +234,7 @@ function RefineCatalogSearchDialog({
         </form>
       </div>
     </div>,
-    document.body,
+    document.body
   )
 }
 
@@ -306,19 +305,18 @@ export function SongNewPage(): React.ReactElement | null {
     if (!canSubmit) {
       return
     }
+    setScrapePreview(null)
+    setCatalogQuery(null)
+    setCatalogUiPage(1)
+    setPickHit(null)
+    setLyricsPreview(null)
+
     scrapeLyrics.mutate(
       {
         title: trimmedTitle,
         ...(trimmedArtist.length > 0 ? { artist: trimmedArtist } : {}),
       },
       {
-        onMutate: (): void => {
-          setScrapePreview(null)
-          setCatalogQuery(null)
-          setCatalogUiPage(1)
-          setPickHit(null)
-          setLyricsPreview(null)
-        },
         onSuccess: (result): void => {
           setScrapePreview({
             userSearchTitle: trimmedTitle,
@@ -326,7 +324,7 @@ export function SongNewPage(): React.ReactElement | null {
             lyrics: [...result.lyrics],
           })
         },
-      },
+      }
     )
   }
 
@@ -412,8 +410,7 @@ export function SongNewPage(): React.ReactElement | null {
           }
           const hit: ScrapeSearchSongHit = pickHit
           const searchTitle: string = catalogQuery.title.trim()
-          const rowArtist: string | null =
-            hit.artist != null && hit.artist.trim().length > 0 ? hit.artist.trim() : null
+          const rowArtist: string | null = hit.artist != null && hit.artist.trim().length > 0 ? hit.artist.trim() : null
           saveSong.mutate(
             {
               userId,
@@ -426,7 +423,7 @@ export function SongNewPage(): React.ReactElement | null {
                 setPickHit(null)
                 navigate(`/songs/${data.song.id}/edit`)
               },
-            },
+            }
           )
         }}
       />
@@ -528,11 +525,14 @@ export function SongNewPage(): React.ReactElement | null {
         </form>
 
         {showScrapedBlock && scrapePreview !== null ? (
-          <section className="flex w-full flex-col gap-4 border-t border-border pt-6" aria-labelledby="song-new-scraped-heading">
+          <section
+            className="border-border flex w-full flex-col gap-4 border-t pt-6"
+            aria-labelledby="song-new-scraped-heading"
+          >
             <h2 id="song-new-scraped-heading" className="text-lg font-semibold">
               {t('page.song_new.scraped_heading')}
             </h2>
-            <pre className="text-foreground max-h-96 overflow-y-auto text-sm whitespace-pre-wrap break-words">
+            <pre className="text-foreground max-h-96 overflow-y-auto text-sm wrap-break-word whitespace-pre-wrap">
               {formatPreviewLyrics(scrapePreview.lyrics)}
             </pre>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -558,7 +558,7 @@ export function SongNewPage(): React.ReactElement | null {
                       onSuccess: (data): void => {
                         navigate(`/songs/${data.song.id}/edit`)
                       },
-                    },
+                    }
                   )
                 }}
               >
@@ -580,7 +580,10 @@ export function SongNewPage(): React.ReactElement | null {
         ) : null}
 
         {showCatalog ? (
-          <section className="flex w-full flex-col gap-4 border-t border-border pt-6" aria-labelledby="song-new-catalog-heading">
+          <section
+            className="border-border flex w-full flex-col gap-4 border-t pt-6"
+            aria-labelledby="song-new-catalog-heading"
+          >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 id="song-new-catalog-heading" className="text-lg font-semibold">
                 {t('page.song_new.catalog_heading')}
@@ -605,13 +608,15 @@ export function SongNewPage(): React.ReactElement | null {
 
             {!catalogSearch.isError && catalogPageData !== undefined && batchLen > 0 ? (
               <>
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full min-w-[28rem] text-left text-sm">
-                    <thead className="bg-muted/50 border-b border-border">
+                <div className="border-border overflow-x-auto rounded-lg border">
+                  <table className="w-full min-w-md text-left text-sm">
+                    <thead className="bg-muted/50 border-border border-b">
                       <tr>
                         <th className="px-3 py-2 font-medium">{t('list.title')}</th>
                         <th className="px-3 py-2 font-medium">{t('list.artist')}</th>
-                        <th className="px-3 py-2 w-16 text-center font-medium">{t('page.song_new.catalog_col_lyrics')}</th>
+                        <th className="w-16 px-3 py-2 text-center font-medium">
+                          {t('page.song_new.catalog_col_lyrics')}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -620,7 +625,7 @@ export function SongNewPage(): React.ReactElement | null {
                           key={catalogRowKey(hit, rowIndex, catalogUiPage)}
                           role="button"
                           tabIndex={0}
-                          className="hover:bg-muted/40 cursor-pointer border-b border-border last:border-b-0"
+                          className="hover:bg-muted/40 border-border cursor-pointer border-b last:border-b-0"
                           onClick={(): void => {
                             setPickHit(hit)
                           }}
@@ -639,10 +644,10 @@ export function SongNewPage(): React.ReactElement | null {
                             <button
                               type="button"
                               className={cn(
-                                'inline-flex rounded-md p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                                'focus-visible:ring-ring inline-flex rounded-md p-1.5 outline-none focus-visible:ring-2',
                                 hitHasLyrics(hit)
                                   ? 'text-foreground hover:bg-muted cursor-pointer'
-                                  : 'text-muted-foreground/35 cursor-not-allowed opacity-50',
+                                  : 'text-muted-foreground/35 cursor-not-allowed opacity-50'
                               )}
                               disabled={!hitHasLyrics(hit)}
                               aria-label={

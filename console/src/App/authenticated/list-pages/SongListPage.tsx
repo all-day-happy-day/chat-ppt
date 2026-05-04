@@ -8,11 +8,7 @@ import { Trash2Icon } from 'lucide-react'
 import { QUERY_KEY } from '@/api/query/key'
 import { useDeleteSong, useListSongsPage } from '@/api/query/song.query'
 import { useGetUsers } from '@/api/query/user.query'
-import {
-  BASE_LIST_PAGE_SIZE,
-  BaseListFooter,
-  BaseListHeader,
-} from '@/App/layouts/base-list-layout/BaseListLayout'
+import { BASE_LIST_PAGE_SIZE, BaseListFooter, BaseListHeader } from '@/App/layouts/base-list-layout/BaseListLayout'
 import { ListSortTh } from '@/App/layouts/base-list-layout/ListSortTh'
 import { Button } from '@/components/ui/button/Button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog/ConfirmDialog'
@@ -127,14 +123,12 @@ const SongListTable = ({
                   ) : (
                     <>
                       <td className="max-w-0 truncate px-4 py-1 align-middle font-medium">{song.title}</td>
-                      <td className="max-w-0 truncate px-4 py-1 align-middle">
-                        {song.artist ?? t('song.no_artist')}
-                      </td>
+                      <td className="max-w-0 truncate px-4 py-1 align-middle">{song.artist ?? t('song.no_artist')}</td>
                       <td className="max-w-0 truncate px-4 py-1 align-middle">{row.user.username}</td>
                       <td className="max-w-0 truncate px-4 py-1 align-middle">{formatDate(song.createdAt)}</td>
                       <td className="max-w-0 truncate px-4 py-1 align-middle">{formatDate(song.updatedAt)}</td>
                       <td
-                        className="min-w-[4.5rem] pl-4 pr-10 py-1 align-middle"
+                        className="min-w-18 py-1 pr-10 pl-4 align-middle"
                         onClick={(e: React.MouseEvent<HTMLTableCellElement>): void => {
                           e.stopPropagation()
                         }}
@@ -169,9 +163,7 @@ const SongListTable = ({
       <ConfirmDialog
         open={deleteTarget !== null}
         title={t('page.song_delete.dialog_title')}
-        description={
-          deleteTarget !== null ? t('list.delete_song_confirm', { title: deleteTarget.title }) : ''
-        }
+        description={deleteTarget !== null ? t('list.delete_song_confirm', { title: deleteTarget.title }) : ''}
         cancelLabel={t('common.global.cancel')}
         confirmLabel={t('common.global.delete')}
         confirmVariant="destructive"
@@ -249,22 +241,12 @@ export function SongListPage(): ReactElement | null {
 
   const headerRow: ReactElement = (
     <>
-      <ListSortTh
-        label={t('list.title')}
-        column="name"
-        sort={sort}
-        onSortChange={handleSortChange}
-      />
+      <ListSortTh label={t('list.title')} column="name" sort={sort} onSortChange={handleSortChange} />
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.artist')}</th>
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.username')}</th>
-      <ListSortTh
-        label={t('list.created_at')}
-        column="created_at"
-        sort={sort}
-        onSortChange={handleSortChange}
-      />
+      <ListSortTh label={t('list.created_at')} column="created_at" sort={sort} onSortChange={handleSortChange} />
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.updated_at')}</th>
-      <th className="bg-secondary h-fit min-w-[4.5rem] py-4 pl-3 pr-10 text-right">
+      <th className="bg-secondary h-fit min-w-18 py-4 pr-10 pl-3 text-right">
         <span className="sr-only">{t('list.actions_column')}</span>
       </th>
     </>

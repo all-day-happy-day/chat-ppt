@@ -49,7 +49,7 @@ export function ConfirmDialog({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4" role="presentation">
       <div className="absolute inset-0 bg-black/50" role="presentation" onClick={onCancel} />
       <div
         role="dialog"
