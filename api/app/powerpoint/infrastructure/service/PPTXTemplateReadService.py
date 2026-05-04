@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
@@ -88,7 +89,11 @@ class PPTXTemplateReadService(TemplateReadService):
             image_data: ImageData | None = None
             if self._get_shape_type(shape=shape) == ShapeType.IMAGE:
                 assert isinstance(shape, Picture)
-                image_data = ImageData(data=shape.image.blob, ext=shape.image.ext, byte_length=len(shape.image.blob))
+                image_data = ImageData(
+                    data=base64.b64encode(shape.image.blob).decode("utf-8"),
+                    # ext=shape.image.ext.upper(),
+                    byte_length=len(shape.image.blob),
+                )
 
             shape_list.append(
                 Shape(

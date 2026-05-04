@@ -1,5 +1,5 @@
 import type { ShapeType } from '@/domain/enums/powerpoint'
-import type { ColorConfig, Position, Size } from '@/domain/valueobjects/powerpoint'
+import type { ColorConfig, ImageData, Position, Size } from '@/domain/valueobjects/powerpoint'
 
 export interface Shape {
   id: string
@@ -12,6 +12,7 @@ export interface Shape {
   placeholder: boolean
   type: ShapeType
   fillColor: ColorConfig
+  image?: ImageData | null
 }
 
 export interface Layout {
@@ -20,6 +21,8 @@ export interface Layout {
   name: string
   shapes: Shape[]
   backgroundColor: ColorConfig
+  /** Slide dimensions in the same unit as shape positions (template slide size). */
+  slideSize: Size
 }
 
 export interface Template {

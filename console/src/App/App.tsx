@@ -27,6 +27,15 @@ const ManageUser = lazy(() =>
 const SongEditPage = lazy(() =>
   import('./authenticated/song-edit/SongEditPage').then((module) => ({ default: module.SongEditPage }))
 )
+const TemplateNewPage = lazy(() =>
+  import('./authenticated/template/TemplateNewPage').then((module) => ({ default: module.TemplateNewPage }))
+)
+const TemplateEditPage = lazy(() =>
+  import('./authenticated/template/TemplateEditPage').then((module) => ({ default: module.TemplateEditPage }))
+)
+const ProjectViewPage = lazy(() =>
+  import('./authenticated/project-view/ProjectViewPage').then((module) => ({ default: module.ProjectViewPage }))
+)
 
 export default function App() {
   return (
@@ -42,9 +51,12 @@ export default function App() {
                 <Route path="/settings" element={<UserSettings />} />
                 <Route path="/settings/users" element={<ManageUser />} />
                 <Route path="/projects" element={<ProjectListPage />} />
+                <Route path="/projects/:projectId" element={<ProjectViewPage />} />
                 <Route path="/songs" element={<SongListPage />} />
                 <Route path="/songs/:songId/edit" element={<SongEditPage />} />
                 <Route path="/templates" element={<TemplateListPage />} />
+                <Route path="/templates/new" element={<TemplateNewPage />} />
+                <Route path="/templates/:templateId/edit" element={<TemplateEditPage />} />
               </Route>
 
               <Route path="/" element={<UnauthenticatedLayout />}>

@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ImageData(BaseModel):
-    data: bytes
-    ext: str
-    byte_length: int = Field(default_factory=lambda data: len(data))
+    data: str
+    # ext: str
+    byte_length: int

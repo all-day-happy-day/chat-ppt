@@ -1,10 +1,13 @@
 import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { Layout } from '@/domain/models/powerpoint'
+import type { Size } from '@/domain/valueobjects/powerpoint'
 
 export interface TemplateResponse {
   templateId: string
   userId: string
   name: string
+  filename: string
+  layoutSize: Size
   createdAt: Date
   updatedAt: Date
 }

@@ -21,6 +21,8 @@ export const ko_KR = {
   'common.global.new_password_confirmed': '새 비밀번호가 확인되었습니다',
   'common.global.password_changed': '비밀번호가 성공적으로 변경되었습니다',
   'common.global.no_content': '내용 없음',
+  'common.global.add': '추가',
+  'common.global.cancel': '취소',
 
   // Home
   'home.profile': '프로필',
@@ -48,6 +50,33 @@ export const ko_KR = {
   'page.not_found.title': '페이지를 찾을 수 없습니다.',
   'page.not_found.description': '존재하지 않는 페이지입니다.',
 
+  // Template edit
+  'page.template_edit.back': '템플릿',
+  'page.template_edit.title': '템플릿 편집',
+  'page.template_edit.name_label': '템플릿 이름',
+  'page.template_edit.source_file_label': '업로드 파일',
+  'page.template_edit.layouts_heading': '레이아웃',
+  'page.template_edit.no_layouts': '이 템플릿에 레이아웃이 없습니다.',
+  'page.template_edit.missing_id': '템플릿 ID가 없습니다.',
+  'page.template_edit.not_found': '템플릿을 찾을 수 없거나 접근 권한이 없습니다.',
+  'page.template_edit.load_error': '템플릿 목록을 불러오지 못했습니다.',
+  'page.template_edit.layouts_error': '레이아웃을 불러오지 못했습니다.',
+
+  // Template new
+  'page.template_new.title': '템플릿 추가',
+  'page.template_new.name_label': '템플릿 이름',
+  'page.template_new.file_label': '템플릿 파일 (.pptx)',
+  'page.template_new.error_generic': '템플릿을 올리지 못했습니다. 다시 시도해 주세요.',
+
+  // Project view
+  'page.project_view.back': '프로젝트',
+  'page.project_view.missing_id': '프로젝트 ID가 없습니다.',
+  'page.project_view.not_found': '프로젝트를 찾을 수 없거나 접근 권한이 없습니다.',
+  'page.project_view.load_error': '프로젝트 목록을 불러오지 못했습니다.',
+  'page.project_view.created': '생성',
+  'page.project_view.updated': '수정',
+  'page.project_view.placeholder': '프로젝트 작업 화면은 이후에 확장됩니다.',
+
   // Song
   'song.no_artist': '아티스트 없음',
 
@@ -61,4 +90,6 @@ export const ko_KR = {
   'list.title': '제목',
   'list.artist': '아티스트',
   'list.open_song_row': '편집하려면 열기: {{title}}',
+  'list.open_template_row': '템플릿 편집으로 열기: {{name}}',
+  'list.open_project_row': '프로젝트 열기: {{name}}',
 } as const

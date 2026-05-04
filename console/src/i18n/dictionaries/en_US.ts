@@ -21,6 +21,8 @@ export const en_US = {
   'common.global.new_password_confirmed': 'New password confirmed',
   'common.global.password_changed': 'Password changed successfully',
   'common.global.no_content': 'No content',
+  'common.global.add': 'Add',
+  'common.global.cancel': 'Cancel',
 
   // Home
   'home.profile': 'Profile',
@@ -48,6 +50,33 @@ export const en_US = {
   'page.not_found.title': 'Page Not Found',
   'page.not_found.description': 'The page you are looking for does not exist.',
 
+  // Template edit
+  'page.template_edit.back': 'Templates',
+  'page.template_edit.title': 'Edit template',
+  'page.template_edit.name_label': 'Template name',
+  'page.template_edit.source_file_label': 'Uploaded file',
+  'page.template_edit.layouts_heading': 'Layouts',
+  'page.template_edit.no_layouts': 'No layouts in this template.',
+  'page.template_edit.missing_id': 'Missing template id.',
+  'page.template_edit.not_found': 'Template not found or you do not have access.',
+  'page.template_edit.load_error': 'Failed to load templates.',
+  'page.template_edit.layouts_error': 'Failed to load layouts.',
+
+  // Template new
+  'page.template_new.title': 'Add template',
+  'page.template_new.name_label': 'Template name',
+  'page.template_new.file_label': 'Template file (.pptx)',
+  'page.template_new.error_generic': 'Could not upload template. Try again.',
+
+  // Project view
+  'page.project_view.back': 'Projects',
+  'page.project_view.missing_id': 'Missing project id.',
+  'page.project_view.not_found': 'Project not found or you do not have access.',
+  'page.project_view.load_error': 'Failed to load projects.',
+  'page.project_view.created': 'Created',
+  'page.project_view.updated': 'Updated',
+  'page.project_view.placeholder': 'Project workspace will be expanded here.',
+
   // Song
   'song.no_artist': 'No Artist',
 
@@ -61,4 +90,6 @@ export const en_US = {
   'list.title': 'Title',
   'list.artist': 'Artist',
   'list.open_song_row': 'Open song to edit: {{title}}',
+  'list.open_template_row': 'Open template to edit: {{name}}',
+  'list.open_project_row': 'Open project: {{name}}',
 } as const

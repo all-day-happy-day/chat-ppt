@@ -7,9 +7,9 @@ import type {
   ChangeTemplateNameRequest,
   ChangeTemplateNameResponse,
   DeleteTemplateResponse,
+  LayoutWire,
   ListLayoutsResponse,
   ListTemplatesResponse,
-  ReadTemplateRequest,
   ReadTemplateResponse,
   TemplatePageResponse,
   UpdateTemplateRequest,
@@ -25,9 +25,14 @@ const templatePartialPath = (userId: string): string => `/powerpoint/template/pa
 
 export class RemotePowerpointRepository implements PowerpointRepository {
   async readTemplate(requestBody: { file: File; userId: string; templateName: string }): Promise<TemplateResponse> {
-    const { response } = await httpClient.post<ReadTemplateRequest, ReadTemplateResponse>(
+    const formData: FormData = new FormData()
+    formData.append('file', requestBody.file)
+    formData.append('user_id', requestBody.userId)
+    formData.append('template_name', requestBody.templateName)
+
+    const { response } = await httpClient.post<FormData, ReadTemplateResponse>(
       `/powerpoint/template/read`,
-      requestBody
+      formData
     )
     return toTemplateResponse(response)
   }
@@ -82,7 +87,14 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {
     const { response } = await httpClient.get<ListLayoutsResponse>(`/powerpoint/template/layouts/${templateId}`)
     return {
-      layouts: response.layouts,
+      layouts: response.map((row: LayoutWire, index: number): Layout => ({
+        id: `${templateId}-layout-${String(index)}`,
+        templateId,
+        name: row.name,
+        shapes: row.shapes,
+        backgroundColor: row.backgroundColor,
+        slideSize: row.slideSize,
+      })),
     }
   }
 }

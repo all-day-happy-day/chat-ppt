@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
 import { useChangeTemplateName, useListTemplatesPage } from '@/api/query/powerpoint.query'
@@ -11,6 +12,7 @@ import {
   BaseListHeader,
 } from '@/App/layouts/base-list-layout/BaseListLayout'
 import { ListSortTh } from '@/App/layouts/base-list-layout/ListSortTh'
+import { Button } from '@/components/ui/button/Button'
 import type { ListSort } from '@/domain/list-query'
 import type { User } from '@/domain/models/user'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
@@ -88,6 +90,8 @@ const TemplateListTable = ({
   rows,
   changeTemplateName,
 }: TemplateListTableProps): React.ReactElement => {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
   const tableRef: React.RefObject<HTMLTableElement | null> = React.useRef<HTMLTableElement | null>(null)
   const theadRef: React.RefObject<HTMLTableSectionElement | null> = React.useRef<HTMLTableSectionElement | null>(null)
   const [bodyRowHeightPx, setBodyRowHeightPx] = React.useState<number>(MIN_BODY_ROW_PX)
@@ -135,7 +139,32 @@ const TemplateListTable = ({
               <tr
                 key={rowKey}
                 style={trHeightStyle}
-                className="border-border hover:bg-border active:bg-secondary border-y align-middle"
+                tabIndex={row === undefined ? undefined : 0}
+                onClick={
+                  row === undefined
+                    ? undefined
+                    : (): void => {
+                        navigate(`/templates/${row.template.templateId}/edit`)
+                      }
+                }
+                onKeyDown={
+                  row === undefined
+                    ? undefined
+                    : (e: React.KeyboardEvent<HTMLTableRowElement>): void => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          navigate(`/templates/${row.template.templateId}/edit`)
+                        }
+                      }
+                }
+                className={cn(
+                  'border-border border-y align-middle',
+                  row !== undefined &&
+                    'hover:bg-border active:bg-secondary focus-visible:ring-ring cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+                )}
+                aria-label={
+                  row === undefined ? undefined : t('list.open_template_row', { name: row.template.name })
+                }
               >
                 {row === undefined ? (
                   <td colSpan={colCount} className="align-middle" />
@@ -173,6 +202,7 @@ const TemplateListTable = ({
 
 export function TemplateListPage(): React.ReactElement | null {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [page, setPage] = useState<number>(1)
   const [sort, setSort] = useState<ListSort>('date_desc')
   const changeTemplateName: ReturnType<typeof useChangeTemplateName> = useChangeTemplateName()
@@ -245,8 +275,21 @@ export function TemplateListPage(): React.ReactElement | null {
   return (
     <div className="scrollbar-hide flex h-full min-h-0 w-full min-w-fit flex-col overflow-hidden px-48 pt-8">
       <BaseListHeader title={t('home.templates')} />
-      <div className="min-h-0 flex-1">
-        {totalItems > 0 ? (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex shrink-0 justify-end px-4 pt-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="default"
+            onClick={(): void => {
+              navigate('/templates/new')
+            }}
+          >
+            {t('common.global.add')}
+          </Button>
+        </div>
+        <div className="min-h-0 flex-1">
+          {totalItems > 0 ? (
           <TemplateListTable
             headerRow={headerRow}
             colCount={4}
@@ -258,6 +301,7 @@ export function TemplateListPage(): React.ReactElement | null {
             <div className="text-muted-foreground text-center text-sm">{t('common.global.no_content')}</div>
           </div>
         )}
+        </div>
       </div>
       <BaseListFooter
         pagination={{ page: safePage, pageSize: BASE_LIST_PAGE_SIZE, total: totalItems }}

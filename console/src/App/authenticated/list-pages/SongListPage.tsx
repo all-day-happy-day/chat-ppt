@@ -10,6 +10,7 @@ import {
   BaseListHeader,
 } from '@/App/layouts/base-list-layout/BaseListLayout'
 import { ListSortTh } from '@/App/layouts/base-list-layout/ListSortTh'
+import { Button } from '@/components/ui/button/Button'
 import type { ListSort } from '@/domain/list-query'
 import type { Song } from '@/domain/models/song'
 import { cn, formatDate } from '@/lib/utils'
@@ -115,8 +116,14 @@ export function SongListPage(): ReactElement | null {
   return (
     <div className="scrollbar-hide flex h-full min-h-0 w-full min-w-fit flex-col overflow-hidden px-48 pt-8">
       <BaseListHeader title={t('home.songs')} />
-      <div className="min-h-0 flex-1">
-        {totalItems > 0 ? (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex shrink-0 justify-end px-4 pt-2">
+          <Button type="button" size="sm" variant="default">
+            {t('common.global.add')}
+          </Button>
+        </div>
+        <div className="min-h-0 flex-1">
+          {totalItems > 0 ? (
           <div className="flex h-full min-h-0 w-full flex-col overflow-hidden p-4">
             <table ref={tableRef} className="h-full min-h-0 w-full table-fixed border-collapse">
               <thead ref={theadRef} className="text-md">
@@ -179,6 +186,7 @@ export function SongListPage(): ReactElement | null {
             <div className="text-muted-foreground text-center text-sm">{t('common.global.no_content')}</div>
           </div>
         )}
+        </div>
       </div>
       <BaseListFooter
         pagination={{ page: safePage, pageSize: BASE_LIST_PAGE_SIZE, total: totalItems }}

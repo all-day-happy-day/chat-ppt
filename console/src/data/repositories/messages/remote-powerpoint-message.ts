@@ -1,10 +1,13 @@
-import type { Layout } from '@/domain/models/powerpoint'
+import type { Shape } from '@/domain/models/powerpoint'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
+import type { ColorConfig, Size } from '@/domain/valueobjects/powerpoint'
 
 export interface BaseTemplateResponse {
   templateId: string
   userId: string
   name: string
+  filename: string
+  layoutSize: Size
   createdAt: string
   updatedAt: string
 }
@@ -14,6 +17,8 @@ export function toTemplateResponse(response: BaseTemplateResponse): TemplateResp
     templateId: response.templateId,
     userId: response.userId,
     name: response.name,
+    filename: response.filename ?? '',
+    layoutSize: response.layoutSize ?? { width: 1, height: 1 },
     createdAt: new Date(response.createdAt),
     updatedAt: new Date(response.updatedAt),
   }
@@ -55,5 +60,12 @@ export type TemplatePageResponse = {
   totalPages: number
 }
 
-// ListLayouts
-export type ListLayoutsResponse = { layouts: Layout[] }
+// GET /powerpoint/template/layouts/{template_id} → list[GetLayoutResponse]
+export type LayoutWire = {
+  name: string
+  shapes: Shape[]
+  slideSize: Size
+  backgroundColor: ColorConfig
+}
+
+export type ListLayoutsResponse = LayoutWire[]

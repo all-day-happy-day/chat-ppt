@@ -99,9 +99,11 @@ export function useListTemplatesPartial(userId: string, size: number) {
   })
 }
 
-export function useListLayouts(templateId: string) {
+export function useListLayouts(templateId: string, options?: { readonly enabled?: boolean }) {
+  const enabled: boolean = options?.enabled ?? true
   return useQuery({
     queryKey: QUERY_KEY.POWERPOINT.LIST_LAYOUTS(templateId),
     queryFn: () => powerpointUseCase.listLayouts(templateId),
+    enabled: enabled && templateId.length > 0,
   })
 }
