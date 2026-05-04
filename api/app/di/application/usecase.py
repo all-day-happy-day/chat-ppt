@@ -22,6 +22,7 @@ from app.di.domain.repository import (
     get_template_file_repository,
     get_template_repository,
     get_user_repository,
+    get_variable_repository,
 )
 from app.di.domain.service import (
     get_authentication_service,
@@ -46,19 +47,24 @@ from app.powerpoint.domain.service import TemplateFileStorageService, TemplateRe
 from app.project.application.usecase import (
     CreateProjectContainerUseCase,
     CreateProjectUseCase,
+    CreateVariableUseCase,
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
+    DeleteVariableUseCase,
     ExportPPTUseCase,
+    GetAllVariablesUseCase,
     GetPagedProjectContainersUseCase,
     GetPagedProjectsUseCase,
     GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
+    GetVariableUseCase,
     InsertPartUseCase,
     PatchProjectContainerUseCase,
     PatchProjectUseCase,
+    PatchVariableUseCase,
 )
-from app.project.domain.repository import ProjectContainerRepository, ProjectRepository
+from app.project.domain.repository import ProjectContainerRepository, ProjectRepository, VariableRepository
 from app.project.domain.service import PresentationService
 from app.song.application.usecase import (
     DeleteSongUseCase,
@@ -447,3 +453,33 @@ def get_insert_part_use_case(
     project_repository: ProjectRepository = Depends(get_project_repository),
 ) -> InsertPartUseCase:
     return InsertPartUseCase(project_repository=project_repository)
+
+
+def get_get_all_variables_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> GetAllVariablesUseCase:
+    return GetAllVariablesUseCase(variable_repository=variable_repository)
+
+
+def get_get_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> GetVariableUseCase:
+    return GetVariableUseCase(variable_repository=variable_repository)
+
+
+def get_create_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> CreateVariableUseCase:
+    return CreateVariableUseCase(variable_repository=variable_repository)
+
+
+def get_delete_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> DeleteVariableUseCase:
+    return DeleteVariableUseCase(variable_repository=variable_repository)
+
+
+def get_patch_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> PatchVariableUseCase:
+    return PatchVariableUseCase(variable_repository=variable_repository)

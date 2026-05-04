@@ -2,6 +2,7 @@ from .BibleContents import BibleContent, BibleContents
 from .LyricsContents import LyricsContent, LyricsContents
 from .PlainContents import PlainContents
 from .ValueContents import ValueContent, ValueContents
+from .Variable import Variable
 
 __all__ = [
     "BibleContent",
@@ -11,4 +12,5 @@ __all__ = [
     "PlainContents",
     "ValueContent",
     "ValueContents",
+    "Variable",
 ]

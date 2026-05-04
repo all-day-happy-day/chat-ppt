@@ -6,9 +6,10 @@ from app.bible.infrastructure.repository import AlchemyBibleRepository
 from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
 from app.powerpoint.infrastructure.repository.template import AlchemyTemplateRepository
 from app.powerpoint.infrastructure.repository.template_file import AlchemyTemplateFileRepository
-from app.project.domain.repository import ProjectContainerRepository, ProjectRepository
+from app.project.domain.repository import ProjectContainerRepository, ProjectRepository, VariableRepository
 from app.project.infrastructure.repository.project import AlchemyProjectRepository
 from app.project.infrastructure.repository.project_container import AlchemyProjectContainerRepository
+from app.project.infrastructure.repository.variable import AlchemyVariableRepository
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.infrastructure.respository.lyrics.AlchemyLyricsRepository import AlchemyLyricsRepository
 from app.song.infrastructure.respository.song.AlchemySongRepository import AlchemySongRepository
@@ -64,3 +65,7 @@ def get_project_repository(db: Session = Depends(get_db)) -> ProjectRepository:
 
 def get_project_container_repository(db: Session = Depends(get_db)) -> ProjectContainerRepository:
     return AlchemyProjectContainerRepository(db)
+
+
+def get_variable_repository(db: Session = Depends(get_db)) -> VariableRepository:
+    return AlchemyVariableRepository(db)

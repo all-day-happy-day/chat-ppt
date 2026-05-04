@@ -7,6 +7,7 @@ from app.project.domain.enum import PartType
 
 class ValueContent(BaseModel):
     placeholder_name: str
+    placeholder_shape_id: int
     value: str | None = None
 
 

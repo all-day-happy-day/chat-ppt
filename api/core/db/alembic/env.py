@@ -10,6 +10,7 @@ from app.powerpoint.infrastructure.repository.template_file.entity import Templa
 from app.project.infrastructure.repository.part.entity import PartAlchemyEntity  # noqa: F401
 from app.project.infrastructure.repository.project.entity import ProjectAlchemyEntity  # noqa: F401
 from app.project.infrastructure.repository.project_container.entity import ProjectContainerAlchemyEntity  # noqa: F401
+from app.project.infrastructure.repository.variable.entity import VariableAlchemyEntity  # noqa: F401
 from app.song.infrastructure.respository.lyrics.entity import LyricsAlchemyEntity  # noqa: F401
 from app.song.infrastructure.respository.song.entity import SongAlchemyEntity  # noqa: F401
 from app.user.infrastructure.repository.entity import UserAlchemyEntity  # noqa: F401
