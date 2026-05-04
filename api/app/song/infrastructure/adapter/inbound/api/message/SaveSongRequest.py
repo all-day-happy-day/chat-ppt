@@ -1,9 +1,11 @@
 from pydantic import BaseModel
+from ulid import ULID
 
 from app.shared.song.domain.valueobject import LyricsPart
 
 
-class ScrapeLyricsResponse(BaseModel):
+class SaveSongRequest(BaseModel):
+    user_id: ULID
     title: str
-    artist: str
+    artist: str | None = None
     lyrics: list[LyricsPart]

@@ -1,11 +1,14 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 import { ShapeTypes } from '@/domain/enums/powerpoint'
 import type { Layout, Shape } from '@/domain/models/powerpoint'
 import type { ColorConfig, Size } from '@/domain/valueobjects/powerpoint'
 import { imageDataToDataUrl } from '@/domain/valueobjects/powerpoint'
 import { cn } from '@/lib/utils'
+
+import '@/i18n/i18n'
 
 function fillStyle(fill: ColorConfig): React.CSSProperties {
   if (fill.colorType === 'none') {
@@ -125,9 +128,13 @@ function resolveSlideDimensions(layout: Layout, fallback: Size): { width: number
 }
 
 function ShapeHoverTooltip({ tip }: { readonly tip: HoverTipState }): React.ReactElement {
+  const { t } = useTranslation()
   const { shape, clientX, clientY } = tip
   const textPreview: string | null =
     shape.text !== null && shape.text.trim().length > 0 ? shape.text : null
+  const kindLabel: string = shape.placeholder
+    ? t('page.template_layout.tooltip_placeholder')
+    : shape.type
 
   return (
     <div
@@ -140,7 +147,7 @@ function ShapeHoverTooltip({ tip }: { readonly tip: HoverTipState }): React.Reac
       }}
       className="bg-popover text-popover-foreground border-border pointer-events-none max-w-xs rounded-md border px-3 py-2 text-left text-xs shadow-lg"
     >
-      <div className="text-foreground font-semibold">{shape.type}</div>
+      <div className="text-foreground font-semibold">{kindLabel}</div>
       <div className="text-muted-foreground mt-0.5 font-mono text-[11px]">
         {String(shape.shapeId)}:{shape.name}
       </div>

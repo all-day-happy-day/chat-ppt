@@ -84,17 +84,26 @@ export class APIClient {
       method: request.method,
       headers: fetchHeaders,
       credentials: 'include',
+      cache: 'no-store',
       ...(preparedRequestBody ? { body: preparedRequestBody.body } : {}),
     })
     if (!fetchResponse.ok) throw new Error(`Failed to fetch data: ${fetchResponse.statusText}`)
 
+    const statusCode: number = fetchResponse.status
     const contentType: string = fetchResponse.headers.get('content-type') ?? ''
 
-    let parsedBody: TResponse | string
-    if (contentType.includes('application/json')) {
-      parsedBody = (await fetchResponse.json()) as TResponse
+    let parsedBody: TResponse | string | undefined
+    if (fetchResponse.ok && (statusCode === 204 || statusCode === 205)) {
+      parsedBody = undefined
     } else {
-      parsedBody = await fetchResponse.text()
+      const rawText: string = await fetchResponse.text()
+      if (rawText.length === 0) {
+        parsedBody = undefined
+      } else if (contentType.includes('application/json')) {
+        parsedBody = JSON.parse(rawText) as TResponse
+      } else {
+        parsedBody = rawText
+      }
     }
 
     let apiResponse: APIResponse<TResponse> = {
@@ -108,7 +117,12 @@ export class APIClient {
       apiResponse
     )
     const response: APIResponse<TResponse> = apiResponse
-    response.response = snakeToCamel<TResponse>(response.response as Input)
+    const rawBody: unknown = response.response
+    if (rawBody !== null && rawBody !== undefined && typeof rawBody === 'object') {
+      response.response = snakeToCamel<TResponse>(rawBody as Input)
+    } else if (rawBody === undefined) {
+      response.response = undefined as TResponse
+    }
 
     return response
   }

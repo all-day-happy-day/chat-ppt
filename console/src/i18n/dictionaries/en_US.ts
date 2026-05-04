@@ -23,6 +23,7 @@ export const en_US = {
   'common.global.no_content': 'No content',
   'common.global.add': 'Add',
   'common.global.cancel': 'Cancel',
+  'common.global.delete': 'Delete',
 
   // Home
   'home.profile': 'Profile',
@@ -61,12 +62,21 @@ export const en_US = {
   'page.template_edit.not_found': 'Template not found or you do not have access.',
   'page.template_edit.load_error': 'Failed to load templates.',
   'page.template_edit.layouts_error': 'Failed to load layouts.',
+  'page.template_edit.delete_template_confirm': 'Delete template "{{name}}"? This cannot be undone.',
+  'page.template_edit.delete_template_aria': 'Delete template {{name}}',
+  'page.template_edit.deleting': 'Deleting…',
 
   // Template new
   'page.template_new.title': 'Add template',
   'page.template_new.name_label': 'Template name',
   'page.template_new.file_label': 'Template file (.pptx)',
   'page.template_new.error_generic': 'Could not upload template. Try again.',
+
+  // Template layout preview (hover)
+  'page.template_layout.tooltip_placeholder': 'Placeholder',
+
+  // Template delete (dialog)
+  'page.template_delete.dialog_title': 'Delete template?',
 
   // Project view
   'page.project_view.back': 'Projects',
@@ -80,16 +90,67 @@ export const en_US = {
   // Song
   'song.no_artist': 'No Artist',
 
+  // Song new (scrape)
+  'page.song_new.title': 'Add song',
+  'page.song_new.subtitle':
+    'Search loads a lyrics preview only. Save to create the song and open the editor, or use the catalog to pick another track.',
+  'page.song_new.back': 'Songs',
+  'page.song_new.title_label': 'Title',
+  'page.song_new.artist_label': 'Artist',
+  'page.song_new.artist_optional': '(optional)',
+  'page.song_new.search': 'Search',
+  'page.song_new.searching': 'Searching…',
+  'page.song_new.scraped_heading': 'Lyrics found',
+  'page.song_new.go_edit': 'Save and open editor',
+  'page.song_new.saving': 'Saving…',
+  'page.song_new.not_this_song': 'Not this song',
+  'page.song_new.refine_title': 'Search the catalog?',
+  'page.song_new.refine_description':
+    'Adjust the search keywords below, then search the catalog.',
+  'page.song_new.refine_confirm': 'OK',
+  'page.song_new.refine_cancel': 'Cancel',
+  'page.song_new.catalog_heading': 'Catalog results',
+  'page.song_new.catalog_col_lyrics': 'Lyrics',
+  'page.song_new.catalog_empty': 'No songs matched this search.',
+  'page.song_new.catalog_error': 'Could not load catalog results.',
+  'page.song_new.catalog_loading': 'Loading…',
+  'page.song_new.catalog_progress':
+    'List page {{ui}} · source page {{remote}} · rows {{from}}–{{to}} of {{total}} in this batch.',
+  'page.song_new.catalog_prev': 'Previous',
+  'page.song_new.catalog_next': 'Next',
+  'page.song_new.lyrics_preview_title': 'Lyrics',
+  'page.song_new.lyrics_preview_close': 'Close',
+  'page.song_new.lyrics_preview_empty': 'No lyrics text is available.',
+  'page.song_new.pick_confirm_title': 'Use this song?',
+  'page.song_new.pick_confirm_description':
+    'Open the editor for "{{title}}"{{artistSuffix}}? You can change details on the next screen.',
+  'page.song_new.pick_confirm_suffix_by': ' by {{artist}}',
+  'page.song_new.pick_confirm': 'Confirm',
+  'page.song_new.lyrics_icon_aria_view': 'View lyrics for {{title}}',
+  'page.song_new.lyrics_icon_aria_none': 'No lyrics for this row',
+  'page.song_new.error_generic': 'Could not find or add this song. Try again.',
+  'page.song_new.error_conflict': 'A song with this title and artist already exists.',
+  'page.song_new.error_not_found': 'No lyrics found for this search. Try another title or artist.',
+
+  // Song delete (dialog)
+  'page.song_delete.dialog_title': 'Delete song?',
+  'page.song_delete.deleting': 'Deleting…',
+  'list.delete_song_confirm': 'Delete song "{{title}}"? This cannot be undone.',
+  'list.delete_song_aria': 'Delete song {{title}}',
+
   // Lists
   'list.name': 'Name',
   'list.username': 'Username',
   'list.created_at': 'Created at',
   'list.last_signin': 'Last sign-in',
-  'list.updated_at': 'Updated At',
+  'list.updated_at': 'Updated at',
   'list.template_name': 'Template Name',
   'list.title': 'Title',
   'list.artist': 'Artist',
   'list.open_song_row': 'Open song to edit: {{title}}',
   'list.open_template_row': 'Open template to edit: {{name}}',
   'list.open_project_row': 'Open project: {{name}}',
+  'list.delete_template_confirm': 'Delete template "{{name}}"? This cannot be undone.',
+  'list.delete_template_aria': 'Delete template {{name}}',
+  'list.actions_column': 'Actions',
 } as const

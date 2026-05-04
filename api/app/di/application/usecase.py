@@ -68,7 +68,9 @@ from app.song.application.usecase import (
     ListAllSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
+    SaveSongUseCase,
     ScrapeLyricsUseCase,
+    ScrapeSearchSongsUseCase,
 )
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
@@ -254,15 +256,22 @@ def get_patch_song_use_case(
 
 
 def get_scrape_lyrics_use_case(
-    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
-    song_repository: SongRepository = Depends(get_song_repository),
     lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
 ) -> ScrapeLyricsUseCase:
-    return ScrapeLyricsUseCase(
-        lyrics_repository=lyrics_repository,
-        song_repository=song_repository,
-        lyrics_fetcher_service=lyrics_fetcher_service,
-    )
+    return ScrapeLyricsUseCase(lyrics_fetcher_service=lyrics_fetcher_service)
+
+
+def get_scrape_search_songs_use_case(
+    lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
+) -> ScrapeSearchSongsUseCase:
+    return ScrapeSearchSongsUseCase(lyrics_fetcher_service=lyrics_fetcher_service)
+
+
+def get_save_song_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+) -> SaveSongUseCase:
+    return SaveSongUseCase(song_repository=song_repository, lyrics_repository=lyrics_repository)
 
 
 # Powerpoint

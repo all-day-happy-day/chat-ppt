@@ -15,6 +15,8 @@ export const QUERY_KEY = Object.freeze({
     PAGE: (page: number, size: number, sort: ListSort) => ['song', 'page', page, size, sort] as const,
     PARTIAL: (size: number) => ['song', 'partial', size] as const,
     GET_LYRICS: (songId: string) => ['song', 'lyrics', 'get', songId] as const,
+    SCRAPE_SEARCH: (title: string, artist: string, page: number) =>
+      ['song', 'scrape-search-songs', title, artist, page] as const,
   },
   POWERPOINT: {
     LIST_ALL: (userId: string) => ['powerpoint', 'list', 'all', userId] as const,

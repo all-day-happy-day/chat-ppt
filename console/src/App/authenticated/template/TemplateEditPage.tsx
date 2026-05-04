@@ -1,11 +1,17 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, Trash2Icon } from 'lucide-react'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
-import { useChangeTemplateName, useListLayouts, useListTemplates } from '@/api/query/powerpoint.query'
+import {
+  useChangeTemplateName,
+  useDeleteTemplate,
+  useListLayouts,
+  useListTemplates,
+} from '@/api/query/powerpoint.query'
 import { Button } from '@/components/ui/button/Button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import { Spinner } from '@/components/ui/spinner/Spinner'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
 import { getQueryData } from '@/lib/utils'
@@ -41,7 +47,7 @@ function TemplateNameField({
   }
 
   return (
-    <div className="flex min-w-0 w-full flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
       <input
         id={inputId}
         type="text"
@@ -83,6 +89,7 @@ export function TemplateEditPage(): React.ReactElement | null {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { templateId = '' } = useParams<{ templateId: string }>()
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const currentUser = getQueryData(useGetCurrentUser())
   const userId: string = currentUser?.id ?? ''
@@ -95,6 +102,7 @@ export function TemplateEditPage(): React.ReactElement | null {
 
   const layoutsQuery = useListLayouts(templateId, { enabled: template !== undefined })
   const changeName = useChangeTemplateName()
+  const deleteTemplate = useDeleteTemplate()
 
   if (templateId.length === 0) {
     return <div className="text-muted-foreground text-center text-sm">{t('page.template_edit.missing_id')}</div>
@@ -141,9 +149,9 @@ export function TemplateEditPage(): React.ReactElement | null {
   const nameInputId: string = `template-name-${template.templateId}`
 
   return (
-    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pb-16 pt-8 md:px-16">
+    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pt-8 pb-16 md:px-16">
       <div className="flex w-full max-w-4xl flex-col items-center gap-8">
-        <div className="flex w-full justify-start">
+        <div className="flex w-full items-center justify-between gap-4">
           <button
             type="button"
             onClick={(): void => {
@@ -154,6 +162,21 @@ export function TemplateEditPage(): React.ReactElement | null {
             <ArrowLeftIcon aria-hidden className="size-4 shrink-0" />
             {t('page.template_edit.back')}
           </button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="shrink-0 shadow-sm transition-[transform,filter] duration-100 hover:brightness-150 active:scale-95 active:brightness-80"
+            loading={deleteTemplate.isPending}
+            loadingLabel={t('page.template_edit.deleting')}
+            disabled={deleteTemplate.isPending}
+            aria-label={t('page.template_edit.delete_template_aria', { name: template.name })}
+            onClick={(): void => {
+              setDeleteDialogOpen(true)
+            }}
+          >
+            <Trash2Icon aria-hidden className="size-4" />
+          </Button>
         </div>
 
         <div className="flex w-full flex-col gap-4">
@@ -200,6 +223,32 @@ export function TemplateEditPage(): React.ReactElement | null {
           )}
         </section>
       </div>
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title={t('page.template_delete.dialog_title')}
+        description={t('page.template_edit.delete_template_confirm', { name: template.name })}
+        cancelLabel={t('common.global.cancel')}
+        confirmLabel={t('common.global.delete')}
+        confirmVariant="destructive"
+        confirmLoading={deleteTemplate.isPending}
+        confirmLoadingLabel={t('page.template_edit.deleting')}
+        onCancel={(): void => {
+          setDeleteDialogOpen(false)
+        }}
+        onConfirm={(): void => {
+          deleteTemplate.mutate(
+            { templateId, userId },
+            {
+              onSuccess: (): void => {
+                navigate('/templates')
+              },
+              onSettled: (): void => {
+                setDeleteDialogOpen(false)
+              },
+            },
+          )
+        }}
+      />
     </div>
   )
 }

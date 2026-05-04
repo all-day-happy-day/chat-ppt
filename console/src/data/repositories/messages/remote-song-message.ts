@@ -1,4 +1,4 @@
-import type { Song } from '@/domain/models/song'
+import type { ScrapeSearchSongHit, ScrapeSearchSongsResult, Song } from '@/domain/models/song'
 import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
 export type SongWire = {
@@ -36,17 +36,24 @@ export type ListAllSongsResponse = {
   songs: SongWire[]
 }
 
-// ScrapeLyrics
-export type ScrapeLyricsRequest = {
-  userId: string
+// Scrape lyrics preview (GET)
+export type ScrapeLyricsResponseWire = {
   title: string
-  artist?: string | null
-  overwrite?: boolean
+  artist: string
+  lyrics: LyricsPart[]
 }
-export type ScrapeLyricsResponse = BaseLyricsResponse
 
 // GetLyrics
 export type GetLyricsResponse = BaseLyricsResponse
+
+// Save song (POST)
+export type SaveSongRequestWire = {
+  userId: string
+  title: string
+  artist?: string | null
+  lyrics: LyricsPart[]
+}
+export type SaveSongResponseWire = BaseLyricsResponse
 
 // PatchSong
 export type PatchSongRequest = {
@@ -67,6 +74,39 @@ export type PatchLyricsResponse = {
 }
 
 // DeleteSong
+
+/** `GET /song/scrape-search-songs` — each song is `[title, artist, lyrics | null]`. */
+export type ScrapeSearchSongsResponseWire = {
+  songs: unknown[]
+  page: number
+  size: number
+}
+
+function parseScrapeSearchSongRow(raw: unknown): ScrapeSearchSongHit | null {
+  if (!Array.isArray(raw) || raw.length !== 3) {
+    return null
+  }
+  const titleVal: unknown = raw[0]
+  const artistVal: unknown = raw[1]
+  const lyricsVal: unknown = raw[2]
+  const title: string = typeof titleVal === 'string' ? titleVal : String(titleVal ?? '')
+  const artist: string | null =
+    artistVal == null || artistVal === '' ? null : typeof artistVal === 'string' ? artistVal : String(artistVal)
+  const lyricsText: string | null =
+    lyricsVal == null ? null : typeof lyricsVal === 'string' ? lyricsVal : String(lyricsVal)
+  return { title, artist, lyricsText }
+}
+
+export function toScrapeSearchSongsResult(wire: ScrapeSearchSongsResponseWire): ScrapeSearchSongsResult {
+  const items: ScrapeSearchSongHit[] = []
+  for (const row of wire.songs) {
+    const hit: ScrapeSearchSongHit | null = parseScrapeSearchSongRow(row)
+    if (hit !== null) {
+      items.push(hit)
+    }
+  }
+  return { items, page: wire.page, size: wire.size }
+}
 
 /** `Page[GetSongsResponse]`: each item is one `GetSongsResponse` (typically one song per item). */
 export type SongPageResponse = {

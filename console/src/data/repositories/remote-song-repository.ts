@@ -1,6 +1,6 @@
 import { httpClient } from '@/api/client'
 import { buildPagingSearchParams, type PageResult, type PagingQuery } from '@/domain/list-query'
-import type { Song } from '@/domain/models/song'
+import type { ScrapeLyricsPreview, ScrapeSearchSongsResult, Song } from '@/domain/models/song'
 import type { SongRepository } from '@/domain/repositories/song-repository'
 import type { Lyrics, LyricsPart } from '@/domain/valueobjects/song'
 
@@ -12,17 +12,28 @@ import type {
   PatchLyricsResponse,
   PatchSongRequest,
   PatchSongResponse,
-  ScrapeLyricsRequest,
-  ScrapeLyricsResponse,
+  SaveSongRequestWire,
+  SaveSongResponseWire,
+  ScrapeLyricsResponseWire,
+  ScrapeSearchSongsResponseWire,
   SongPageResponse,
 } from './messages/remote-song-message'
-import { toSong } from './messages/remote-song-message'
+import { toScrapeSearchSongsResult, toSong } from './messages/remote-song-message'
 
 /** `GET /song/list-songs/page?page&size&sort` */
 const songListPagePath: string = '/song/list-songs/page'
 
 /** `GET /song/list-songs/partial?size=` */
 const songPartialPath: string = '/song/list-songs/partial'
+
+/** `GET /song/scrape-search-songs?title&artist&page` */
+const songScrapeSearchSongsPath: string = '/song/scrape-search-songs'
+
+/** `GET /song/lyrics/scrape?title&artist` */
+const songLyricsScrapePath: string = '/song/lyrics/scrape'
+
+/** `POST /song/save` */
+const songSavePath: string = '/song/save'
 
 function pageItemsToSongs(items: ListSongsResponse[]): Song[] {
   return items.flatMap((cell: ListSongsResponse): Song[] => cell.songs.map((row) => toSong(row)))
@@ -61,16 +72,37 @@ export class RemoteSongRepository implements SongRepository {
     return response.songs.map((row) => toSong(row))
   }
 
-  async scrapeLyrics(requestBody: {
+  async scrapeSearchSongs(params: {
+    title: string
+    artist?: string | null
+    page: number
+  }): Promise<ScrapeSearchSongsResult> {
+    const search: URLSearchParams = new URLSearchParams()
+    search.set('title', params.title)
+    search.set('artist', params.artist ?? '')
+    search.set('page', String(params.page))
+    const { response } = await httpClient.get<ScrapeSearchSongsResponseWire>(songScrapeSearchSongsPath, undefined, search)
+    return toScrapeSearchSongsResult(response)
+  }
+
+  async scrapeLyrics(params: { title: string; artist?: string | null }): Promise<ScrapeLyricsPreview> {
+    const search: URLSearchParams = new URLSearchParams()
+    search.set('title', params.title)
+    search.set('artist', params.artist ?? '')
+    const { response } = await httpClient.get<ScrapeLyricsResponseWire>(songLyricsScrapePath, undefined, search)
+    return {
+      matchedArtist: response.artist,
+      lyrics: response.lyrics,
+    }
+  }
+
+  async saveSong(requestBody: {
     userId: string
     title: string
     artist?: string | null
-    overwrite?: boolean
+    lyrics: LyricsPart[]
   }): Promise<{ song: Song; lyrics: Lyrics }> {
-    const { response } = await httpClient.post<ScrapeLyricsRequest, ScrapeLyricsResponse>(
-      `/song/lyrics/scrape`,
-      requestBody
-    )
+    const { response } = await httpClient.post<SaveSongRequestWire, SaveSongResponseWire>(songSavePath, requestBody)
     return { song: toSong(response.song), lyrics: response.lyrics }
   }
 

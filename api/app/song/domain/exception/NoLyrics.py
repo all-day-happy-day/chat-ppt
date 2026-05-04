@@ -1,0 +1,2 @@
+class NoLyrics(Exception):
+    pass

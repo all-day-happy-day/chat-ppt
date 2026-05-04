@@ -6,7 +6,9 @@ from .GetSongsUseCase import GetSongsUseCase
 from .ListAllSongsUseCase import ListAllSongsUseCase
 from .PatchLyricsUseCase import PatchLyricsUseCase
 from .PatchSongUseCase import PatchSongUseCase
+from .SaveSongUseCase import SaveSongUseCase
 from .ScrapeLyricsUseCase import ScrapeLyricsUseCase
+from .ScrapeSearchSongsUseCase import ScrapeSearchSongsUseCase
 
 __all__ = [
     "DeleteSongUseCase",
@@ -17,5 +19,7 @@ __all__ = [
     "ListAllSongsUseCase",
     "PatchLyricsUseCase",
     "PatchSongUseCase",
+    "SaveSongUseCase",
     "ScrapeLyricsUseCase",
+    "ScrapeSearchSongsUseCase",
 ]

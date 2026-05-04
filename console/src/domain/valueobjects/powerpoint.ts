@@ -17,10 +17,10 @@ export interface ColorConfig {
 
 export interface ImageData {
   readonly data: string
-  // readonly ext: string
   readonly byteLength: number
 }
 
+/** Strips whitespace and an optional `data:*;base64,` prefix so we always build one valid data URL. */
 export function normalizeImageBase64Payload(data: string): string {
   let s: string = data.trim()
   const marker: string = 'base64,'

@@ -2,9 +2,10 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { Trash2Icon } from 'lucide-react'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
-import { useChangeTemplateName, useListTemplatesPage } from '@/api/query/powerpoint.query'
+import { useChangeTemplateName, useDeleteTemplate, useListTemplatesPage } from '@/api/query/powerpoint.query'
 import { useGetUsers } from '@/api/query/user.query'
 import {
   BASE_LIST_PAGE_SIZE,
@@ -13,6 +14,7 @@ import {
 } from '@/App/layouts/base-list-layout/BaseListLayout'
 import { ListSortTh } from '@/App/layouts/base-list-layout/ListSortTh'
 import { Button } from '@/components/ui/button/Button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import type { ListSort } from '@/domain/list-query'
 import type { User } from '@/domain/models/user'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
@@ -81,20 +83,27 @@ interface TemplateListTableProps {
   readonly headerRow: React.ReactNode
   readonly colCount: number
   readonly rows: readonly TemplateRow[]
+  readonly listUserId: string
+  readonly refetchTemplatePage: () => Promise<unknown>
   readonly changeTemplateName: ReturnType<typeof useChangeTemplateName>
+  readonly deleteTemplate: ReturnType<typeof useDeleteTemplate>
 }
 
 const TemplateListTable = ({
   headerRow,
   colCount,
   rows,
+  listUserId,
+  refetchTemplatePage,
   changeTemplateName,
+  deleteTemplate,
 }: TemplateListTableProps): React.ReactElement => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const tableRef: React.RefObject<HTMLTableElement | null> = React.useRef<HTMLTableElement | null>(null)
   const theadRef: React.RefObject<HTMLTableSectionElement | null> = React.useRef<HTMLTableSectionElement | null>(null)
   const [bodyRowHeightPx, setBodyRowHeightPx] = React.useState<number>(MIN_BODY_ROW_PX)
+  const [deleteTarget, setDeleteTarget] = React.useState<TemplateResponse | null>(null)
 
   React.useLayoutEffect((): void | (() => void) => {
     const tableEl: HTMLTableElement | null = tableRef.current
@@ -126,7 +135,8 @@ const TemplateListTable = ({
   }, [bodyRowHeightPx])
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden p-4">
+    <>
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden p-4">
       <table ref={tableRef} className="h-full min-h-0 w-full table-fixed border-collapse">
         <thead ref={theadRef} className="text-md">
           <tr>{headerRow}</tr>
@@ -189,6 +199,37 @@ const TemplateListTable = ({
                     <td className="max-w-0 truncate px-4 py-1 align-middle">{row.user.username}</td>
                     <td className="max-w-0 truncate px-4 py-1 align-middle">{formatDate(row.template.createdAt)}</td>
                     <td className="max-w-0 truncate px-4 py-1 align-middle">{formatDate(row.template.updatedAt)}</td>
+                    <td
+                      className="min-w-[4.5rem] pl-4 pr-10 py-1 align-middle"
+                      onClick={(e: React.MouseEvent<HTMLTableCellElement>): void => {
+                        e.stopPropagation()
+                      }}
+                    >
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={
+                            deleteTemplate.isPending &&
+                            deleteTemplate.variables?.templateId === row.template.templateId
+                          }
+                          loading={
+                            deleteTemplate.isPending &&
+                            deleteTemplate.variables?.templateId === row.template.templateId
+                          }
+                          loadingLabel={t('page.template_edit.deleting')}
+                          aria-label={t('list.delete_template_aria', { name: row.template.name })}
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>): void => {
+                            e.stopPropagation()
+                            setDeleteTarget(row.template)
+                          }}
+                        >
+                          <Trash2Icon aria-hidden className="size-4" />
+                        </Button>
+                      </div>
+                    </td>
                   </>
                 )}
               </tr>
@@ -197,6 +238,45 @@ const TemplateListTable = ({
         </tbody>
       </table>
     </div>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={t('page.template_delete.dialog_title')}
+        description={
+          deleteTarget !== null
+            ? t('list.delete_template_confirm', { name: deleteTarget.name })
+            : ''
+        }
+        cancelLabel={t('common.global.cancel')}
+        confirmLabel={t('common.global.delete')}
+        confirmVariant="destructive"
+        confirmLoading={
+          deleteTemplate.isPending &&
+          deleteTarget !== null &&
+          deleteTemplate.variables?.templateId === deleteTarget.templateId
+        }
+        confirmLoadingLabel={t('page.template_edit.deleting')}
+        onCancel={(): void => {
+          setDeleteTarget(null)
+        }}
+        onConfirm={(): void => {
+          if (deleteTarget === null) {
+            return
+          }
+          const id: string = deleteTarget.templateId
+          deleteTemplate.mutate(
+            { templateId: id, userId: listUserId },
+            {
+              onSuccess: async (): Promise<void> => {
+                await refetchTemplatePage()
+              },
+              onSettled: (): void => {
+                setDeleteTarget(null)
+              },
+            },
+          )
+        }}
+      />
+    </>
   )
 }
 
@@ -206,6 +286,7 @@ export function TemplateListPage(): React.ReactElement | null {
   const [page, setPage] = useState<number>(1)
   const [sort, setSort] = useState<ListSort>('date_desc')
   const changeTemplateName: ReturnType<typeof useChangeTemplateName> = useChangeTemplateName()
+  const deleteTemplate: ReturnType<typeof useDeleteTemplate> = useDeleteTemplate()
 
   const currentUser: User | undefined = getQueryData(useGetCurrentUser())
   const userId: string = currentUser?.id ?? ''
@@ -254,6 +335,9 @@ export function TemplateListPage(): React.ReactElement | null {
         onSortChange={handleSortChange}
       />
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.updated_at')}</th>
+      <th className="bg-secondary h-fit min-w-[4.5rem] py-4 pl-3 pr-10 text-right">
+        <span className="sr-only">{t('list.actions_column')}</span>
+      </th>
     </>
   )
 
@@ -292,9 +376,12 @@ export function TemplateListPage(): React.ReactElement | null {
           {totalItems > 0 ? (
           <TemplateListTable
             headerRow={headerRow}
-            colCount={4}
+            colCount={5}
             rows={templateRows}
+            listUserId={userId}
+            refetchTemplatePage={pageQuery.refetch}
             changeTemplateName={changeTemplateName}
+            deleteTemplate={deleteTemplate}
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center p-4">

@@ -178,10 +178,3 @@ class PPTXTemplateReadService(TemplateReadService):
             size=Path(ppt_path).stat().st_size,
         )
         return template_file, template
-
-
-if __name__ == "__main__":
-    service: PPTXTemplateReadService = PPTXTemplateReadService()
-    template_file, template = service.read(
-        user_id=ULID(), ppt_path="./thepureum-template.pptx", template_name="thepureum"
-    )

@@ -1,17 +1,88 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { powerpointUseCase } from '@/di/usecases'
-import type { PagingQuery } from '@/domain/list-query'
+import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { User } from '@/domain/models/user'
+import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
 import { getQueryData } from '@/lib/utils'
 
 import { useGetCurrentUser } from './auth.query'
 import { QUERY_KEY } from './key'
 
-function invalidatePowerpointLists(queryClient: ReturnType<typeof useQueryClient>, userId: string): void {
-  queryClient.invalidateQueries({ queryKey: QUERY_KEY.POWERPOINT.LIST_ALL(userId) })
-  queryClient.invalidateQueries({ queryKey: ['powerpoint', 'page'] })
-  queryClient.invalidateQueries({ queryKey: ['powerpoint', 'partial'] })
+function evictDeletedTemplateFromListCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  userId: string,
+  templateId: string,
+): void {
+  queryClient.setQueriesData<PageResult<TemplateResponse>>(
+    { queryKey: ['powerpoint', 'page', userId] },
+    (previous: PageResult<TemplateResponse> | undefined): PageResult<TemplateResponse> | undefined => {
+      if (previous === undefined) {
+        return undefined
+      }
+      const nextItems: TemplateResponse[] = previous.items.filter(
+        (item: TemplateResponse): boolean => item.templateId !== templateId,
+      )
+      if (nextItems.length === previous.items.length) {
+        return previous
+      }
+      const removed: number = previous.items.length - nextItems.length
+      const nextTotalItems: number = Math.max(0, previous.totalItems - removed)
+      const nextTotalPages: number = Math.max(1, Math.ceil(nextTotalItems / previous.size))
+      return {
+        ...previous,
+        items: nextItems,
+        totalItems: nextTotalItems,
+        totalPages: nextTotalPages,
+      }
+    },
+  )
+
+  queryClient.setQueriesData<TemplateResponse[]>(
+    { queryKey: QUERY_KEY.POWERPOINT.LIST_ALL(userId) },
+    (previous: TemplateResponse[] | undefined): TemplateResponse[] | undefined => {
+      if (previous === undefined) {
+        return undefined
+      }
+      const next: TemplateResponse[] = previous.filter(
+        (item: TemplateResponse): boolean => item.templateId !== templateId,
+      )
+      return next.length === previous.length ? previous : next
+    },
+  )
+
+  queryClient.setQueriesData<TemplateResponse[]>(
+    { queryKey: ['powerpoint', 'partial', userId] },
+    (previous: TemplateResponse[] | undefined): TemplateResponse[] | undefined => {
+      if (previous === undefined) {
+        return undefined
+      }
+      const next: TemplateResponse[] = previous.filter(
+        (item: TemplateResponse): boolean => item.templateId !== templateId,
+      )
+      return next.length === previous.length ? previous : next
+    },
+  )
+}
+
+async function invalidatePowerpointListQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  userId: string,
+): Promise<void> {
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: QUERY_KEY.POWERPOINT.LIST_ALL(userId),
+      refetchType: 'all',
+    }),
+    queryClient.invalidateQueries({
+      queryKey: ['powerpoint', 'page', userId],
+      refetchType: 'all',
+    }),
+    queryClient.invalidateQueries({
+      queryKey: ['powerpoint', 'partial', userId],
+      refetchType: 'all',
+    }),
+  ])
 }
 
 export function useReadTemplate() {
@@ -20,8 +91,8 @@ export function useReadTemplate() {
   const mutation = useMutation({
     mutationFn: (requestBody: { file: File; userId: string; templateName: string }) =>
       powerpointUseCase.readTemplate(requestBody),
-    onSuccess: (_, { userId }) => {
-      invalidatePowerpointLists(queryClient, userId)
+    onSuccess: async (_, { userId }): Promise<void> => {
+      await invalidatePowerpointListQueries(queryClient, userId)
     },
   })
 
@@ -34,8 +105,8 @@ export function useUpdateTemplate() {
   const mutation = useMutation({
     mutationFn: (requestBody: { file: File; userId: string; templateId: string }) =>
       powerpointUseCase.updateTemplate(requestBody),
-    onSuccess: (_, { userId }) => {
-      invalidatePowerpointLists(queryClient, userId)
+    onSuccess: async (_, { userId }): Promise<void> => {
+      await invalidatePowerpointListQueries(queryClient, userId)
     },
   })
 
@@ -49,10 +120,12 @@ export function useChangeTemplateName() {
   const mutation = useMutation({
     mutationFn: ({ templateId, requestBody }: { templateId: string; requestBody: { newName: string } }) =>
       powerpointUseCase.changeTemplateName(templateId, requestBody),
-    onSuccess: () => {
+    onSuccess: async () => {
       const user = getQueryData<User>(getCurrentUser)
-      if (!user) return
-      invalidatePowerpointLists(queryClient, user.id)
+      if (user === undefined) {
+        return
+      }
+      await invalidatePowerpointListQueries(queryClient, user.id)
     },
   })
 
@@ -61,14 +134,13 @@ export function useChangeTemplateName() {
 
 export function useDeleteTemplate() {
   const queryClient = useQueryClient()
-  const getCurrentUser = useGetCurrentUser()
 
   const mutation = useMutation({
-    mutationFn: (templateId: string) => powerpointUseCase.deleteTemplate(templateId),
-    onSuccess: () => {
-      const user = getQueryData<User>(getCurrentUser)
-      if (!user) return
-      invalidatePowerpointLists(queryClient, user.id)
+    mutationFn: ({ templateId }: { templateId: string; userId: string }) =>
+      powerpointUseCase.deleteTemplate(templateId),
+    onSuccess: async (_void, { userId, templateId }): Promise<void> => {
+      evictDeletedTemplateFromListCaches(queryClient, userId, templateId)
+      await invalidatePowerpointListQueries(queryClient, userId)
     },
   })
 
