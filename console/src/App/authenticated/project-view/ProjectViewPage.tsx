@@ -83,9 +83,7 @@ function partsRecordFromParts(parts: readonly Part[]): PartsRecord {
 
 function partsPatchPayloadFromProject(project: Project): PartRequestBody[] {
   const sorted: Part[] = [...project.parts].sort((a: Part, b: Part): number => a.order - b.order)
-  const localSlides: LocalSlide[] = sorted.map(
-    (p: Part): LocalSlide => ({ id: p.id, partType: p.type })
-  )
+  const localSlides: LocalSlide[] = sorted.map((p: Part): LocalSlide => ({ id: p.id, partType: p.type }))
   const partsById: Map<string, Part> = new Map(sorted.map((p: Part): readonly [string, Part] => [p.id, p]))
   return buildProjectPartsPatchPayload(localSlides, partsById)
 }
@@ -466,17 +464,10 @@ function defaultContainerIdForInsert(
   return Object.values(prevRecord)[0]?.containerId ?? project.parts[0]?.containerId ?? ''
 }
 
-const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspaceProps>(
-  function ProjectWorkspace(
-    {
-      workspaceKind,
-      project,
-      userId,
-      container,
-      onWorkspaceExportIncompleteChange,
-    }: ProjectWorkspaceProps,
-    ref: React.ForwardedRef<ProjectWorkspaceHandle>
-  ): ReactElement {
+const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspaceProps>(function ProjectWorkspace(
+  { workspaceKind, project, userId, container, onWorkspaceExportIncompleteChange }: ProjectWorkspaceProps,
+  ref: React.ForwardedRef<ProjectWorkspaceHandle>
+): ReactElement {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const patchProject = usePatchProject()
@@ -527,6 +518,21 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
   } | null>(null)
   /** Bible phrase cards: editor-reported errors (probe, invalid verse, books/chapters fetch errors). */
   const [bibleBlockingUiByPartId, setBibleBlockingUiByPartId] = React.useState<Record<string, boolean>>({})
+
+  React.useEffect((): void | (() => void) => {
+    if (!isEditPanelOpen) {
+      return
+    }
+    const onKeyDown = (e: globalThis.KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        setIsEditPanelOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return (): void => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isEditPanelOpen])
 
   const handleBibleEditorBlockingUiChange = React.useCallback((partId: string, blocking: boolean): void => {
     setBibleBlockingUiByPartId((prev: Record<string, boolean>): Record<string, boolean> => {
@@ -1642,7 +1648,9 @@ export function ProjectContainerListPage(): ReactElement | null {
   const project: Project | undefined = projectsQuery.data?.find((p: Project): boolean => p.id === projectId)
   const projectContainers: ProjectContainer[] = React.useMemo((): ProjectContainer[] => {
     const rows: ProjectContainer[] = containersQuery.data ?? []
-    return [...rows].sort((a: ProjectContainer, b: ProjectContainer): number => b.updatedAt.getTime() - a.updatedAt.getTime())
+    return [...rows].sort(
+      (a: ProjectContainer, b: ProjectContainer): number => b.updatedAt.getTime() - a.updatedAt.getTime()
+    )
   }, [containersQuery.data])
 
   if (projectId.length === 0) {
@@ -1742,11 +1750,11 @@ export function ProjectContainerListPage(): ReactElement | null {
                       )}
                     >
                       <td className="max-w-0 truncate px-4 py-2.5 align-middle">{row.containerName}</td>
-                      <td className="px-4 py-2.5 align-middle tabular-nums whitespace-nowrap">{row.parts.length}</td>
-                      <td className="px-4 py-2.5 align-middle tabular-nums whitespace-nowrap">
+                      <td className="px-4 py-2.5 align-middle whitespace-nowrap tabular-nums">{row.parts.length}</td>
+                      <td className="px-4 py-2.5 align-middle whitespace-nowrap tabular-nums">
                         {formatDate(row.createdAt)}
                       </td>
-                      <td className="px-4 py-2.5 align-middle tabular-nums whitespace-nowrap">
+                      <td className="px-4 py-2.5 align-middle whitespace-nowrap tabular-nums">
                         {formatDate(row.updatedAt)}
                       </td>
                     </tr>
@@ -1918,16 +1926,7 @@ export function ProjectViewPage(): ReactElement | null {
     } finally {
       setSaveAsContainerBusy(false)
     }
-  }, [
-    createProjectContainer,
-    patchProjectContainer,
-    navigate,
-    project,
-    queryClient,
-    saveAsContainerName,
-    t,
-    userId,
-  ])
+  }, [createProjectContainer, patchProjectContainer, navigate, project, queryClient, saveAsContainerName, t, userId])
 
   if (projectId.length === 0) {
     return <div className="text-muted-foreground text-center text-sm">{t('page.project_view.missing_id')}</div>
