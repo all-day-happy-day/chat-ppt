@@ -7,7 +7,7 @@ import { shapePlaceholderApiName } from '@/domain/models/powerpoint'
 import type { PlainPart, ValuePart } from '@/domain/models/project'
 import type { Size } from '@/domain/valueobjects/powerpoint'
 import type { ValueContent } from '@/domain/valueobjects/project'
-import { cn } from '@/lib/utils'
+import { cn, LAYOUT_SELECTION_ACTIVE_CHROME } from '@/lib/utils'
 
 export interface ProjectValuePlainEditorProps {
   readonly layouts: readonly Layout[]
@@ -31,22 +31,23 @@ function valueContentsForLayout(layout: Layout, prev: ValuePart | PlainPart): Va
   const prevByName: Map<string, string | null> = new Map<string, string | null>()
   if (prev.type === 'VALUE') {
     for (const row of prev.contents.contents) {
-      if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null && row.placeholderShapeId.length > 0) {
+      if (
+        row.placeholderShapeId !== undefined &&
+        row.placeholderShapeId !== null &&
+        row.placeholderShapeId.length > 0
+      ) {
         prevByShapeId.set(row.placeholderShapeId, row.value)
       }
       prevByName.set(row.placeholderName, row.value)
     }
   }
-  return shapes.map(
-    (shape: Shape): ValueContent => {
-      const placeholderName: string = shapePlaceholderApiName(shape)
-      const placeholderShapeId: string = shape.id
-      const fromId: string | null | undefined = prevByShapeId.get(placeholderShapeId)
-      const value: string | null =
-        fromId !== undefined ? fromId : (prevByName.get(placeholderName) ?? null)
-      return { placeholderName, placeholderShapeId, value }
-    },
-  )
+  return shapes.map((shape: Shape): ValueContent => {
+    const placeholderName: string = shapePlaceholderApiName(shape)
+    const placeholderShapeId: string = shape.id
+    const fromId: string | null | undefined = prevByShapeId.get(placeholderShapeId)
+    const value: string | null = fromId !== undefined ? fromId : (prevByName.get(placeholderName) ?? null)
+    return { placeholderName, placeholderShapeId, value }
+  })
 }
 
 /** Rows from server may omit `placeholderShapeId`; zip with layout placeholders by index. */
@@ -104,7 +105,7 @@ export function ProjectValuePlainEditor({
       }
       onCommit(next, 'PLAIN')
     },
-    [onCommit, part],
+    [onCommit, part]
   )
 
   const ensureShapeIdsOnRows = React.useCallback(
@@ -117,7 +118,7 @@ export function ProjectValuePlainEditor({
         return { ...row, placeholderShapeId: sid }
       })
     },
-    [placeholderShapes],
+    [placeholderShapes]
   )
 
   const updatePlaceholderValue = React.useCallback(
@@ -133,13 +134,13 @@ export function ProjectValuePlainEditor({
           type: 'VALUE',
           contents: baseRows.map(
             (row: ValueContent): ValueContent =>
-              row.placeholderShapeId === placeholderShapeId ? { ...row, value: stored } : row,
+              row.placeholderShapeId === placeholderShapeId ? { ...row, value: stored } : row
           ),
         },
       }
       onCommit(next, 'VALUE')
     },
-    [ensureShapeIdsOnRows, onCommit, part],
+    [ensureShapeIdsOnRows, onCommit, part]
   )
 
   return (
@@ -163,7 +164,7 @@ export function ProjectValuePlainEditor({
                 }}
                 className={cn(
                   'border-border/60 hover:border-border shrink-0 rounded-lg border bg-transparent p-2 transition-[border-color,box-shadow]',
-                  selected ? 'border-primary ring-primary ring-2 ring-inset' : '',
+                  selected ? LAYOUT_SELECTION_ACTIVE_CHROME : ''
                 )}
               >
                 <TemplateLayoutSlide
@@ -191,13 +192,25 @@ export function ProjectValuePlainEditor({
             {part.contents.contents.map((row: ValueContent, index: number): React.ReactElement => {
               const shapeId: string | null = resolvePlaceholderShapeId(row, index, placeholderShapes)
               const rowKey: string = shapeId ?? `${row.placeholderName}-${String(index)}`
+              const shapeForRow: Shape | undefined =
+                shapeId !== null
+                  ? placeholderShapes.find((s: Shape): boolean => s.id === shapeId)
+                  : placeholderShapes[index]
+              const layoutHint: string | null =
+                shapeForRow !== undefined &&
+                shapeForRow.text !== null &&
+                shapeForRow.text.trim().length > 0
+                  ? shapeForRow.text.trim()
+                  : null
+              const inputPlaceholder: string = layoutHint !== null ? layoutHint : row.placeholderName
               return (
                 <label key={rowKey} className="flex min-w-0 flex-col gap-1">
-                  <span title={row.placeholderName} className="text-muted-foreground truncate text-xs font-mono">
+                  <span title={row.placeholderName} className="text-muted-foreground truncate font-mono text-xs">
                     {row.placeholderName}
                   </span>
                   <input
                     type="text"
+                    placeholder={inputPlaceholder}
                     value={row.value ?? ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
                       if (shapeId === null) {

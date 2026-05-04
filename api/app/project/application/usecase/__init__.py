@@ -3,6 +3,7 @@ from .CreateProjectUseCase import CreateProjectUseCase
 from .DeleteProjectContainerUseCase import DeleteProjectContainerUseCase
 from .DeleteProjectUseCase import DeleteProjectUseCase
 from .ExportPPTUseCase import ExportPPTUseCase
+from .GetPagedProjectContainersUseCase import GetPagedProjectContainersUseCase
 from .GetPagedProjectsUseCase import GetPagedProjectsUseCase
 from .GetPartialProjectsUseCase import GetPartialProjectsUseCase
 from .GetProjectContainersUseCase import GetProjectContainersUseCase
@@ -17,6 +18,7 @@ __all__ = [
     "DeleteProjectContainerUseCase",
     "DeleteProjectUseCase",
     "ExportPPTUseCase",
+    "GetPagedProjectContainersUseCase",
     "GetPagedProjectsUseCase",
     "GetPartialProjectsUseCase",
     "GetProjectContainersUseCase",

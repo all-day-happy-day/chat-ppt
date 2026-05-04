@@ -49,6 +49,7 @@ from app.project.application.usecase import (
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
     ExportPPTUseCase,
+    GetPagedProjectContainersUseCase,
     GetPagedProjectsUseCase,
     GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
@@ -420,6 +421,12 @@ def get_patch_project_use_case(
     project_repository: ProjectRepository = Depends(get_project_repository),
 ) -> PatchProjectUseCase:
     return PatchProjectUseCase(project_repository=project_repository)
+
+
+def get_get_paged_project_containers_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> GetPagedProjectContainersUseCase:
+    return GetPagedProjectContainersUseCase(project_container_repository=project_container_repository)
 
 
 def get_export_ppt_use_case(

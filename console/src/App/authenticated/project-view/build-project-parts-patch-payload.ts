@@ -1,6 +1,7 @@
-import type { BiblePart, Part, PartRequestBody } from '@/domain/models/project'
-import type { LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
+import type { BiblePart, LyricsPart, Part, PartRequestBody } from '@/domain/models/project'
+import type { BibleContentRange, BibleContents, LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
 import type { LyricsPart as LyricsLine } from '@/domain/valueobjects/song'
+import { LYRICS_FORM_BLANK_SEQUENCE_INDEX, normalizeLyricsPartSequence, readLyricsPartSequenceFromRow } from '@/lib/lyrics-part-sequence'
 
 /** Matches arch `normalizePartsForPatchRequest`: order is the array index. `id` is always a ULID (server or client). */
 export interface LocalSlideLike {
@@ -11,29 +12,136 @@ export interface LocalSlideLike {
 /**
  * API rejects LYRICS when two lines share the same `part` name (DuplicatedPartName → 400).
  * Keep first occurrence per `part`, drop later duplicates from corrupt / legacy data.
+ * Also maps `lyricsPartSequence` indices to the deduped lyrics array so song-form order survives PATCH.
  */
-function uniqueLyricsLinesByPart(lines: readonly LyricsLine[]): LyricsLine[] {
+function uniqueLyricsLinesByPartWithIndexMap(lines: readonly LyricsLine[]): {
+  readonly lines: LyricsLine[]
+  readonly oldIndexToNew: readonly (number | undefined)[]
+} {
   const seen: Set<string> = new Set<string>()
   const result: LyricsLine[] = []
-  for (const line of lines) {
+  const oldIndexToNew: (number | undefined)[] = []
+  for (let i: number = 0; i < lines.length; i++) {
+    const line: LyricsLine = lines[i]!
     if (seen.has(line.part)) {
+      oldIndexToNew[i] = undefined
       continue
     }
     seen.add(line.part)
+    oldIndexToNew[i] = result.length
     result.push(line)
   }
-  return result
+  return { lines: result, oldIndexToNew }
+}
+
+function remapLyricsPartSequenceAfterLineDedupe(
+  dedupedLineCount: number,
+  rawSequence: readonly number[] | undefined,
+  oldIndexToNew: readonly (number | undefined)[]
+): number[] {
+  const seq: readonly number[] = Array.isArray(rawSequence) ? rawSequence : []
+  const mapped: number[] = []
+  for (const entry of seq) {
+    if (entry === LYRICS_FORM_BLANK_SEQUENCE_INDEX) {
+      mapped.push(LYRICS_FORM_BLANK_SEQUENCE_INDEX)
+      continue
+    }
+    if (!Number.isInteger(entry) || entry < 0 || entry >= oldIndexToNew.length) {
+      continue
+    }
+    const nextIdx: number | undefined = oldIndexToNew[entry]
+    if (nextIdx !== undefined) {
+      mapped.push(nextIdx)
+    }
+  }
+  return normalizeLyricsPartSequence(dedupedLineCount, mapped)
 }
 
 function lyricsContentsWithUniqueLineParts(lyricsContents: LyricsContents): LyricsContents {
+  const blocks: LyricsContent[] = lyricsContents.contents ?? []
   return {
+    ...lyricsContents,
     type: 'LYRICS',
-    contents: lyricsContents.contents.map(
-      (block: LyricsContent): LyricsContent => ({
-        ...block,
-        lyrics: uniqueLyricsLinesByPart(block.lyrics),
-      }),
+    contents: blocks.map(
+      (block: LyricsContent): LyricsContent => {
+        const { lines, oldIndexToNew } = uniqueLyricsLinesByPartWithIndexMap(block.lyrics ?? [])
+        return {
+          ...block,
+          lyrics: lines,
+          lyricsPartSequence: remapLyricsPartSequenceAfterLineDedupe(lines.length, block.lyricsPartSequence, oldIndexToNew),
+        }
+      }
     ),
+  }
+}
+
+function hydrateLyricsContentsRows(body: LyricsContents): LyricsContents {
+  const rows: LyricsContent[] = body.contents ?? []
+  const legacyFirstOff: boolean = body.includeTitleForFirstCard === false
+  const nextRows: LyricsContent[] = rows.map(
+    (row: LyricsContent, index: number): LyricsContent => {
+      let includeTitleSlide: boolean
+      if (row.includeTitleSlide !== undefined) {
+        includeTitleSlide = row.includeTitleSlide
+      } else if (index === 0 && legacyFirstOff) {
+        includeTitleSlide = false
+      } else {
+        includeTitleSlide = true
+      }
+      const lyrics: LyricsLine[] = row.lyrics ?? []
+      return {
+        ...row,
+        includeTitleSlide,
+        lyrics,
+        lyricsPartSequence: readLyricsPartSequenceFromRow(row, lyrics.length),
+        lyricsPartsConfigured: row.lyricsPartsConfigured === true,
+      }
+    }
+  )
+  const includeFirstCard: boolean =
+    nextRows.length === 0 ? true : nextRows[0]!.includeTitleSlide !== false
+  return {
+    ...body,
+    contents: nextRows,
+    includeTitleForFirstCard: includeFirstCard,
+  }
+}
+
+/** Resolves `contents` from API payloads or legacy client state that used `content`. */
+function lyricsContentsFromPart(part: LyricsPart): LyricsContents {
+  const legacy = part as LyricsPart & { content?: LyricsContents }
+  const body: LyricsContents | undefined = legacy.contents ?? legacy.content
+  if (body === undefined) {
+    return { type: 'LYRICS', contents: [], includeTitleForFirstCard: true }
+  }
+  return hydrateLyricsContentsRows(body)
+}
+
+function bibleContentsFromPart(part: BiblePart): BibleContents {
+  const legacy = part as BiblePart & { content?: BibleContents }
+  const body: BibleContents | undefined = legacy.contents ?? legacy.content
+  if (body === undefined) {
+    return { type: 'BIBLE', contents: [] }
+  }
+  return body
+}
+
+/**
+ * Hydrates BIBLE parts from API/legacy shapes onto `contents` and layout ids.
+ */
+export function normalizeBiblePartForStore(part: BiblePart): BiblePart {
+  const r = part as BiblePart & { content?: BibleContents }
+  const bodyRaw: BibleContents =
+    r.contents ?? r.content ?? ({ type: 'BIBLE', contents: [] } satisfies BibleContents)
+  return {
+    id: r.id,
+    projectId: r.projectId,
+    containerId: r.containerId,
+    order: r.order,
+    type: 'BIBLE',
+    phraseLayoutId: r.phraseLayoutId ?? null,
+    titleLayoutId: r.titleLayoutId ?? null,
+    contents: { type: 'BIBLE', contents: bodyRaw.contents ?? [] },
   }
 }
 
@@ -68,18 +176,17 @@ function partToRequestBody(part: Part, order: number): PartRequestBody {
         id: part.id,
         order,
         type: 'LYRICS',
-        contents: lyricsContentsWithUniqueLineParts(part.content),
+        contents: lyricsContentsWithUniqueLineParts(lyricsContentsFromPart(part)),
         lyricsLayoutId: part.lyricsLayoutId,
         titleLayoutId: part.titleLayoutId,
       }
     case 'BIBLE': {
-      const bible: BiblePart & { phraseLayoutId?: string | null; titleLayoutId?: string | null } =
-        part as BiblePart & { phraseLayoutId?: string | null; titleLayoutId?: string | null }
+      const bible: BiblePart = normalizeBiblePartForStore(part)
       return {
         id: part.id,
         order,
         type: 'BIBLE',
-        contents: part.content,
+        contents: bibleContentsFromPart(bible),
         phraseLayoutId: bible.phraseLayoutId ?? null,
         titleLayoutId: bible.titleLayoutId ?? null,
       }
@@ -116,15 +223,8 @@ function newPartRequestBody(partUlid: string, order: number, kind: Part['type'])
         type: 'LYRICS',
         contents: {
           type: 'LYRICS',
-          contents: [
-            {
-              title: '',
-              artist: null,
-              lyrics: [{ part: 'blank', lyrics: '' }],
-              lyricsPartSequence: [],
-              lyricsPartsConfigured: false,
-            },
-          ],
+          contents: [],
+          includeTitleForFirstCard: true,
         },
         lyricsLayoutId: null,
         titleLayoutId: null,
@@ -170,15 +270,8 @@ function partRequestBodyForTypeChange(serverPartId: string, order: number, kind:
         type: 'LYRICS',
         contents: {
           type: 'LYRICS',
-          contents: [
-            {
-              title: '',
-              artist: null,
-              lyrics: [{ part: 'blank', lyrics: '' }],
-              lyricsPartSequence: [],
-              lyricsPartsConfigured: false,
-            },
-          ],
+          contents: [],
+          includeTitleForFirstCard: true,
         },
         lyricsLayoutId: null,
         titleLayoutId: null,
@@ -193,6 +286,106 @@ function partRequestBodyForTypeChange(serverPartId: string, order: number, kind:
         titleLayoutId: null,
       }
   }
+}
+
+/**
+ * Ensures lyrics body is stored on `contents`. Migrates a stray legacy `content` field if present.
+ */
+export function normalizeLyricsPartForStore(part: LyricsPart): LyricsPart {
+  const r = part as LyricsPart & { content?: LyricsContents }
+  const bodyRaw: LyricsContents =
+    r.contents ??
+    r.content ??
+    ({ type: 'LYRICS', contents: [], includeTitleForFirstCard: true } satisfies LyricsContents)
+  const body: LyricsContents = hydrateLyricsContentsRows(bodyRaw)
+  return {
+    id: r.id,
+    projectId: r.projectId,
+    containerId: r.containerId,
+    order: r.order,
+    type: 'LYRICS',
+    lyricsLayoutId: r.lyricsLayoutId,
+    titleLayoutId: r.titleLayoutId,
+    contents: body,
+  }
+}
+
+function isPhraseRangeCompleteForExport(r: BibleContentRange): boolean {
+  if (r.type !== 'phrase') {
+    return true
+  }
+  if (r.start.book.trim().length === 0) {
+    return false
+  }
+  if (!Number.isInteger(r.start.chapter) || r.start.chapter < 1) {
+    return false
+  }
+  if (!Number.isInteger(r.start.verse) || r.start.verse < 1) {
+    return false
+  }
+  if (r.end === null) {
+    return true
+  }
+  if (
+    r.end.version !== r.start.version ||
+    r.end.book !== r.start.book ||
+    r.end.chapter !== r.start.chapter
+  ) {
+    return false
+  }
+  if (!Number.isInteger(r.end.verse) || r.end.verse < r.start.verse) {
+    return false
+  }
+  return true
+}
+
+/** True when no usable phrase reference or any phrase row fails basic completeness checks. */
+export function isBiblePartIncompleteForPptExport(part: BiblePart): boolean {
+  const normalized: BiblePart = normalizeBiblePartForStore(part)
+  const ranges: BibleContentRange[] = normalized.contents.contents ?? []
+  const phrases: BibleContentRange[] = ranges.filter((x: BibleContentRange): boolean => x.type === 'phrase')
+  if (phrases.length === 0) {
+    return true
+  }
+  return phrases.some((p: BibleContentRange): boolean => !isPhraseRangeCompleteForExport(p))
+}
+
+/** True when there are no songs or any song is missing "configured" (parts overlay not confirmed). */
+export function isLyricsPartIncompleteForPptExport(part: LyricsPart): boolean {
+  const normalized: LyricsPart = normalizeLyricsPartForStore(part)
+  const rows: LyricsContent[] = normalized.contents.contents ?? []
+  if (rows.length === 0) {
+    return true
+  }
+  return rows.some((row: LyricsContent): boolean => row.lyricsPartsConfigured !== true)
+}
+
+export function isPartIncompleteForPptExport(part: Part): boolean {
+  if (part.type === 'BIBLE') {
+    return isBiblePartIncompleteForPptExport(part)
+  }
+  if (part.type === 'LYRICS') {
+    return isLyricsPartIncompleteForPptExport(part)
+  }
+  return false
+}
+
+/** Whether any slide has incomplete Bible phrases or Lyrics configure state (blocks PPT export). */
+export function workspaceHasIncompletePartsForPptExport(
+  slides: readonly LocalSlideLike[],
+  partsById: Readonly<Record<string, Part>>,
+  bibleUiBlockedPartIds?: ReadonlySet<string> | undefined
+): boolean {
+  for (const slide of slides) {
+    const p: Part | undefined = partsById[slide.id]
+    if (p !== undefined && isPartIncompleteForPptExport(p)) {
+      return true
+    }
+    if (bibleUiBlockedPartIds !== undefined && bibleUiBlockedPartIds.has(slide.id)) {
+      return true
+    }
+  }
+  return false
 }
 
 /**

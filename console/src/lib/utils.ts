@@ -92,3 +92,22 @@ export type OutgoingJson = Record<string, unknown> | readonly unknown[]
 export function camelToSnake<TSnake>(data: OutgoingJson): TSnake {
   return decamelizeKeys(data as Record<string, unknown> | readonly unknown[], { deep: true }) as TSnake
 }
+
+/** Layout-picker selected chip + matching slide thumbnail selection (keep in sync visually). */
+export const LAYOUT_SELECTION_ACTIVE_CHROME: string =
+  'border-primary ring-primary ring-2 ring-inset'
+
+/** Slide list drag-over target; same primary family, slightly muted. */
+export const LAYOUT_SELECTION_DRAG_TARGET_CHROME: string =
+  'border-primary/80 ring-primary/80 ring-2 ring-inset'
+
+/** Focused VALUE placeholder on slide previews (must match {@link LAYOUT_SELECTION_ACTIVE_CHROME} hue). */
+export const LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT: string =
+  'border-primary z-[5] bg-primary/55 border-2 border-solid ring-primary ring-2 ring-offset-1 ring-offset-background'
+
+/**
+ * Non-focused placeholder with filled interior (e.g. sidebar thumbnails).
+ * Border follows shape bounds; inside is tinted primary.
+ */
+export const PLACEHOLDER_FILL_BASE_CHROME: string =
+  'border-primary bg-primary/45 border-2 border-solid'

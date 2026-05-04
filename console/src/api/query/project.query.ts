@@ -1,10 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import {
+  type LocalSlideLike,
+  workspaceHasIncompletePartsForPptExport,
+} from '@/App/authenticated/project-view/build-project-parts-patch-payload'
 import { projectUseCase } from '@/di/usecases'
 import type { PagingQuery } from '@/domain/list-query'
-import type { PartRequestBody } from '@/domain/models/project'
+import type { Part, PartRequestBody } from '@/domain/models/project'
 
 import { QUERY_KEY } from './key'
+
+/** Thrown by `useExportPPT` when `workspace` is passed and Bible/Lyrics slides are incomplete. */
+export class WorkspaceExportIncompleteError extends Error {
+  override readonly name: string = 'WorkspaceExportIncompleteError'
+
+  constructor() {
+    super('WORKSPACE_EXPORT_INCOMPLETE')
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
 
 function invalidateProjectLists(queryClient: ReturnType<typeof useQueryClient>, userId: string): void {
   queryClient.invalidateQueries({ queryKey: ['project', 'page'] })
@@ -108,8 +122,8 @@ export function usePatchProjectContainer() {
       projectContainerId: string
       requestBody: { containerName: string | null; completed: boolean | null; parts: PartRequestBody[] | null }
     }) => projectUseCase.patchProjectContainer(projectContainerId, requestBody),
-    onSuccess: (_, { projectContainerId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL_CONTAINERS(projectContainerId) })
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL_CONTAINERS(updated.projectId) })
     },
   })
 }
@@ -119,20 +133,40 @@ export function useDeleteProjectContainer() {
 
   return useMutation({
     mutationFn: (projectContainerId: string) => projectUseCase.deleteProjectContainer(projectContainerId),
-    onSuccess: (_, projectContainerId) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.GET_ALL_CONTAINERS(projectContainerId) })
+    onSuccess: (): void => {
+      queryClient.invalidateQueries({ queryKey: ['project', 'get', 'all', 'containers'] })
     },
   })
 }
 
 export function useExportPPT() {
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       projectContainerId,
       requestBody,
+      workspace,
     }: {
       projectContainerId: string
       requestBody: { savePath: string }
-    }) => projectUseCase.exportPPT(projectContainerId, requestBody),
+      /** When set, the mutation rejects if any slide fails Bible/Lyrics export readiness. */
+      workspace?: {
+        readonly slides: readonly LocalSlideLike[]
+        readonly partsById: Readonly<Record<string, Part>>
+        /** Part ids with Bible editor validation/probe errors (incomplete export). */
+        readonly bibleUiBlockedPartIds?: ReadonlySet<string> | undefined
+      }
+    }): Promise<string> => {
+      if (
+        workspace !== undefined &&
+        workspaceHasIncompletePartsForPptExport(
+          workspace.slides,
+          workspace.partsById,
+          workspace.bibleUiBlockedPartIds
+        )
+      ) {
+        throw new WorkspaceExportIncompleteError()
+      }
+      return projectUseCase.exportPPT(projectContainerId, requestBody)
+    },
   })
 }

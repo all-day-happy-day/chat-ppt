@@ -10,6 +10,7 @@ from app.di.application.usecase import (
     get_delete_project_container_use_case,
     get_delete_project_use_case,
     get_export_ppt_use_case,
+    get_get_paged_project_containers_use_case,
     get_get_paged_projects_use_case,
     get_get_partial_projects_use_case,
     get_get_project_containers_use_case,
@@ -24,6 +25,7 @@ from app.project.application.usecase import (
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
     ExportPPTUseCase,
+    GetPagedProjectContainersUseCase,
     GetPagedProjectsUseCase,
     GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
@@ -141,7 +143,6 @@ def create_project_container(
 ):
     project_container: ProjectContainer = usecase(
         project_id=request_model.project_id,
-        user_id=request_model.user_id,
         container_name=request_model.container_name,
     )
     return CreateProjectContainerResponse.from_domain_entity(project_container)
@@ -174,6 +175,27 @@ def delete_project_container(
         usecase(project_container_id=project_container_id)
     except ProjectContainerNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get(
+    "/container/{project_id}/page", status_code=status.HTTP_200_OK, response_model=Page[GetProjectContainerResponse]
+)
+def get_paged_project_containers(
+    project_id: ULID,
+    paging_options: Annotated[PagingOptions, Depends()],
+    usecase: Annotated[GetPagedProjectContainersUseCase, Depends(get_get_paged_project_containers_use_case)],
+):
+    project_containers: Page[ProjectContainer] = usecase(project_id=project_id, paging_options=paging_options)
+    return Page(
+        items=[
+            GetProjectContainerResponse.from_domain_entity(project_container)
+            for project_container in project_containers.items
+        ],
+        page=project_containers.page,
+        size=project_containers.size,
+        total_items=project_containers.total_items,
+        total_pages=project_containers.total_pages,
+    )
 
 
 @router.post(

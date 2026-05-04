@@ -21,7 +21,7 @@ class AlchemyProjectRepository(ProjectRepository):
         alchemy_entity = self.db.merge(alchemy_entity)
         self.db.commit()
         self.db.refresh(alchemy_entity)
-        return project
+        return ProjectMapper.to_domain_entity(alchemy_entity)
 
     def get_by_id(self, id: ULID) -> Project:
         alchemy_entity: ProjectAlchemyEntity | None = (

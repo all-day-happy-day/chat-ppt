@@ -81,7 +81,7 @@ class PartMapper:
             container_id=str(domain_entity.container_id) if domain_entity.container_id is not None else None,
             order=domain_entity.order,
             type=domain_entity.type,
-            contents=domain_entity.contents.model_dump(),
+            contents=domain_entity.contents.model_dump(mode="json"),
             additional_data=domain_entity.model_dump(
                 mode="json", exclude={"id", "project_id", "container_id", "order", "type", "contents"}
             ),

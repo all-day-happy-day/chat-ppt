@@ -25,6 +25,11 @@ export const QUERY_KEY = Object.freeze({
     PARTIAL: (userId: string, size: number) => ['powerpoint', 'partial', userId, size] as const,
     LIST_LAYOUTS: (templateId: string) => ['powerpoint', 'list', 'layouts', templateId] as const,
   },
+  BIBLE: {
+    BOOKS: (version: string) => ['bible', 'books', version] as const,
+    CHAPTERS: (version: string, book: string) => ['bible', 'chapters', version, book] as const,
+    VERSES: (version: string, book: string, chapter: number) => ['bible', 'verses', version, book, chapter] as const,
+  },
   PROJECT: {
     GET_ALL: (userId: string) => ['project', 'get', 'all', userId] as const,
     PAGE: (userId: string, page: number, size: number, sort: ListSort) =>

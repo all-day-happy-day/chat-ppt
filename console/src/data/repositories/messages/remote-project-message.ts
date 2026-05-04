@@ -72,7 +72,6 @@ export type GetProjectContainersResponse = BaseProjectContainerResponse[]
 // CreateProjectContainer
 export type CreateProjectContainerRequest = {
   projectId: string
-  userId: string
   containerName: string
 }
 export type CreateProjectContainerResponse = BaseProjectContainerResponse

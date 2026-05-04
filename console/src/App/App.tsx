@@ -36,6 +36,16 @@ const TemplateNewPage = lazy(() =>
 const TemplateEditPage = lazy(() =>
   import('./authenticated/template/TemplateEditPage').then((module) => ({ default: module.TemplateEditPage }))
 )
+const ProjectContainerViewPage = lazy(() =>
+  import('./authenticated/project-view/ProjectViewPage').then((module) => ({
+    default: module.ProjectContainerViewPage,
+  }))
+)
+const ProjectContainerListPage = lazy(() =>
+  import('./authenticated/project-view/ProjectViewPage').then((module) => ({
+    default: module.ProjectContainerListPage,
+  }))
+)
 const ProjectNewPage = lazy(() =>
   import('./authenticated/project/ProjectNewPage').then((module) => ({ default: module.ProjectNewPage }))
 )
@@ -58,6 +68,8 @@ export default function App() {
                 <Route path="/settings/users" element={<ManageUser />} />
                 <Route path="/projects" element={<ProjectListPage />} />
                 <Route path="/projects/new" element={<ProjectNewPage />} />
+                <Route path="/projects/:projectId/containers" element={<ProjectContainerListPage />} />
+                <Route path="/projects/:projectId/containers/:containerId" element={<ProjectContainerViewPage />} />
                 <Route path="/projects/:projectId" element={<ProjectViewPage />} />
                 <Route path="/songs" element={<SongListPage />} />
                 <Route path="/songs/new" element={<SongNewPage />} />

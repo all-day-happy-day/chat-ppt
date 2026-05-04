@@ -1,6 +1,8 @@
 import { APIClient } from './base-client/APIClient'
 
-export const httpClient = new APIClient(`http://${window.location.hostname}:8000`)
+export const API_BASE_URL: string = `http://${window.location.hostname}:8000`
+
+export const httpClient = new APIClient(API_BASE_URL)
 
 httpClient.interceptors.request.use((request) => {
   console.log('[Request] Sent', request.url, request)

@@ -9,12 +9,14 @@ interface BasePart {
 
 export interface BiblePart extends BasePart {
   type: 'BIBLE'
-  content: BibleContents
+  contents: BibleContents
+  phraseLayoutId: string | null
+  titleLayoutId: string | null
 }
 
 export interface LyricsPart extends BasePart {
   type: 'LYRICS'
-  content: LyricsContents
+  contents: LyricsContents
   lyricsLayoutId: string | null
   titleLayoutId: string | null
 }

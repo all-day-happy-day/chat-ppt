@@ -13,7 +13,7 @@ class CreateProjectContainerUseCase:
         self.project_repository: ProjectRepository = project_repository
         self.project_container_repository: ProjectContainerRepository = project_container_repository
 
-    def __call__(self, project_id: ULID, user_id: ULID, container_name: str) -> ProjectContainer:
+    def __call__(self, project_id: ULID, container_name: str) -> ProjectContainer:
         project: Project = self.project_repository.get_by_id(id=project_id)
         now: datetime = datetime.now(timezone.utc)
         container_id: ULID = ULID()

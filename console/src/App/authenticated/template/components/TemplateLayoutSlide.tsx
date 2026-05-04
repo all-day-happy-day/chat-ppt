@@ -5,7 +5,11 @@ import { useTranslation } from 'react-i18next'
 import { ShapeTypes } from '@/domain/enums/powerpoint'
 import { type Layout, type Shape } from '@/domain/models/powerpoint'
 import { type ColorConfig, imageDataToDataUrl, type Size } from '@/domain/valueobjects/powerpoint'
-import { cn } from '@/lib/utils'
+import {
+  cn,
+  LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT,
+  PLACEHOLDER_FILL_BASE_CHROME,
+} from '@/lib/utils'
 
 import '@/i18n/i18n'
 
@@ -20,13 +24,21 @@ function fillStyle(fill: ColorConfig): React.CSSProperties {
   return { backgroundColor: color }
 }
 
-function outlineRingClass(placeholder: boolean, highlightPlaceholder: boolean): string {
+function outlineRingClass(
+  placeholder: boolean,
+  highlightPlaceholder: boolean,
+  filledPlaceholderTint: boolean,
+): string {
   if (highlightPlaceholder) {
-    return 'border-primary z-[5] border-2 border-solid ring-primary ring-2 ring-offset-1 ring-offset-background'
+    return LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT
   }
-  return placeholder
-    ? 'border-primary border border-solid'
-    : 'border-muted-foreground border border-dashed'
+  if (placeholder) {
+    if (filledPlaceholderTint) {
+      return PLACEHOLDER_FILL_BASE_CHROME
+    }
+    return 'border-primary border border-solid'
+  }
+  return 'border-muted-foreground border border-dashed'
 }
 
 interface HoverTipState {
@@ -44,6 +56,8 @@ interface ShapeViewProps {
   readonly onHoverEnd: () => void
   readonly interactionDisabled: boolean
   readonly highlightPlaceholder: boolean
+  /** Filled primary tint inside placeholder bounds (sidebar thumbnails). */
+  readonly filledPlaceholderTint: boolean
 }
 
 function ShapeView({
@@ -55,13 +69,16 @@ function ShapeView({
   onHoverEnd,
   interactionDisabled,
   highlightPlaceholder,
+  filledPlaceholderTint,
 }: ShapeViewProps): React.ReactElement {
   const leftPct: number = (shape.position.x / slideW) * 100
   const topPct: number = (shape.position.y / slideH) * 100
   const wPct: number = (shape.size.width / slideW) * 100
   const hPct: number = (shape.size.height / slideH) * 100
   const rot: number = shape.position.rotation
-  const ring: string = outlineRingClass(shape.placeholder, highlightPlaceholder)
+  const ring: string = outlineRingClass(shape.placeholder, highlightPlaceholder, filledPlaceholderTint)
+  const showLayoutFillLayer: boolean =
+    !shape.placeholder || (!filledPlaceholderTint && !highlightPlaceholder)
 
   const base: React.CSSProperties = {
     position: 'absolute',
@@ -99,7 +116,9 @@ function ShapeView({
   if (shape.image != null) {
     return (
       <div style={base} className={cn('relative overflow-hidden', ring, cursorClass)} {...hitProps}>
-        <div className="absolute inset-0" style={fillStyle(shape.fillColor)} aria-hidden />
+        {showLayoutFillLayer ? (
+          <div className="absolute inset-0" style={fillStyle(shape.fillColor)} aria-hidden />
+        ) : null}
         <img
           src={imageDataToDataUrl(shape.image)}
           alt=""
@@ -113,7 +132,14 @@ function ShapeView({
   if (shape.type === ShapeTypes.IMAGE) {
     return (
       <div
-        style={{ ...base, ...fillStyle(shape.fillColor) }}
+        style={
+          showLayoutFillLayer
+            ? { ...base, ...fillStyle(shape.fillColor) }
+            : {
+                ...base,
+                backgroundColor: 'transparent',
+              }
+        }
         className={cn('overflow-hidden', ring, cursorClass)}
         {...hitProps}
         aria-hidden
@@ -123,7 +149,14 @@ function ShapeView({
 
   return (
     <div
-      style={{ ...base, ...fillStyle(shape.fillColor) }}
+      style={
+        showLayoutFillLayer
+          ? { ...base, ...fillStyle(shape.fillColor) }
+          : {
+              ...base,
+              backgroundColor: 'transparent',
+            }
+      }
       className={cn('overflow-hidden', ring, cursorClass)}
       {...hitProps}
       aria-hidden
@@ -181,6 +214,18 @@ export interface TemplateLayoutSlideProps {
   readonly disableHoverTip?: boolean
   /** If false, hide the layout name above the slide (compact thumbnails). */
   readonly showLayoutTitle?: boolean
+  /**
+   * When true, the root only spans the slide width (for sidebars); default stretches to full container width.
+   */
+  readonly fitWidth?: boolean
+  /**
+   * When true, omit border/shadow/muted backdrop on the slide box so a parent can provide the frame.
+   */
+  readonly hideSlideChrome?: boolean
+  /**
+   * When true, placeholder shapes use a solid primary tint inside the outline (sidebar thumbnails).
+   */
+  readonly filledPlaceholderTint?: boolean
 }
 
 export function TemplateLayoutSlide({
@@ -190,6 +235,9 @@ export function TemplateLayoutSlide({
   highlightPlaceholderShapeId = null,
   disableHoverTip = false,
   showLayoutTitle = true,
+  fitWidth = false,
+  hideSlideChrome = false,
+  filledPlaceholderTint = false,
 }: TemplateLayoutSlideProps): React.ReactElement {
   const slide: { width: number; height: number } = resolveSlideDimensions(layout, fallbackSlideSize)
   const aspect: number = slide.height / slide.width
@@ -219,13 +267,22 @@ export function TemplateLayoutSlide({
 
   return (
     <div
-      className={cn('flex w-full min-w-0 flex-col items-center', showLayoutTitle ? 'gap-2' : 'gap-0')}
+      className={cn(
+        'flex min-w-0 flex-col items-center',
+        fitWidth ? 'w-auto max-w-full' : 'w-full',
+        showLayoutTitle ? 'gap-2' : 'gap-0 p-0 leading-none',
+      )}
     >
       {showLayoutTitle ? (
         <div className="text-muted-foreground w-full max-w-full text-center text-sm font-medium">{layout.name}</div>
       ) : null}
       <div
-        className="border-border bg-muted/10 relative mx-auto max-w-full overflow-hidden rounded-lg border shadow-sm"
+        className={cn(
+          'relative mx-auto max-w-full overflow-hidden rounded-lg',
+          hideSlideChrome
+            ? 'rounded-[inherit]'
+            : 'border-border bg-muted/10 border shadow-sm',
+        )}
         style={{ width: displayW, height: displayH }}
       >
         <div className="absolute inset-0" style={{ ...fillStyle(layout.backgroundColor) }} />
@@ -247,6 +304,7 @@ export function TemplateLayoutSlide({
                 onHoverEnd={onHoverEnd}
                 interactionDisabled={disableHoverTip}
                 highlightPlaceholder={highlighted}
+                filledPlaceholderTint={filledPlaceholderTint}
               />
             )
           })}
