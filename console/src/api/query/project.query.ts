@@ -139,6 +139,81 @@ export function useDeleteProjectContainer() {
   })
 }
 
+function invalidateProjectVariables(
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId: string,
+  affectedName?: string
+): void {
+  queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.VARIABLES(projectId) })
+  if (affectedName !== undefined && affectedName.length > 0) {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEY.PROJECT.VARIABLE(projectId, affectedName) })
+  }
+}
+
+export function useGetProjectVariables(projectId: string) {
+  return useQuery({
+    queryKey: QUERY_KEY.PROJECT.VARIABLES(projectId),
+    queryFn: () => projectUseCase.getProjectVariables(projectId),
+    enabled: projectId.length > 0,
+  })
+}
+
+export function useGetProjectVariable(projectId: string, name: string) {
+  return useQuery({
+    queryKey: QUERY_KEY.PROJECT.VARIABLE(projectId, name),
+    queryFn: () => projectUseCase.getProjectVariable(projectId, name),
+    enabled: projectId.length > 0 && name.length > 0,
+  })
+}
+
+export function useCreateProjectVariable() {
+  const queryClient: ReturnType<typeof useQueryClient> = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      requestBody,
+    }: {
+      projectId: string
+      requestBody: { name: string; value: string }
+    }) => projectUseCase.createProjectVariable(projectId, requestBody),
+    onSuccess: (_created: unknown, { projectId, requestBody }: { projectId: string; requestBody: { name: string } }) => {
+      invalidateProjectVariables(queryClient, projectId, requestBody.name)
+    },
+  })
+}
+
+export function usePatchProjectVariable() {
+  const queryClient: ReturnType<typeof useQueryClient> = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      name,
+      requestBody,
+    }: {
+      projectId: string
+      name: string
+      requestBody: { value?: string | null }
+    }) => projectUseCase.patchProjectVariable(projectId, name, requestBody),
+    onSuccess: (_updated: unknown, { projectId, name }: { projectId: string; name: string }) => {
+      invalidateProjectVariables(queryClient, projectId, name)
+    },
+  })
+}
+
+export function useDeleteProjectVariable() {
+  const queryClient: ReturnType<typeof useQueryClient> = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ projectId, name }: { projectId: string; name: string }) =>
+      projectUseCase.deleteProjectVariable(projectId, name),
+    onSuccess: (_void: unknown, { projectId, name }: { projectId: string; name: string }) => {
+      invalidateProjectVariables(queryClient, projectId, name)
+    },
+  })
+}
+
 export function useExportPPT() {
   return useMutation({
     mutationFn: async ({

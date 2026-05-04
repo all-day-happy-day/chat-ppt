@@ -36,5 +36,7 @@ export const QUERY_KEY = Object.freeze({
       ['project', 'page', userId, page, size, sort] as const,
     PARTIAL: (userId: string, size: number) => ['project', 'partial', userId, size] as const,
     GET_ALL_CONTAINERS: (projectId: string) => ['project', 'get', 'all', 'containers', projectId] as const,
+    VARIABLES: (projectId: string) => ['project', 'variables', projectId] as const,
+    VARIABLE: (projectId: string, name: string) => ['project', 'variable', projectId, name] as const,
   },
 } as const)

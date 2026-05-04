@@ -1,5 +1,5 @@
 import type { PageResult, PagingQuery } from '../list-query'
-import type { PartRequestBody, Project, ProjectContainer } from '../models/project'
+import type { PartRequestBody, Project, ProjectContainer, ProjectVariable } from '../models/project'
 
 export abstract class ProjectRepository {
   abstract getProjects(userId: string): Promise<Project[]>
@@ -23,4 +23,16 @@ export abstract class ProjectRepository {
   ): Promise<ProjectContainer>
   abstract deleteProjectContainer(projectContainerId: string): Promise<void>
   abstract exportPPT(projectContainerId: string, requestBody: { savePath: string }): Promise<string>
+  abstract getProjectVariables(projectId: string): Promise<ProjectVariable[]>
+  abstract getProjectVariable(projectId: string, name: string): Promise<ProjectVariable>
+  abstract createProjectVariable(
+    projectId: string,
+    requestBody: { name: string; value: string }
+  ): Promise<ProjectVariable>
+  abstract patchProjectVariable(
+    projectId: string,
+    name: string,
+    requestBody: { value?: string | null }
+  ): Promise<ProjectVariable>
+  abstract deleteProjectVariable(projectId: string, name: string): Promise<void>
 }

@@ -1,7 +1,7 @@
 import type { PageResult, PagingQuery } from '@/domain/list-query'
 import type { ProjectRepository } from '@/domain/repositories/project-repository'
 
-import type { PartRequestBody, Project, ProjectContainer } from '../models/project'
+import type { PartRequestBody, Project, ProjectContainer, ProjectVariable } from '../models/project'
 
 export class ProjectUseCase {
   private readonly projectRepository: ProjectRepository
@@ -62,5 +62,32 @@ export class ProjectUseCase {
 
   async exportPPT(projectContainerId: string, requestBody: { savePath: string }): Promise<string> {
     return this.projectRepository.exportPPT(projectContainerId, requestBody)
+  }
+
+  async getProjectVariables(projectId: string): Promise<ProjectVariable[]> {
+    return this.projectRepository.getProjectVariables(projectId)
+  }
+
+  async getProjectVariable(projectId: string, name: string): Promise<ProjectVariable> {
+    return this.projectRepository.getProjectVariable(projectId, name)
+  }
+
+  async createProjectVariable(
+    projectId: string,
+    requestBody: { name: string; value: string }
+  ): Promise<ProjectVariable> {
+    return this.projectRepository.createProjectVariable(projectId, requestBody)
+  }
+
+  async patchProjectVariable(
+    projectId: string,
+    name: string,
+    requestBody: { value?: string | null }
+  ): Promise<ProjectVariable> {
+    return this.projectRepository.patchProjectVariable(projectId, name, requestBody)
+  }
+
+  async deleteProjectVariable(projectId: string, name: string): Promise<void> {
+    return this.projectRepository.deleteProjectVariable(projectId, name)
   }
 }

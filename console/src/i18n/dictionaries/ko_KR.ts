@@ -142,6 +142,7 @@ export const ko_KR = {
   'page.project_view.lyrics_lyrics_slide_hint': '텍스트 플레이스홀더가 하나 이상 있는 레이아웃만 선택할 수 있습니다.',
   'page.project_view.lyrics_layout_requires_placeholder':
     '플레이스홀더가 있는 레이아웃을 선택하세요. 이 레이아웃에는 플레이스홀더가 없습니다.',
+  'page.project_view.lyrics_title_placeholder_target': '타이틀 슬라이드 텍스트 플레이스홀더',
   'page.project_view.lyrics_placeholder_targets': '가사를 넣을 플레이스홀더',
   'page.project_view.lyrics_keep_one_placeholder': '플레이스홀더는 최소 하나는 선택해야 합니다.',
   'page.project_view.lyrics_include_title_slide': '이 곡에 타이틀 슬라이드 포함',
@@ -188,8 +189,13 @@ export const ko_KR = {
   'page.project_view.bible_title_slide_heading': '타이틀 슬라이드(선택)',
   'page.project_view.bible_title_slide_hint':
     '절 사이에 넣을 타이틀/구역 구분 슬라이드 레이아웃을 고르거나, 없음을 선택해 성절 슬라이드만 쓸 수 있습니다.',
+  'page.project_view.bible_title_target_sermon_title': '타이틀 슬라이드: 설교 제목 플레이스홀더',
+  'page.project_view.bible_title_target_scripture_range': '타이틀 슬라이드: 말씀 구절 범위 플레이스홀더',
+  'page.project_view.bible_title_target_preacher': '타이틀 슬라이드: 설교자 플레이스홀더',
   'page.project_view.bible_phrase_slide_heading': '성경 구절 슬라이드(필수)',
   'page.project_view.bible_phrase_slide_hint': '텍스트 플레이스홀더가 하나 이상 있는 레이아웃만 선택할 수 있습니다.',
+  'page.project_view.bible_phrase_target_phrase_text': '구절 슬라이드: 본문 텍스트 플레이스홀더',
+  'page.project_view.bible_phrase_target_scripture_range': '구절 슬라이드: 말씀 구절 범위 플레이스홀더',
   'page.project_view.bible_cards_heading': '슬라이드(순서)',
   'page.project_view.bible_cards_hint':
     '각 구절 카드가 한 장의 슬라이드입니다. 카드를 드래그해 순서를 바꿉니다. 절 범위는 하이픈 또는 물결표로 입력하세요(예: 3-5).',

@@ -1,7 +1,11 @@
 import type { BiblePart, LyricsPart, Part, PartRequestBody } from '@/domain/models/project'
 import type { BibleContentRange, BibleContents, LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
 import type { LyricsPart as LyricsLine } from '@/domain/valueobjects/song'
-import { LYRICS_FORM_BLANK_SEQUENCE_INDEX, normalizeLyricsPartSequence, readLyricsPartSequenceFromRow } from '@/lib/lyrics-part-sequence'
+import {
+  LYRICS_FORM_BLANK_SEQUENCE_INDEX,
+  normalizeLyricsPartSequence,
+  readLyricsPartSequenceFromRow,
+} from '@/lib/lyrics-part-sequence'
 
 /** Matches arch `normalizePartsForPatchRequest`: order is the array index. `id` is always a ULID (server or client). */
 export interface LocalSlideLike {
@@ -62,47 +66,50 @@ function lyricsContentsWithUniqueLineParts(lyricsContents: LyricsContents): Lyri
   return {
     ...lyricsContents,
     type: 'LYRICS',
-    contents: blocks.map(
-      (block: LyricsContent): LyricsContent => {
-        const { lines, oldIndexToNew } = uniqueLyricsLinesByPartWithIndexMap(block.lyrics ?? [])
-        return {
-          ...block,
-          lyrics: lines,
-          lyricsPartSequence: remapLyricsPartSequenceAfterLineDedupe(lines.length, block.lyricsPartSequence, oldIndexToNew),
-        }
+    contents: blocks.map((block: LyricsContent): LyricsContent => {
+      const { lines, oldIndexToNew } = uniqueLyricsLinesByPartWithIndexMap(block.lyrics ?? [])
+      return {
+        ...block,
+        lyrics: lines,
+        lyricsPartSequence: remapLyricsPartSequenceAfterLineDedupe(
+          lines.length,
+          block.lyricsPartSequence,
+          oldIndexToNew
+        ),
       }
-    ),
+    }),
   }
 }
 
 function hydrateLyricsContentsRows(body: LyricsContents): LyricsContents {
   const rows: LyricsContent[] = body.contents ?? []
   const legacyFirstOff: boolean = body.includeTitleForFirstCard === false
-  const nextRows: LyricsContent[] = rows.map(
-    (row: LyricsContent, index: number): LyricsContent => {
-      let includeTitleSlide: boolean
-      if (row.includeTitleSlide !== undefined) {
-        includeTitleSlide = row.includeTitleSlide
-      } else if (index === 0 && legacyFirstOff) {
-        includeTitleSlide = false
-      } else {
-        includeTitleSlide = true
-      }
-      const lyrics: LyricsLine[] = row.lyrics ?? []
-      return {
-        ...row,
-        includeTitleSlide,
-        lyrics,
-        lyricsPartSequence: readLyricsPartSequenceFromRow(row, lyrics.length),
-        lyricsPartsConfigured: row.lyricsPartsConfigured === true,
-      }
+  const nextRows: LyricsContent[] = rows.map((row: LyricsContent, index: number): LyricsContent => {
+    const legacyRow = row as LyricsContent & { matchedBackendSongId?: string | null }
+    let includeTitleSlide: boolean
+    if (row.includeTitleSlide !== undefined) {
+      includeTitleSlide = row.includeTitleSlide
+    } else if (index === 0 && legacyFirstOff) {
+      includeTitleSlide = false
+    } else {
+      includeTitleSlide = true
     }
-  )
-  const includeFirstCard: boolean =
-    nextRows.length === 0 ? true : nextRows[0]!.includeTitleSlide !== false
+    const lyrics: LyricsLine[] = row.lyrics ?? []
+    return {
+      ...row,
+      includeTitleSlide,
+      lyrics,
+      songId: row.songId ?? legacyRow.matchedBackendSongId ?? null,
+      lyricsPartSequence: readLyricsPartSequenceFromRow(row, lyrics.length),
+      lyricsPartsConfigured: row.lyricsPartsConfigured === true,
+    }
+  })
+  const includeFirstCard: boolean = nextRows.length === 0 ? true : nextRows[0]!.includeTitleSlide !== false
   return {
     ...body,
     contents: nextRows,
+    lyricsPlaceholderShapeId: body.lyricsPlaceholderShapeId ?? 0,
+    titlePlaceholderShapeId: body.titlePlaceholderShapeId ?? null,
     includeTitleForFirstCard: includeFirstCard,
   }
 }
@@ -112,7 +119,13 @@ function lyricsContentsFromPart(part: LyricsPart): LyricsContents {
   const legacy = part as LyricsPart & { content?: LyricsContents }
   const body: LyricsContents | undefined = legacy.contents ?? legacy.content
   if (body === undefined) {
-    return { type: 'LYRICS', contents: [], includeTitleForFirstCard: true }
+    return {
+      type: 'LYRICS',
+      contents: [],
+      lyricsPlaceholderShapeId: 0,
+      titlePlaceholderShapeId: null,
+      includeTitleForFirstCard: true,
+    }
   }
   return hydrateLyricsContentsRows(body)
 }
@@ -131,8 +144,7 @@ function bibleContentsFromPart(part: BiblePart): BibleContents {
  */
 export function normalizeBiblePartForStore(part: BiblePart): BiblePart {
   const r = part as BiblePart & { content?: BibleContents }
-  const bodyRaw: BibleContents =
-    r.contents ?? r.content ?? ({ type: 'BIBLE', contents: [] } satisfies BibleContents)
+  const bodyRaw: BibleContents = r.contents ?? r.content ?? ({ type: 'BIBLE', contents: [] } satisfies BibleContents)
   return {
     id: r.id,
     projectId: r.projectId,
@@ -141,7 +153,15 @@ export function normalizeBiblePartForStore(part: BiblePart): BiblePart {
     type: 'BIBLE',
     phraseLayoutId: r.phraseLayoutId ?? null,
     titleLayoutId: r.titleLayoutId ?? null,
-    contents: { type: 'BIBLE', contents: bodyRaw.contents ?? [] },
+    contents: {
+      type: 'BIBLE',
+      contents: bodyRaw.contents ?? [],
+      titleSermonTitlePlaceholderShapeId: bodyRaw.titleSermonTitlePlaceholderShapeId ?? undefined,
+      titleScriptureRangePlaceholderShapeId: bodyRaw.titleScriptureRangePlaceholderShapeId ?? undefined,
+      titlePreacherPlaceholderShapeId: bodyRaw.titlePreacherPlaceholderShapeId ?? undefined,
+      phraseTextPlaceholderShapeId: bodyRaw.phraseTextPlaceholderShapeId ?? undefined,
+      phraseScriptureRangePlaceholderShapeId: bodyRaw.phraseScriptureRangePlaceholderShapeId ?? undefined,
+    },
   }
 }
 
@@ -155,10 +175,11 @@ function partToRequestBody(part: Part, order: number): PartRequestBody {
         contents: {
           type: 'VALUE',
           contents: part.contents.contents.map(
-            (row): { placeholderName: string; value: string | null } => ({
+            (row): { placeholderName: string; placeholderShapeId: number; value: string | null } => ({
               placeholderName: row.placeholderName,
+              placeholderShapeId: row.placeholderShapeId,
               value: row.value,
-            }),
+            })
           ),
         },
         layoutId: part.layoutId,
@@ -212,7 +233,7 @@ function newPartRequestBody(partUlid: string, order: number, kind: Part['type'])
         type: 'VALUE',
         contents: {
           type: 'VALUE',
-          contents: [{ placeholderName: 'value', value: null }],
+          contents: [],
         },
         layoutId: null,
       }
@@ -224,6 +245,8 @@ function newPartRequestBody(partUlid: string, order: number, kind: Part['type'])
         contents: {
           type: 'LYRICS',
           contents: [],
+          lyricsPlaceholderShapeId: 0,
+          titlePlaceholderShapeId: null,
           includeTitleForFirstCard: true,
         },
         lyricsLayoutId: null,
@@ -259,7 +282,7 @@ function partRequestBodyForTypeChange(serverPartId: string, order: number, kind:
         type: 'VALUE',
         contents: {
           type: 'VALUE',
-          contents: [{ placeholderName: 'value', value: null }],
+          contents: [],
         },
         layoutId: null,
       }
@@ -271,6 +294,8 @@ function partRequestBodyForTypeChange(serverPartId: string, order: number, kind:
         contents: {
           type: 'LYRICS',
           contents: [],
+          lyricsPlaceholderShapeId: 0,
+          titlePlaceholderShapeId: null,
           includeTitleForFirstCard: true,
         },
         lyricsLayoutId: null,
@@ -296,7 +321,13 @@ export function normalizeLyricsPartForStore(part: LyricsPart): LyricsPart {
   const bodyRaw: LyricsContents =
     r.contents ??
     r.content ??
-    ({ type: 'LYRICS', contents: [], includeTitleForFirstCard: true } satisfies LyricsContents)
+    ({
+      type: 'LYRICS',
+      contents: [],
+      lyricsPlaceholderShapeId: 0,
+      titlePlaceholderShapeId: null,
+      includeTitleForFirstCard: true,
+    } satisfies LyricsContents)
   const body: LyricsContents = hydrateLyricsContentsRows(bodyRaw)
   return {
     id: r.id,
@@ -326,11 +357,7 @@ function isPhraseRangeCompleteForExport(r: BibleContentRange): boolean {
   if (r.end === null) {
     return true
   }
-  if (
-    r.end.version !== r.start.version ||
-    r.end.book !== r.start.book ||
-    r.end.chapter !== r.start.chapter
-  ) {
+  if (r.end.version !== r.start.version || r.end.book !== r.start.book || r.end.chapter !== r.start.chapter) {
     return false
   }
   if (!Number.isInteger(r.end.verse) || r.end.verse < r.start.verse) {
@@ -394,7 +421,7 @@ export function workspaceHasIncompletePartsForPptExport(
  */
 export function buildProjectPartsPatchPayload(
   localSlides: readonly LocalSlideLike[],
-  partsById: ReadonlyMap<string, Part>,
+  partsById: ReadonlyMap<string, Part>
 ): PartRequestBody[] {
   return localSlides.map((slide: LocalSlideLike, order: number): PartRequestBody => {
     const existing: Part | undefined = partsById.get(slide.id)
@@ -418,7 +445,7 @@ export function slidesSignature(slides: readonly LocalSlideLike[]): string {
  */
 export function workspaceSignature(
   localSlides: readonly LocalSlideLike[],
-  partsById: ReadonlyMap<string, Part>,
+  partsById: ReadonlyMap<string, Part>
 ): string {
   return JSON.stringify(buildProjectPartsPatchPayload(localSlides, partsById))
 }

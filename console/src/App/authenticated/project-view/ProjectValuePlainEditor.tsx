@@ -27,15 +27,11 @@ function placeholderShapesInLayout(layout: Layout): Shape[] {
 
 function valueContentsForLayout(layout: Layout, prev: ValuePart | PlainPart): ValueContent[] {
   const shapes: Shape[] = placeholderShapesInLayout(layout)
-  const prevByShapeId: Map<string, string | null> = new Map<string, string | null>()
+  const prevByShapeId: Map<number, string | null> = new Map<number, string | null>()
   const prevByName: Map<string, string | null> = new Map<string, string | null>()
   if (prev.type === 'VALUE') {
     for (const row of prev.contents.contents) {
-      if (
-        row.placeholderShapeId !== undefined &&
-        row.placeholderShapeId !== null &&
-        row.placeholderShapeId.length > 0
-      ) {
+      if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null) {
         prevByShapeId.set(row.placeholderShapeId, row.value)
       }
       prevByName.set(row.placeholderName, row.value)
@@ -43,7 +39,7 @@ function valueContentsForLayout(layout: Layout, prev: ValuePart | PlainPart): Va
   }
   return shapes.map((shape: Shape): ValueContent => {
     const placeholderName: string = shapePlaceholderApiName(shape)
-    const placeholderShapeId: string = shape.id
+    const placeholderShapeId: number = shape.shapeId
     const fromId: string | null | undefined = prevByShapeId.get(placeholderShapeId)
     const value: string | null = fromId !== undefined ? fromId : (prevByName.get(placeholderName) ?? null)
     return { placeholderName, placeholderShapeId, value }
@@ -51,12 +47,12 @@ function valueContentsForLayout(layout: Layout, prev: ValuePart | PlainPart): Va
 }
 
 /** Rows from server may omit `placeholderShapeId`; zip with layout placeholders by index. */
-function resolvePlaceholderShapeId(row: ValueContent, index: number, phShapes: Shape[]): string | null {
-  if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null && row.placeholderShapeId.length > 0) {
+function resolvePlaceholderShapeId(row: ValueContent, index: number, phShapes: Shape[]): number | null {
+  if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null) {
     return row.placeholderShapeId
   }
   const sh: Shape | undefined = phShapes[index]
-  return sh !== undefined ? sh.id : null
+  return sh !== undefined ? sh.shapeId : null
 }
 
 export function ProjectValuePlainEditor({
@@ -122,7 +118,7 @@ export function ProjectValuePlainEditor({
   )
 
   const updatePlaceholderValue = React.useCallback(
-    (placeholderShapeId: string, raw: string): void => {
+    (placeholderShapeId: number, raw: string): void => {
       if (part.type !== 'VALUE') {
         return
       }
@@ -190,11 +186,11 @@ export function ProjectValuePlainEditor({
           </h3>
           <div className="flex flex-col gap-3">
             {part.contents.contents.map((row: ValueContent, index: number): React.ReactElement => {
-              const shapeId: string | null = resolvePlaceholderShapeId(row, index, placeholderShapes)
+              const shapeId: number | null = resolvePlaceholderShapeId(row, index, placeholderShapes)
               const rowKey: string = shapeId ?? `${row.placeholderName}-${String(index)}`
               const shapeForRow: Shape | undefined =
                 shapeId !== null
-                  ? placeholderShapes.find((s: Shape): boolean => s.id === shapeId)
+                  ? placeholderShapes.find((s: Shape): boolean => s.shapeId === shapeId)
                   : placeholderShapes[index]
               const layoutHint: string | null =
                 shapeForRow !== undefined &&
@@ -219,10 +215,10 @@ export function ProjectValuePlainEditor({
                       updatePlaceholderValue(shapeId, e.target.value)
                     }}
                     onFocus={(): void => {
-                      if (shapeId === null) {
+                      if (shapeForRow === undefined) {
                         return
                       }
-                      onActivePlaceholderChange(shapeId)
+                      onActivePlaceholderChange(shapeForRow.id)
                     }}
                     onBlur={(): void => {
                       onActivePlaceholderChange(null)

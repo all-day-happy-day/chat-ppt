@@ -35,6 +35,7 @@ import type {
 } from '@/domain/models/project'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
 import type { Size } from '@/domain/valueobjects/powerpoint'
+import type { BibleContents, LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
 import { generatePartUlid } from '@/lib/generate-ulid'
 import { cn, formatDate, getQueryData } from '@/lib/utils'
 
@@ -104,7 +105,7 @@ function createSyntheticPartForInsert(id: string, kind: PartKind, projectId: str
         type: 'VALUE',
         contents: {
           type: 'VALUE',
-          contents: [{ placeholderName: 'value', value: null }],
+          contents: [],
         },
         layoutId: null,
       }
@@ -115,6 +116,8 @@ function createSyntheticPartForInsert(id: string, kind: PartKind, projectId: str
         contents: {
           type: 'LYRICS',
           contents: [],
+          lyricsPlaceholderShapeId: 0,
+          titlePlaceholderShapeId: null,
           includeTitleForFirstCard: true,
         },
         lyricsLayoutId: null,
@@ -135,6 +138,66 @@ function createSyntheticPartForInsert(id: string, kind: PartKind, projectId: str
   }
 }
 
+function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | undefined): Part {
+  if (localPart === undefined || localPart.type !== serverPart.type) {
+    return serverPart
+  }
+  if (serverPart.type === 'BIBLE' && localPart.type === 'BIBLE') {
+    const serverContents: BibleContents = serverPart.contents
+    const localContents: BibleContents = localPart.contents
+    return {
+      ...serverPart,
+      contents: {
+        ...serverContents,
+        titleSermonTitlePlaceholderShapeId:
+          serverContents.titleSermonTitlePlaceholderShapeId ?? localContents.titleSermonTitlePlaceholderShapeId,
+        titleScriptureRangePlaceholderShapeId:
+          serverContents.titleScriptureRangePlaceholderShapeId ?? localContents.titleScriptureRangePlaceholderShapeId,
+        titlePreacherPlaceholderShapeId:
+          serverContents.titlePreacherPlaceholderShapeId ?? localContents.titlePreacherPlaceholderShapeId,
+        phraseTextPlaceholderShapeId:
+          serverContents.phraseTextPlaceholderShapeId ?? localContents.phraseTextPlaceholderShapeId,
+        phraseScriptureRangePlaceholderShapeId:
+          serverContents.phraseScriptureRangePlaceholderShapeId ?? localContents.phraseScriptureRangePlaceholderShapeId,
+      },
+    }
+  }
+  if (serverPart.type === 'LYRICS' && localPart.type === 'LYRICS') {
+    const serverContents: LyricsContents = serverPart.contents
+    const localContents: LyricsContents = localPart.contents
+    return {
+      ...serverPart,
+      contents: {
+        ...serverContents,
+        lyricsPlaceholderShapeId:
+          serverContents.lyricsPlaceholderShapeId > 0
+            ? serverContents.lyricsPlaceholderShapeId
+            : localContents.lyricsPlaceholderShapeId,
+        titlePlaceholderShapeId:
+          serverContents.titlePlaceholderShapeId ?? localContents.titlePlaceholderShapeId,
+        contents: serverContents.contents.map((serverRow: LyricsContent, index: number): LyricsContent => {
+          const localRow: LyricsContent | undefined = localContents.contents[index]
+          if (localRow === undefined) {
+            return serverRow
+          }
+          return {
+            ...serverRow,
+            songId: serverRow.songId ?? localRow.songId ?? null,
+          }
+        }),
+      },
+    }
+  }
+  return serverPart
+}
+
+function mergeServerPartsWithLocalFallback(updatedParts: Part[], localRecord: PartsRecord): Part[] {
+  return updatedParts.map((serverPart: Part): Part => {
+    const localPart: Part | undefined = localRecord[serverPart.id]
+    return mergeServerPartWithLocalFallback(serverPart, localPart)
+  })
+}
+
 function layoutSlideAspect(layout: Layout, fallbackSlideSize: Size): number {
   const w: number = layout.slideSize.width > 0 ? layout.slideSize.width : fallbackSlideSize.width
   const h: number = layout.slideSize.height > 0 ? layout.slideSize.height : fallbackSlideSize.height
@@ -143,10 +206,10 @@ function layoutSlideAspect(layout: Layout, fallbackSlideSize: Size): number {
 
 /** Merge VALUE placeholder strings into layout shapes for sidebar / thumbnail preview. */
 function mergeValuePartIntoLayoutThumb(layout: Layout, part: ValuePart): Layout {
-  const prevByShapeId: Map<string, string | null> = new Map<string, string | null>()
+  const prevByShapeId: Map<number, string | null> = new Map<number, string | null>()
   const prevByName: Map<string, string | null> = new Map<string, string | null>()
   for (const row of part.contents.contents) {
-    if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null && row.placeholderShapeId.length > 0) {
+    if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null) {
       prevByShapeId.set(row.placeholderShapeId, row.value)
     }
     prevByName.set(row.placeholderName, row.value)
@@ -157,7 +220,7 @@ function mergeValuePartIntoLayoutThumb(layout: Layout, part: ValuePart): Layout 
       if (!shape.placeholder) {
         return shape
       }
-      const fromId: string | null | undefined = prevByShapeId.get(shape.id)
+      const fromId: string | null | undefined = prevByShapeId.get(shape.shapeId)
       const value: string | null | undefined =
         fromId !== undefined ? fromId : prevByName.get(shapePlaceholderApiName(shape))
       if (value === null || value === undefined) {
@@ -516,6 +579,10 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     readonly slideId: string
     readonly shapeId: string
   } | null>(null)
+  const [editPanelPreview, setEditPanelPreview] = React.useState<{
+    readonly slideId: string
+    readonly layoutId: string | null
+  } | null>(null)
   /** Bible phrase cards: editor-reported errors (probe, invalid verse, books/chapters fetch errors). */
   const [bibleBlockingUiByPartId, setBibleBlockingUiByPartId] = React.useState<Record<string, boolean>>({})
 
@@ -605,16 +672,18 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
 
   const finalizePatchSuccess = React.useCallback(
     (updatedParts: Part[], onFullSync?: (() => void) | undefined): void => {
-      const mergedMap: Map<string, Part> = new Map(Object.entries(partsRecordRef.current))
+      const localRecord: PartsRecord = partsRecordRef.current
+      const mergedUpdatedParts: Part[] = mergeServerPartsWithLocalFallback(updatedParts, localRecord)
+      const mergedMap: Map<string, Part> = new Map(Object.entries(localRecord))
       const currentSignature: string = workspaceSignature(localSlidesRef.current, mergedMap)
-      const nextRecord: PartsRecord = partsRecordFromParts(updatedParts)
+      const nextRecord: PartsRecord = partsRecordFromParts(mergedUpdatedParts)
       if (pendingSaveSignatureRef.current !== currentSignature) {
         setPartsRecord(nextRecord)
         partsSnapshotRef.current = new Map(Object.entries(nextRecord))
         pendingSaveSignatureRef.current = null
         return
       }
-      const nextSlides: LocalSlide[] = partsToLocalSlides(updatedParts)
+      const nextSlides: LocalSlide[] = partsToLocalSlides(mergedUpdatedParts)
       setLocalSlides(nextSlides)
       localSlidesRef.current = nextSlides
       setPartsRecord(nextRecord)
@@ -840,6 +909,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     setIsEditPanelOpen(false)
     setDeleteConfirmSlideId(null)
     setPlaceholderFocus(null)
+    setEditPanelPreview(null)
     setBibleBlockingUiByPartId({})
   }, [workspaceKind, project, container])
 
@@ -848,6 +918,12 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     selectedId !== null && selectedId.length > 0 ? partsRecord[selectedId] : undefined
 
   const mainStageLayout: Layout | undefined = React.useMemo((): Layout | undefined => {
+    if (selectedId !== null && editPanelPreview !== null && editPanelPreview.slideId === selectedId) {
+      if (editPanelPreview.layoutId !== null) {
+        return layouts.find((l: Layout): boolean => l.id === editPanelPreview.layoutId)
+      }
+      return undefined
+    }
     if (selectedPart === undefined) {
       return undefined
     }
@@ -858,7 +934,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
       return undefined
     }
     return layouts.find((l: Layout): boolean => l.id === selectedPart.layoutId)
-  }, [layouts, selectedPart])
+  }, [editPanelPreview, layouts, selectedId, selectedPart])
 
   const mainStageAspectHW: number = React.useMemo((): number => {
     if (mainStageLayout !== undefined) {
@@ -868,9 +944,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
   }, [mainStageLayout, templateFallbackSize])
 
   const showMainLayoutSlidePreview: boolean =
-    selectedSlide !== undefined &&
-    (selectedSlide.partType === 'PLAIN' || selectedSlide.partType === 'VALUE') &&
-    mainStageLayout !== undefined
+    selectedSlide !== undefined && mainStageLayout !== undefined
 
   const mainStageBoxPx: {
     widthPx: number
@@ -1131,7 +1205,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
         >
           <div
             ref={slideListInnerRef}
-            className="scrollbar-hide bg-muted/35 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-0 md:px-2.5"
+            className="scrollbar-hide bg-muted/35 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 md:px-2.5"
           >
             <div className="flex flex-col gap-0">
               {(() => {
@@ -1219,7 +1293,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                     <div
                       key={slide.id}
                       className={cn(
-                        'group grid grid-cols-[auto_1fr] items-start gap-x-1 gap-y-0 px-0 py-0 pt-3 md:gap-x-1.5',
+                        'group grid grid-cols-[auto_1fr] items-start gap-x-1 gap-y-0 px-0 pt-3 md:gap-x-1.5',
                         index < slideCount - 1 && 'mb-1',
                         isSelected && 'bg-primary/5 rounded-md'
                       )}
@@ -1473,12 +1547,31 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                       </p>
                     )
                   ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 px-3">
-                      <StagePartLayoutCaption
-                        partKindText={partKindTypeCode(selectedSlide.partType)}
-                        layoutName={null}
-                      />
-                    </div>
+                    mainStageLayout !== undefined ? (
+                      <div className="flex max-h-full min-h-0 max-w-full min-w-0 flex-col items-center justify-start gap-1 overflow-hidden">
+                        <StagePartLayoutCaption
+                          partKindText={partKindTypeCode(selectedSlide.partType)}
+                          layoutName={mainStageLayout.name}
+                        />
+                        <TemplateLayoutSlide
+                          layout={mainStageLayout}
+                          fallbackSlideSize={templateFallbackSize}
+                          showLayoutTitle={false}
+                          maxContentWidthPx={
+                            mainStageBoxPx.layoutSlideMaxWidthPx !== null
+                              ? mainStageBoxPx.layoutSlideMaxWidthPx
+                              : Math.max(96, Math.floor(mainStageBoxPx.widthPx) - MAIN_STAGE_CARD_EDGE_PADDING_PX * 2)
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-2 px-3">
+                        <StagePartLayoutCaption
+                          partKindText={partKindTypeCode(selectedSlide.partType)}
+                          layoutName={null}
+                        />
+                      </div>
+                    )
                   )}
                 </div>
               </div>
@@ -1565,6 +1658,12 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                         commitLyricsPart(selectedId, next)
                       }}
                       onFlushWorkspace={flushWorkspaceToServer}
+                      onPreviewLayoutSelect={(layoutId: string | null): void => {
+                        if (selectedId === null) {
+                          return
+                        }
+                        setEditPanelPreview({ slideId: selectedId, layoutId })
+                      }}
                     />
                   ) : (
                     <p className="text-destructive text-sm">{t('page.project_view.part_state_missing')}</p>
@@ -1593,6 +1692,12 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                           return
                         }
                         commitBiblePart(selectedId, next)
+                      }}
+                      onPreviewLayoutSelect={(layoutId: string | null): void => {
+                        if (selectedId === null) {
+                          return
+                        }
+                        setEditPanelPreview({ slideId: selectedId, layoutId })
                       }}
                     />
                   ) : (

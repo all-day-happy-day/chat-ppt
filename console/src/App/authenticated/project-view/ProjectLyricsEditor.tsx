@@ -34,6 +34,8 @@ export interface ProjectLyricsEditorProps {
   readonly onCommit: (next: LyricsPart) => void
   /** After heavy lyrics commits (e.g. song-form overlay), run project PATCH immediately (microtask). */
   readonly onFlushWorkspace?: () => void
+  /** Push selected layout into main stage preview immediately. */
+  readonly onPreviewLayoutSelect?: (layoutId: string | null) => void
 }
 
 function sortedPlaceholderShapes(layout: Layout): Shape[] {
@@ -56,7 +58,7 @@ function emptyLyricsContent(): LyricsContent {
   return {
     title: '',
     artist: null,
-    matchedBackendSongId: null,
+    songId: null,
     lyrics: [{ part: 'blank', lyrics: '' }],
     lyricsPartSequence: [],
     lyricsPartsConfigured: false,
@@ -64,26 +66,25 @@ function emptyLyricsContent(): LyricsContent {
   }
 }
 
-function effectivePlaceholderSelection(
-  stored: string[] | null | undefined,
+function effectiveSinglePlaceholderSelection(
+  stored: number | null | undefined,
   placeholders: readonly Shape[]
-): Set<string> {
-  const allIds: string[] = placeholders.map((s: Shape): string => s.id)
-  if (stored === null || stored === undefined || stored.length === 0) {
-    return new Set<string>(allIds)
+): number | null {
+  const allIds: number[] = placeholders.map((s: Shape): number => s.shapeId)
+  if (allIds.length === 0) {
+    return null
   }
-  const valid: string[] = stored.filter((id: string): boolean => allIds.includes(id))
-  if (valid.length === 0) {
-    return new Set<string>(allIds)
+  if (stored !== null && stored !== undefined && allIds.includes(stored)) {
+    return stored
   }
-  return new Set<string>(valid)
+  return allIds[0] ?? null
 }
 
-function selectionToStoredField(selected: ReadonlySet<string>, allIds: readonly string[]): string[] | undefined {
-  if (selected.size === allIds.length) {
-    return undefined
+function placeholderLabel(shape: Shape): string {
+  if (shape.text !== null && shape.text.trim().length > 0) {
+    return shape.text.trim()
   }
-  return [...selected]
+  return shapePlaceholderApiName(shape)
 }
 
 function syncLegacyIncludeTitleForFirstCard(contents: LyricsContents): LyricsContents {
@@ -219,7 +220,7 @@ function formatSongLibraryLabel(song: Song): string {
  * title (+ artist) match in the loaded library list.
  */
 function resolveSongIdForLyricsFetch(row: LyricsContent, library: readonly Song[] | undefined): string {
-  const explicit: string = row.matchedBackendSongId?.trim() ?? ''
+  const explicit: string = row.songId?.trim() ?? ''
   if (explicit.length > 0) {
     return explicit
   }
@@ -370,6 +371,7 @@ export function ProjectLyricsEditor({
   part,
   onCommit,
   onFlushWorkspace,
+  onPreviewLayoutSelect,
 }: ProjectLyricsEditorProps): React.ReactElement {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
@@ -430,13 +432,12 @@ export function ProjectLyricsEditor({
           const shouldPersistLink: boolean =
             fetchOk &&
             backendId.length > 0 &&
-            (song.matchedBackendSongId?.trim() ?? '') !== backendId
+            (song.songId?.trim() ?? '') !== backendId
           if (shouldPersistLink) {
             patchContents((prev: LyricsContents): LyricsContents => ({
               ...prev,
               contents: prev.contents.map(
-                (row: LyricsContent, i: number): LyricsContent =>
-                  i === songIndex ? { ...row, matchedBackendSongId: backendId } : row
+                (row: LyricsContent, i: number): LyricsContent => (i === songIndex ? { ...row, songId: backendId } : row)
               ),
             }))
           }
@@ -538,17 +539,53 @@ export function ProjectLyricsEditor({
     return lyricsLayout !== undefined ? sortedPlaceholderShapes(lyricsLayout) : []
   }, [lyricsLayout])
 
-  const selectedPhIds: Set<string> = React.useMemo((): Set<string> => {
-    return effectivePlaceholderSelection(part.contents.lyricsPlaceholderShapeIds, lyricsPlaceholders)
-  }, [lyricsPlaceholders, part.contents.lyricsPlaceholderShapeIds])
+  const titlePlaceholders: Shape[] = React.useMemo((): Shape[] => {
+    return titleLayout !== undefined ? sortedPlaceholderShapes(titleLayout) : []
+  }, [titleLayout])
+
+  const selectedLyricsPlaceholderShapeId: number | null = React.useMemo((): number | null => {
+    return effectiveSinglePlaceholderSelection(part.contents.lyricsPlaceholderShapeId, lyricsPlaceholders)
+  }, [lyricsPlaceholders, part.contents.lyricsPlaceholderShapeId])
+
+  const selectedTitlePlaceholderShapeId: number | null = React.useMemo((): number | null => {
+    return effectiveSinglePlaceholderSelection(part.contents.titlePlaceholderShapeId, titlePlaceholders)
+  }, [part.contents.titlePlaceholderShapeId, titlePlaceholders])
 
   const hasTitleSlide: boolean = titleLayout !== undefined
 
   const setTitleLayoutId = React.useCallback(
     (layoutId: string | null): void => {
+      onPreviewLayoutSelect?.(layoutId)
+      if (part.titleLayoutId === layoutId) {
+        return
+      }
+      const selectedLayout: Layout | undefined =
+        layoutId === null ? undefined : layouts.find((l: Layout): boolean => l.id === layoutId)
+      const nextTitlePlaceholders: Shape[] =
+        selectedLayout !== undefined ? sortedPlaceholderShapes(selectedLayout) : []
       onCommit({
         ...part,
         titleLayoutId: layoutId,
+        contents: syncLegacyIncludeTitleForFirstCard({
+          ...part.contents,
+          titlePlaceholderShapeId:
+            layoutId === null
+              ? null
+              : effectiveSinglePlaceholderSelection(part.contents.titlePlaceholderShapeId, nextTitlePlaceholders),
+        }),
+      })
+    },
+    [layouts, onCommit, onPreviewLayoutSelect, part]
+  )
+
+  const setTitlePlaceholderShapeId = React.useCallback(
+    (shapeId: number): void => {
+      onCommit({
+        ...part,
+        contents: syncLegacyIncludeTitleForFirstCard({
+          ...part.contents,
+          titlePlaceholderShapeId: shapeId,
+        }),
       })
     },
     [onCommit, part]
@@ -556,47 +593,41 @@ export function ProjectLyricsEditor({
 
   const trySelectLyricsLayout = React.useCallback(
     (layout: Layout): void => {
+      onPreviewLayoutSelect?.(layout.id)
       if (layoutPlaceholderCount(layout) === 0) {
         toast.error(t('page.project_view.lyrics_layout_requires_placeholder'))
         return
       }
+      if (part.lyricsLayoutId === layout.id) {
+        return
+      }
+      const nextLyricsPlaceholders: Shape[] = sortedPlaceholderShapes(layout)
       onCommit({
         ...part,
         lyricsLayoutId: layout.id,
         contents: syncLegacyIncludeTitleForFirstCard({
           ...part.contents,
-          lyricsPlaceholderShapeIds: undefined,
+          lyricsPlaceholderShapeId: effectiveSinglePlaceholderSelection(
+            part.contents.lyricsPlaceholderShapeId,
+            nextLyricsPlaceholders
+          ) ?? 0,
         }),
       })
     },
-    [onCommit, part, t]
+    [onCommit, onPreviewLayoutSelect, part, t]
   )
 
-  const togglePlaceholder = React.useCallback(
-    (shapeId: string, checked: boolean): void => {
-      if (lyricsPlaceholders.length <= 1) {
-        return
-      }
-      const allIds: string[] = lyricsPlaceholders.map((s: Shape): string => s.id)
-      const next: Set<string> = new Set<string>(selectedPhIds)
-      if (checked) {
-        next.add(shapeId)
-      } else {
-        if (next.size <= 1) {
-          toast.error(t('page.project_view.lyrics_keep_one_placeholder'))
-          return
-        }
-        next.delete(shapeId)
-      }
+  const setLyricsPlaceholderShapeId = React.useCallback(
+    (shapeId: number): void => {
       onCommit({
         ...part,
         contents: syncLegacyIncludeTitleForFirstCard({
           ...part.contents,
-          lyricsPlaceholderShapeIds: selectionToStoredField(next, allIds),
+          lyricsPlaceholderShapeId: shapeId,
         }),
       })
     },
-    [lyricsPlaceholders, onCommit, part, selectedPhIds, t]
+    [onCommit, part]
   )
 
   const updateSongField = React.useCallback(
@@ -610,10 +641,10 @@ export function ProjectLyricsEditor({
                 return row
               }
               if (field === 'title') {
-                return { ...row, title: raw, matchedBackendSongId: null }
+                return { ...row, title: raw, songId: null }
               }
               const artist: string | null = raw.length === 0 ? null : raw
-              return { ...row, artist, matchedBackendSongId: null }
+              return { ...row, artist, songId: null }
             }
           ),
         })
@@ -634,7 +665,7 @@ export function ProjectLyricsEditor({
                     ...row,
                     title: picked.title,
                     artist: picked.artist,
-                    matchedBackendSongId: picked.id,
+                    songId: picked.id,
                   }
                 : row
           ),
@@ -784,6 +815,31 @@ export function ProjectLyricsEditor({
             )
           })}
         </div>
+        {titleLayout !== undefined && titlePlaceholders.length > 0 ? (
+          <div className="mt-3 flex flex-col gap-2">
+            <h4 className="text-foreground text-xs font-semibold tracking-wide uppercase">
+              {t('page.project_view.lyrics_title_placeholder_target')}
+            </h4>
+            {titlePlaceholders.map((shape: Shape): React.ReactElement => {
+              const label: string = placeholderLabel(shape)
+              const checked: boolean = selectedTitlePlaceholderShapeId === shape.shapeId
+              return (
+                <label key={shape.id} className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`lyrics-title-placeholder-${part.id}`}
+                    className="border-input size-4"
+                    checked={checked}
+                    onChange={(): void => {
+                      setTitlePlaceholderShapeId(shape.shapeId)
+                    }}
+                  />
+                  <span className="text-foreground truncate text-sm">{label}</span>
+                </label>
+              )
+            })}
+          </div>
+        ) : null}
       </section>
 
       <section className="min-w-0">
@@ -824,26 +880,24 @@ export function ProjectLyricsEditor({
         </div>
       </section>
 
-      {lyricsLayout !== undefined && lyricsPlaceholders.length > 1 ? (
+      {lyricsLayout !== undefined && lyricsPlaceholders.length > 0 ? (
         <section>
           <h3 className="text-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
             {t('page.project_view.lyrics_placeholder_targets')}
           </h3>
           <div className="flex flex-col gap-2">
             {lyricsPlaceholders.map((shape: Shape): React.ReactElement => {
-              const label: string =
-                shape.text !== null && shape.text.trim().length > 0
-                  ? shape.text.trim()
-                  : shapePlaceholderApiName(shape)
-              const checked: boolean = selectedPhIds.has(shape.id)
+              const label: string = placeholderLabel(shape)
+              const checked: boolean = selectedLyricsPlaceholderShapeId === shape.shapeId
               return (
                 <label key={shape.id} className="flex cursor-pointer items-center gap-2">
                   <input
-                    type="checkbox"
-                    className="border-input size-4 rounded"
+                    type="radio"
+                    name={`lyrics-lyrics-placeholder-${part.id}`}
+                    className="border-input size-4"
                     checked={checked}
-                    onChange={(ev: React.ChangeEvent<HTMLInputElement>): void => {
-                      togglePlaceholder(shape.id, ev.target.checked)
+                    onChange={(): void => {
+                      setLyricsPlaceholderShapeId(shape.shapeId)
                     }}
                   />
                   <span className="text-foreground truncate text-sm">{label}</span>

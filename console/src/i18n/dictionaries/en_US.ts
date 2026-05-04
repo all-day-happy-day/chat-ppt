@@ -141,6 +141,7 @@ export const en_US = {
   'page.project_view.lyrics_lyrics_slide_hint': 'Only layouts with at least one text placeholder can be used.',
   'page.project_view.lyrics_layout_requires_placeholder':
     'That layout has no placeholders. Pick a layout with at least one placeholder.',
+  'page.project_view.lyrics_title_placeholder_target': 'Placeholder for title slide text',
   'page.project_view.lyrics_placeholder_targets': 'Placeholders to fill with lyrics',
   'page.project_view.lyrics_keep_one_placeholder': 'Keep at least one placeholder selected.',
   'page.project_view.lyrics_include_title_slide': 'Include title slide for this song',
@@ -188,8 +189,13 @@ export const en_US = {
   'page.project_view.bible_title_slide_heading': 'Title slide (optional)',
   'page.project_view.bible_title_slide_hint':
     'Pick a layout for title / divider slides between verses, or None to use only the phrase layout.',
+  'page.project_view.bible_title_target_sermon_title': 'Title slide: sermon title placeholder',
+  'page.project_view.bible_title_target_scripture_range': 'Title slide: scripture range placeholder',
+  'page.project_view.bible_title_target_preacher': 'Title slide: preacher placeholder',
   'page.project_view.bible_phrase_slide_heading': 'Bible phrase slide (required)',
   'page.project_view.bible_phrase_slide_hint': 'Only layouts with at least one text placeholder can be used.',
+  'page.project_view.bible_phrase_target_phrase_text': 'Phrase slide: phrase text placeholder',
+  'page.project_view.bible_phrase_target_scripture_range': 'Phrase slide: scripture range placeholder',
   'page.project_view.bible_cards_heading': 'Slides (order)',
   'page.project_view.bible_cards_hint':
     'Each phrase card is one slide. Drag cards to reorder. Use a hyphen or tilde for a verse range (e.g. 3-5).',

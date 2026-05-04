@@ -55,6 +55,12 @@ export interface ProjectContainer {
   parts: (BiblePart | LyricsPart | PlainPart | ValuePart)[]
 }
 
+/** Project-scoped string substitution for value fields (`GET/POST /project/.../variables`). */
+export interface ProjectVariable {
+  name: string
+  value: string
+}
+
 export interface BasePartRequestBody {
   id?: string
   order: number

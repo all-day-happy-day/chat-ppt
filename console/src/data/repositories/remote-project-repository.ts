@@ -1,6 +1,6 @@
 import { httpClient } from '@/api/client'
 import { buildPagingSearchParams, type PageResult, type PagingQuery } from '@/domain/list-query'
-import type { PartRequestBody, Project, ProjectContainer } from '@/domain/models/project'
+import type { PartRequestBody, Project, ProjectContainer, ProjectVariable } from '@/domain/models/project'
 import type { ProjectRepository } from '@/domain/repositories/project-repository'
 
 import type {
@@ -8,26 +8,39 @@ import type {
   CreateProjectContainerResponse,
   CreateProjectRequest,
   CreateProjectResponse,
+  CreateVariableRequest,
+  CreateVariableResponse,
   DeleteProjectContainerResponse,
   DeleteProjectResponse,
+  DeleteVariableResponse,
   ExportPPTRequest,
   ExportPPTResponse,
   GetProjectContainersResponse,
   GetProjectsPartialResponse,
   GetProjectsResponse,
+  GetVariableResponse,
+  GetVariablesResponse,
   PatchProjectContainerRequest,
   PatchProjectContainerResponse,
   PatchProjectRequest,
   PatchProjectResponse,
+  PatchVariableRequest,
+  PatchVariableResponse,
   ProjectPageResponse,
 } from './messages/remote-project-message'
-import { toProject, toProjectContainer } from './messages/remote-project-message'
+import { toProject, toProjectContainer, toProjectVariable } from './messages/remote-project-message'
 
 /** `GET /project/{userId}/page?page&size&sort` */
 const projectPagePath = (userId: string): string => `/project/${userId}/page`
 
 /** `GET /project/{userId}/partial?size=` */
 const projectPartialPath = (userId: string): string => `/project/${userId}/partial`
+
+/** `GET|POST /project/{projectId}/variables` — per-segment encoding for variable `name`. */
+const projectVariablesBasePath = (projectId: string): string => `/project/${projectId}/variables`
+
+const projectVariablePath = (projectId: string, variableName: string): string =>
+  `${projectVariablesBasePath(projectId)}/${encodeURIComponent(variableName)}`
 
 export class RemoteProjectRepository implements ProjectRepository {
   async getProjects(userId: string): Promise<Project[]> {
@@ -119,5 +132,42 @@ export class RemoteProjectRepository implements ProjectRepository {
       requestBody
     )
     return response
+  }
+
+  async getProjectVariables(projectId: string): Promise<ProjectVariable[]> {
+    const { response } = await httpClient.get<GetVariablesResponse>(projectVariablesBasePath(projectId))
+    return response.map((row) => toProjectVariable(row))
+  }
+
+  async getProjectVariable(projectId: string, name: string): Promise<ProjectVariable> {
+    const { response } = await httpClient.get<GetVariableResponse>(projectVariablePath(projectId, name))
+    return toProjectVariable(response)
+  }
+
+  async createProjectVariable(
+    projectId: string,
+    requestBody: { name: string; value: string }
+  ): Promise<ProjectVariable> {
+    const { response } = await httpClient.post<CreateVariableRequest, CreateVariableResponse>(
+      projectVariablesBasePath(projectId),
+      requestBody
+    )
+    return toProjectVariable(response)
+  }
+
+  async patchProjectVariable(
+    projectId: string,
+    name: string,
+    requestBody: { value?: string | null }
+  ): Promise<ProjectVariable> {
+    const { response } = await httpClient.patch<PatchVariableRequest, PatchVariableResponse>(
+      projectVariablePath(projectId, name),
+      requestBody
+    )
+    return toProjectVariable(response)
+  }
+
+  async deleteProjectVariable(projectId: string, name: string): Promise<void> {
+    await httpClient.delete<DeleteVariableResponse>(projectVariablePath(projectId, name))
   }
 }

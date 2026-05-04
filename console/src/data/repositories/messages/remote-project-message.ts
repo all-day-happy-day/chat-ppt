@@ -1,4 +1,4 @@
-import type { Part, PartRequestBody, Project, ProjectContainer } from '@/domain/models/project'
+import type { Part, PartRequestBody, Project, ProjectContainer, ProjectVariable } from '@/domain/models/project'
 
 interface BaseProjectResponse {
   id: string
@@ -41,6 +41,18 @@ export function toProjectContainer(response: BaseProjectContainerResponse): Proj
     updatedAt: new Date(response.updatedAt),
     completed: response.completed,
     parts: response.parts,
+  }
+}
+
+interface BaseVariableResponse {
+  name: string
+  value: string
+}
+
+export function toProjectVariable(response: BaseVariableResponse): ProjectVariable {
+  return {
+    name: response.name,
+    value: response.value,
   }
 }
 
@@ -92,6 +104,20 @@ export type ExportPPTRequest = {
   savePath: string
 }
 export type ExportPPTResponse = string
+
+// Project variables (`/project/{project_id}/variables`)
+export type GetVariablesResponse = BaseVariableResponse[]
+export type CreateVariableRequest = {
+  name: string
+  value: string
+}
+export type CreateVariableResponse = BaseVariableResponse
+export type GetVariableResponse = BaseVariableResponse
+export type PatchVariableRequest = {
+  value?: string | null
+}
+export type PatchVariableResponse = BaseVariableResponse
+export type DeleteVariableResponse = void
 
 // Paged list / partial (response keys are camelCase after httpClient snakeToCamel)
 
