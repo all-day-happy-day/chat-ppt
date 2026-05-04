@@ -39,6 +39,8 @@ export interface PlainContents {
 
 export interface ValueContent {
   placeholderName: string
+  /** Layout shape id — unique; editor highlight + disambiguation when `placeholderName` collides. Omitted in API payload. */
+  placeholderShapeId?: string | null
   value: string | null
 }
 

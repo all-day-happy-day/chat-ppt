@@ -54,7 +54,7 @@ export interface ProjectContainer {
 }
 
 export interface BasePartRequestBody {
-  id: string
+  id?: string
   order: number
 }
 

@@ -87,8 +87,8 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {
     const { response } = await httpClient.get<ListLayoutsResponse>(`/powerpoint/template/layouts/${templateId}`)
     return {
-      layouts: response.map((row: LayoutWire, index: number): Layout => ({
-        id: `${templateId}-layout-${String(index)}`,
+      layouts: response.map((row: LayoutWire): Layout => ({
+        id: row.id,
         templateId,
         name: row.name,
         shapes: row.shapes,

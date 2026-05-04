@@ -15,6 +15,20 @@ export interface Shape {
   image?: ImageData | null
 }
 
+/** Placeholder text written into PPT; from shape name or synthetic `shape_{shapeId}` — may duplicate across shapes. */
+export function shapePlaceholderApiName(shape: Shape): string {
+  const trimmed: string = shape.name.trim()
+  return trimmed.length > 0 ? trimmed : `shape_${String(shape.shapeId)}`
+}
+
+/** Same as API `placeholderName` when `shape.placeholder`; otherwise null. */
+export function shapePlaceholderKey(shape: Shape): string | null {
+  if (!shape.placeholder) {
+    return null
+  }
+  return shapePlaceholderApiName(shape)
+}
+
 export interface Layout {
   id: string
   templateId: string

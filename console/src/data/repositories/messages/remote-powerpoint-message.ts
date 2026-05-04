@@ -62,6 +62,7 @@ export type TemplatePageResponse = {
 
 // GET /powerpoint/template/layouts/{template_id} → list[GetLayoutResponse]
 export type LayoutWire = {
+  id: string
   name: string
   shapes: Shape[]
   slideSize: Size

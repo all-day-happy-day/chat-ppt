@@ -211,6 +211,7 @@ const ProjectListTable = ({
 
 export function ProjectListPage(): React.ReactElement | null {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [page, setPage] = useState<number>(1)
   const [sort, setSort] = useState<ListSort>('date_desc')
   const patchProject: ReturnType<typeof usePatchProject> = usePatchProject()
@@ -291,7 +292,14 @@ export function ProjectListPage(): React.ReactElement | null {
       <BaseListHeader title={t('home.projects')} />
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex shrink-0 justify-end px-4 pt-2">
-          <Button type="button" size="sm" variant="default">
+          <Button
+            type="button"
+            size="sm"
+            variant="default"
+            onClick={(): void => {
+              navigate('/projects/new')
+            }}
+          >
             {t('common.global.add')}
           </Button>
         </div>
