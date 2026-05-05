@@ -1,0 +1,113 @@
+import camelcaseKeys from 'camelcase-keys'
+import { type ClassValue, clsx } from 'clsx'
+import decamelizeKeys from 'decamelize-keys'
+import { twMerge } from 'tailwind-merge'
+
+import type { DefaultError, UseMutationResult, UseQueryResult } from '@tanstack/react-query'
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs))
+}
+
+export function getUserInitials(username: string): string {
+  const initial: string = username
+    .split(' ')
+    .map((name: string) => name[0])
+    .join('')
+
+  if (initial.length > 2) {
+    return initial.slice(0, 2)
+  } else {
+    return initial
+  }
+}
+
+// Query & Mutation
+export type QueryDataState<TData, TError = DefaultError> =
+  | { kind: 'pending' }
+  | { kind: 'error'; error: TError }
+  | { kind: 'success'; data: TData }
+export type MutationDataState<TData, TError = DefaultError> =
+  | { kind: 'idle' }
+  | { kind: 'pending' }
+  | { kind: 'error'; error: TError }
+  | { kind: 'success'; data: TData }
+export function getQueryDataState<TData, TError = DefaultError>(
+  query: UseQueryResult<TData, TError>
+): QueryDataState<TData, TError> {
+  switch (query.status) {
+    case 'error':
+      return { kind: 'error', error: query.error }
+    case 'success':
+      return { kind: 'success', data: query.data }
+    case 'pending':
+      return { kind: 'pending' }
+  }
+}
+export function getMutationDataState<TData, TError = DefaultError>(
+  mutation: UseMutationResult<TData, TError>
+): MutationDataState<TData, TError> {
+  switch (mutation.status) {
+    case 'error':
+      return { kind: 'error', error: mutation.error }
+    case 'success':
+      return { kind: 'success', data: mutation.data }
+    case 'pending':
+      return { kind: 'pending' }
+    case 'idle':
+      return { kind: 'idle' }
+  }
+}
+
+export function getQueryData<TData, TError = DefaultError>(query: UseQueryResult<TData, TError>): TData | undefined {
+  const state: QueryDataState<TData, TError> = getQueryDataState(query)
+  return state.kind === 'success' ? state.data : undefined
+}
+export function getMutationData<TData, TError = DefaultError>(
+  mutation: UseMutationResult<TData, TError>
+): TData | undefined {
+  const state: MutationDataState<TData, TError> = getMutationDataState(mutation)
+  return state.kind === 'success' ? state.data : undefined
+}
+
+// Date Formatting
+export function formatDate(date: Date): string {
+  const month: string = String(date.getMonth() + 1).padStart(2, '0')
+  const day: string = String(date.getDate()).padStart(2, '0')
+  const year: number = date.getFullYear()
+  const hours: string = String(date.getHours()).padStart(2, '0')
+  const minutes: string = String(date.getMinutes()).padStart(2, '0')
+  return `${month}/${day}/${year} ${hours}:${minutes}`
+}
+
+// Map snake_case JSON ↔ camelCase in app code
+export type Input = Record<string, unknown> | readonly Record<string, unknown>[]
+export function snakeToCamel<TCamel>(data: Input): TCamel {
+  return camelcaseKeys(data, { deep: true }) as TCamel
+}
+
+/** Outgoing JSON bodies: keys become snake_case for the API (symmetric with {@link snakeToCamel}). */
+export type OutgoingJson = Record<string, unknown> | readonly unknown[]
+
+export function camelToSnake<TSnake>(data: OutgoingJson): TSnake {
+  return decamelizeKeys(data as Record<string, unknown> | readonly unknown[], { deep: true }) as TSnake
+}
+
+/** Layout-picker selected chip + matching slide thumbnail selection (keep in sync visually). */
+export const LAYOUT_SELECTION_ACTIVE_CHROME: string =
+  'border-primary ring-primary ring-2 ring-inset'
+
+/** Slide list drag-over target; same primary family, slightly muted. */
+export const LAYOUT_SELECTION_DRAG_TARGET_CHROME: string =
+  'border-primary/80 ring-primary/80 ring-2 ring-inset'
+
+/** Focused VALUE placeholder on slide previews (must match {@link LAYOUT_SELECTION_ACTIVE_CHROME} hue). */
+export const LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT: string =
+  'border-primary z-[5] bg-primary/55 border-2 border-solid ring-primary ring-2 ring-offset-1 ring-offset-background'
+
+/**
+ * Non-focused placeholder with filled interior (e.g. sidebar thumbnails).
+ * Border follows shape bounds; inside is tinted primary.
+ */
+export const PLACEHOLDER_FILL_BASE_CHROME: string =
+  'border-primary bg-primary/45 border-2 border-solid'

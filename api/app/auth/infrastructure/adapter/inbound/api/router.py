@@ -2,8 +2,10 @@ import os
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Response, status
+from ulid import ULID
 
 from app.auth.application.usecase import (
+    PatchPasswordUseCase,
     RefreshCredentialsUseCase,
     SignInUseCase,
     SignOutUseCase,
@@ -12,6 +14,9 @@ from app.auth.application.usecase import (
     VerifyPasswordUseCase,
 )
 from app.auth.infrastructure.adapter.inbound.api.message import (
+    GetCurrentUserResponse,
+    PatchPasswordRequest,
+    PatchPasswordResponse,
     SignInRequest,
     SignInResponse,
     SignOutResponse,
@@ -21,6 +26,7 @@ from app.auth.infrastructure.adapter.inbound.api.message import (
     VerifyTokenResponse,
 )
 from app.di.application.usecase import (
+    get_patch_password_use_case,
     get_refresh_credentials_use_case,
     get_sign_in_use_case,
     get_sign_out_use_case,
@@ -30,6 +36,7 @@ from app.di.application.usecase import (
 )
 from app.shared.user.domain.exception import DuplicatedUser
 from app.user.domain.entity import User
+from app.user.domain.exception import UserNotFound
 from core.auth.domain.exception import AlchemyMismatch, DuplicatedPrincipal, InvalidCredentials, PrincipalNotFound
 from core.notifier import EmailNotifier
 
@@ -46,7 +53,7 @@ def signin(
     try:
         user, short_credentials, long_credentials = usecase(
             principal=request_model.principal,
-            secret=request_model.secret,
+            password=request_model.password,
         )
 
         # set refresh token cookie
@@ -76,6 +83,8 @@ def signin(
     except InvalidCredentials as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except PrincipalNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UserNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
@@ -166,7 +175,7 @@ def signup(
 
 
 @router.get("/verify", response_model=VerifyTokenResponse)
-def verify_token(
+def verify_credentials(
     usecase: Annotated[VerifyCredentialsUseCase, Depends(get_verify_credentials_use_case)],
     access_token: str | None = Cookie(None),
 ):
@@ -192,7 +201,7 @@ def verify_password(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Password")
 
 
-@router.post("/refresh", status_code=status.HTTP_200_OK)
+@router.post("/reissue", status_code=status.HTTP_200_OK)
 def reissue_tokens(
     response: Response,
     usecase: Annotated[RefreshCredentialsUseCase, Depends(get_refresh_credentials_use_case)],
@@ -230,3 +239,35 @@ def reissue_tokens(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except PrincipalNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/me", status_code=status.HTTP_200_OK)
+def get_current_user(
+    usecase: Annotated[VerifyCredentialsUseCase, Depends(get_verify_credentials_use_case)],
+    access_token: str | None = Cookie(None),
+):
+    try:
+        if not access_token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing access token")
+        return GetCurrentUserResponse.from_user_entity(user=usecase(raw_short_lived_credentials=access_token))
+    except InvalidCredentials as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except AlchemyMismatch as e:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(e))
+
+
+@router.patch("/password/{user_id}", status_code=status.HTTP_200_OK)
+def patch_password(
+    user_id: ULID,
+    request_model: PatchPasswordRequest,
+    usecase: Annotated[PatchPasswordUseCase, Depends(get_patch_password_use_case)],
+):
+    try:
+        user: User = usecase(user_id=user_id, password=request_model.password)
+        return PatchPasswordResponse.from_user_entity(user=user)
+    except UserNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except InvalidCredentials as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except AlchemyMismatch as e:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(e))

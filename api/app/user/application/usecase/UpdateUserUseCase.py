@@ -19,9 +19,6 @@ class UpdateUserUseCase:
         prepared: dict[str, Any] = dict(update_fields)
         if "role" in prepared:
             raise UnauthorizedRequest("Cannot update role of another user.")
-        if "password" in prepared:
-            raw_password: str = prepared["password"]
-            prepared["password"] = self.password_hasher.hash(raw_password)
         user: User = user_entity.model_copy(update=prepared)
 
         has_change: bool = False

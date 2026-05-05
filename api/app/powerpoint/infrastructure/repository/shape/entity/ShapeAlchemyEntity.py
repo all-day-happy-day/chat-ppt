@@ -20,3 +20,4 @@ class ShapeAlchemyEntity(Base):
     placeholder: Mapped[bool] = mapped_column(Boolean, nullable=False)
     type: Mapped[ShapeType] = mapped_column(Enum(ShapeType), nullable=False)
     fill_color: Mapped[str] = mapped_column(JSON, nullable=False)
+    image: Mapped[str] = mapped_column(JSON, nullable=True)

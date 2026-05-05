@@ -19,7 +19,6 @@ from app.user.application.usecase import (
 )
 from app.user.domain.entity import User
 from app.user.domain.exception import UnauthorizedRequest, UserNotFound
-from app.user.infrastructure.adapter.inbound.api.deps import get_current_user
 from app.user.infrastructure.adapter.inbound.api.message import (
     GetUserResponse,
     UpdateUserRequest,
@@ -43,13 +42,7 @@ def delete_user(user_id: ULID, usecase: Annotated[DeleteUserUseCase, Depends(get
 def get_user(
     user_id: ULID,
     usecase: Annotated[GetUserUseCase, Depends(get_get_user_use_case)],
-    current_user: Annotated[User, Depends(get_current_user)],
 ):
-    if str(current_user.id) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot access another user's profile.",
-        )
     try:
         user: User = usecase(user_id=user_id)
         return GetUserResponse.from_domain_entity(user)
@@ -68,13 +61,7 @@ def patch_user(
     user_id: ULID,
     request_model: UpdateUserRequest,
     usecase: Annotated[UpdateUserUseCase, Depends(get_update_user_use_case)],
-    current_user: Annotated[User, Depends(get_current_user)],
 ):
-    if str(current_user.id) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot update another user's profile.",
-        )
     try:
         update_fields: dict[str, Any] = {k: v for k, v in request_model.model_dump().items() if v is not None}
         user: User = usecase(user_id=user_id, update_fields=update_fields)
@@ -87,11 +74,10 @@ def patch_user(
 def patch_user_role(
     user_id: ULID,
     request_model: UpdateUserRoleRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
     usecase: Annotated[UpdateUserRoleUseCase, Depends(get_update_user_role_use_case)],
 ):
     try:
-        user: User = usecase(user_id=user_id, role=request_model.role, current_user=current_user)
+        user: User = usecase(user_id=user_id, role=request_model.role)
         return UpdateUserRoleResponse.from_domain_entity(user)
     except UnauthorizedRequest as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

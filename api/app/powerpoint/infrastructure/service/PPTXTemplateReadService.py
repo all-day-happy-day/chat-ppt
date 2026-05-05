@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
@@ -8,6 +9,7 @@ from pptx.presentation import Presentation
 from pptx.shapes.autoshape import Shape as AutoShape
 from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
+from pptx.shapes.picture import Picture
 from pptx.slide import SlideLayout
 from pptx.util import Length
 from ulid import ULID
@@ -16,7 +18,7 @@ from app.powerpoint.domain.entity import Layout, Shape, Template, TemplateFile
 from app.powerpoint.domain.enum import ShapeType
 from app.powerpoint.domain.exception import InvalidFileReadRequest, SlideSizeNotDefined
 from app.powerpoint.domain.service.TemplateReadService import TemplateReadService
-from app.powerpoint.domain.valueobject import ColorConfig, Position, Size
+from app.powerpoint.domain.valueobject import ColorConfig, ImageData, Position, Size
 from app.powerpoint.infrastructure.util.PPTXColor import (
     _ThemeColor,
     resolve_layout_background_color,
@@ -84,6 +86,15 @@ class PPTXTemplateReadService(TemplateReadService):
                 raise ValueError("Theme color is not defined")
             fill_color: ColorConfig = resolve_shape_fill_color(shape=shape, theme_color=self.theme_color)
 
+            image_data: ImageData | None = None
+            if self._get_shape_type(shape=shape) == ShapeType.IMAGE:
+                assert isinstance(shape, Picture)
+                image_data = ImageData(
+                    data=base64.b64encode(shape.image.blob).decode("utf-8"),
+                    # ext=shape.image.ext.upper(),
+                    byte_length=len(shape.image.blob),
+                )
+
             shape_list.append(
                 Shape(
                     id=ULID(),
@@ -96,19 +107,21 @@ class PPTXTemplateReadService(TemplateReadService):
                     placeholder=shape.is_placeholder,
                     type=self._get_shape_type(shape=shape),
                     fill_color=fill_color,
+                    image=image_data,
                 )
             )
         else:
             raise ValueError(f"Invalid shape type: {type(shape)}")
         return shape_list
 
-    def _get_layout(self, slide_layout: SlideLayout, template_id: ULID) -> Layout:
+    def _get_layout(self, ppt: Presentation, slide_layout: SlideLayout, template_id: ULID) -> Layout:
         layout_id: ULID = ULID()
         shape_list: list[Shape] = []
         self.theme_color = _ThemeColor.from_slide_layout(slide_layout=slide_layout)
         for shape in slide_layout.shapes:
             shape_list.extend(self._get_shape_element(shape=shape, layout_id=layout_id))
         self.theme_color = None
+
         return Layout(
             id=layout_id,
             template_id=template_id,
@@ -127,7 +140,8 @@ class PPTXTemplateReadService(TemplateReadService):
         template_id = template.id if template is not None else ULID()
         slide_layouts: list[SlideLayout] = self._get_template_slide_layouts(ppt=ppt)
         layouts: list[Layout] = [
-            self._get_layout(slide_layout=slide_layout, template_id=template_id) for slide_layout in slide_layouts
+            self._get_layout(ppt=ppt, slide_layout=slide_layout, template_id=template_id)
+            for slide_layout in slide_layouts
         ]
         now: datetime = datetime.now(tz=timezone.utc)
         if template is not None:

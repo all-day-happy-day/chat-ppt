@@ -29,4 +29,6 @@ class PatchProjectUseCase:
             ]
         if has_changed:
             project.updated_at = datetime.now(timezone.utc)
-        return self.project_repository.save(project=project)
+            return self.project_repository.save(project=project)
+        else:
+            return project

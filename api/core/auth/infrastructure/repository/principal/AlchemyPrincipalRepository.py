@@ -31,6 +31,13 @@ class AlchemyPrincipalRepository(PrincipalRepository):
 
         return principal
 
+    def patch(self, principal: Principal) -> Principal:
+        alchemy_entity: PrincipalAlchemyEntity = PrincipalMapper.to_alchemy_entity(principal)
+        merged_entity: PrincipalAlchemyEntity = self.db.merge(alchemy_entity)
+        self.db.commit()
+        self.db.refresh(merged_entity)
+        return PrincipalMapper.to_domain_entity(merged_entity)
+
     def exists(self, principal: str) -> bool:
         return (
             self.db.query(PrincipalAlchemyEntity).filter(PrincipalAlchemyEntity.principal == principal).first()

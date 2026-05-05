@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from ulid import ULID
 
 from app.powerpoint.domain.enum import ShapeType
-from app.powerpoint.domain.valueobject import ColorConfig, Position, Size
+from app.powerpoint.domain.valueobject import ColorConfig, ImageData, Position, Size
 
 
 class Shape(BaseModel):
@@ -16,3 +16,4 @@ class Shape(BaseModel):
     placeholder: bool
     type: ShapeType
     fill_color: ColorConfig
+    image: ImageData | None = None

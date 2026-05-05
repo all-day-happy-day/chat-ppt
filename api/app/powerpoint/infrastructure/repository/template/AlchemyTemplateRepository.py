@@ -1,6 +1,6 @@
 from math import ceil
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, UnaryExpression, func, select
 from sqlalchemy.orm import Session
 from ulid import ULID
 
@@ -47,12 +47,28 @@ class AlchemyTemplateRepository(TemplateRepository):
         return [TemplateMapper.to_domain_entity(entity) for entity in alchemy_entities]
 
     def get_all_paged_by_user_id(self, user_id: ULID, paging_options: PagingOptions) -> Page[Template]:
+        sort_by: UnaryExpression
+        if paging_options.sort_by == "created_at":
+            if paging_options.sort_order == "asc":
+                sort_by = TemplateAlchemyEntity.created_at.asc()
+            elif paging_options.sort_order == "desc":
+                sort_by = TemplateAlchemyEntity.created_at.desc()
+            else:
+                raise ValueError(f"Invalid sort order: {paging_options.sort_order}")
+        elif paging_options.sort_by == "name":
+            if paging_options.sort_order == "asc":
+                sort_by = TemplateAlchemyEntity.name.asc()
+            elif paging_options.sort_order == "desc":
+                sort_by = TemplateAlchemyEntity.name.desc()
+            else:
+                raise ValueError(f"Invalid sort order: {paging_options.sort_order}")
+        else:
+            sort_by = TemplateAlchemyEntity.id.asc()
+
         stmt: Select[tuple[TemplateAlchemyEntity]] = (
             select(TemplateAlchemyEntity)
-            .order_by(
-                TemplateAlchemyEntity.created_at.desc(), TemplateAlchemyEntity.id.desc()
-            )  # created_at descending order
             .where(TemplateAlchemyEntity.user_id == str(user_id))
+            .order_by(sort_by)
             .offset((paging_options.page - 1) * paging_options.size)
             .limit(paging_options.size)
         )
@@ -71,3 +87,12 @@ class AlchemyTemplateRepository(TemplateRepository):
             total_items=total_items,
             total_pages=total_pages,
         )
+
+    def get_partial_ordered_by_created_at(self, user_id: ULID, size: int) -> list[Template]:
+        stmt: Select[tuple[TemplateAlchemyEntity]] = (
+            select(TemplateAlchemyEntity)
+            .where(TemplateAlchemyEntity.user_id == str(user_id))
+            .order_by(TemplateAlchemyEntity.created_at.desc())
+        )
+        alchemy_entities: list[TemplateAlchemyEntity] = list(self.db.scalars(stmt).fetchmany(size=size))
+        return [TemplateMapper.to_domain_entity(entity) for entity in alchemy_entities]

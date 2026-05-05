@@ -1,5 +1,9 @@
-from .BaseLyricsResponse import BaseLyricsResponse
+from pydantic import BaseModel
+
+from app.shared.song.domain.valueobject import LyricsPart
 
 
-class ScrapeLyricsResponse(BaseLyricsResponse):
-    pass
+class ScrapeLyricsResponse(BaseModel):
+    title: str
+    artist: str
+    lyrics: list[LyricsPart]

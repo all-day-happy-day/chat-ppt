@@ -11,6 +11,10 @@ class PrincipalRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def patch(self, principal: Principal) -> Principal:
+        raise NotImplementedError
+
+    @abstractmethod
     def exists(self, principal: str) -> bool:
         raise NotImplementedError
 

@@ -1,11 +1,15 @@
 from fastapi import Depends  # type: ignore
 
+from app.bible.domain.repository import BibleRepository
 from app.bible.domain.service import ParseVerseQueryService as P
 from app.di.domain.repository import (
+    get_bible_repository,
     get_credentials_repository,
+    get_layout_repository,
     get_principal_repository,
     get_user_repository,
 )
+from app.powerpoint.domain.repository import LayoutRepository
 from app.powerpoint.domain.service import TemplateFileStorageService, TemplateReadService
 from app.powerpoint.infrastructure.service import LocalDiskTemplateFileService, PPTXTemplateReadService
 from app.project.domain.service import PresentationService
@@ -57,5 +61,13 @@ def get_template_file_storage_service() -> TemplateFileStorageService:
 
 
 # Project
-def get_presentation_service() -> PresentationService:
-    return PPTXPresentationService()
+def get_presentation_service(
+    bible_repository: BibleRepository = Depends(get_bible_repository),
+    layout_repository: LayoutRepository = Depends(get_layout_repository),
+    template_read_service: TemplateReadService = Depends(get_template_read_service),
+) -> PresentationService:
+    return PPTXPresentationService(
+        bible_repository=bible_repository,
+        layout_repository=layout_repository,
+        template_read_service=template_read_service,
+    )

@@ -8,6 +8,10 @@ class LyricsFetcherService(ABC):
     def fetch(self, title: str, artist: str | None) -> tuple[str, str, str]:
         raise NotImplementedError
 
+    @abstractmethod
+    def search(self, title: str, artist: str | None, page: int = 1) -> list[tuple[str, str, str | None]]:
+        raise NotImplementedError
+
     @staticmethod
     def strings_match(s1: str, s2: str) -> bool:
         # Equal

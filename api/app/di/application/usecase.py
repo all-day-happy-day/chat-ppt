@@ -1,6 +1,7 @@
 from fastapi import Depends
 
 from app.auth.application.usecase import (
+    PatchPasswordUseCase,
     RefreshCredentialsUseCase,
     SignInUseCase,
     SignOutUseCase,
@@ -21,6 +22,7 @@ from app.di.domain.repository import (
     get_template_file_repository,
     get_template_repository,
     get_user_repository,
+    get_variable_repository,
 )
 from app.di.domain.service import (
     get_authentication_service,
@@ -35,6 +37,7 @@ from app.powerpoint.application.usecase import (
     DeleteTemplateUseCase,
     GetLayoutsUseCase,
     GetPagedTemplatesByUserIDUseCase,
+    GetPartialTemplatesUseCase,
     GetTemplatesByUserIDUseCase,
     ReadTemplateUseCase,
     UpdateTemplateUseCase,
@@ -44,25 +47,37 @@ from app.powerpoint.domain.service import TemplateFileStorageService, TemplateRe
 from app.project.application.usecase import (
     CreateProjectContainerUseCase,
     CreateProjectUseCase,
+    CreateVariableUseCase,
     DeleteProjectContainerUseCase,
     DeleteProjectUseCase,
+    DeleteVariableUseCase,
     ExportPPTUseCase,
+    GetAllVariablesUseCase,
+    GetPagedProjectContainersUseCase,
+    GetPagedProjectsUseCase,
+    GetPartialProjectsUseCase,
     GetProjectContainersUseCase,
     GetProjectsUseCase,
+    GetVariableUseCase,
     InsertPartUseCase,
     PatchProjectContainerUseCase,
     PatchProjectUseCase,
+    PatchVariableUseCase,
 )
-from app.project.domain.repository import ProjectContainerRepository, ProjectRepository
+from app.project.domain.repository import ProjectContainerRepository, ProjectRepository, VariableRepository
 from app.project.domain.service import PresentationService
 from app.song.application.usecase import (
     DeleteSongUseCase,
     GetLyricsUseCase,
+    GetPagedSongsUseCase,
+    GetPartialSongsUseCase,
     GetSongsUseCase,
     ListAllSongsUseCase,
     PatchLyricsUseCase,
     PatchSongUseCase,
+    SaveSongUseCase,
     ScrapeLyricsUseCase,
+    ScrapeSearchSongsUseCase,
 )
 from app.song.domain.repository import LyricsRepository, SongRepository
 from app.song.domain.service import LyricsFetcherService
@@ -113,6 +128,16 @@ def get_update_user_role_use_case(
 
 
 # Auth
+def get_patch_password_use_case(
+    principal_repository: PrincipalRepository = Depends(get_principal_repository),
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_hasher: PasswordHasher = Depends(get_password_hasher),
+) -> PatchPasswordUseCase:
+    return PatchPasswordUseCase(
+        principal_repository=principal_repository, user_repository=user_repository, password_hasher=password_hasher
+    )
+
+
 def get_sign_in_use_case(
     auth_service: AuthenticationService = Depends(get_authentication_service),
     user_repository: UserRepository = Depends(get_user_repository),
@@ -213,6 +238,18 @@ def get_list_all_songs_use_case(
     return ListAllSongsUseCase(song_repository=song_repository)
 
 
+def get_get_partial_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetPartialSongsUseCase:
+    return GetPartialSongsUseCase(song_repository=song_repository)
+
+
+def get_get_paged_songs_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+) -> GetPagedSongsUseCase:
+    return GetPagedSongsUseCase(song_repository=song_repository)
+
+
 def get_patch_lyrics_use_case(
     lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
 ) -> PatchLyricsUseCase:
@@ -226,15 +263,22 @@ def get_patch_song_use_case(
 
 
 def get_scrape_lyrics_use_case(
-    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
-    song_repository: SongRepository = Depends(get_song_repository),
     lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
 ) -> ScrapeLyricsUseCase:
-    return ScrapeLyricsUseCase(
-        lyrics_repository=lyrics_repository,
-        song_repository=song_repository,
-        lyrics_fetcher_service=lyrics_fetcher_service,
-    )
+    return ScrapeLyricsUseCase(lyrics_fetcher_service=lyrics_fetcher_service)
+
+
+def get_scrape_search_songs_use_case(
+    lyrics_fetcher_service: LyricsFetcherService = Depends(get_bugs_lyrics_fetcher_service),
+) -> ScrapeSearchSongsUseCase:
+    return ScrapeSearchSongsUseCase(lyrics_fetcher_service=lyrics_fetcher_service)
+
+
+def get_save_song_use_case(
+    song_repository: SongRepository = Depends(get_song_repository),
+    lyrics_repository: LyricsRepository = Depends(get_lyrics_repository),
+) -> SaveSongUseCase:
+    return SaveSongUseCase(song_repository=song_repository, lyrics_repository=lyrics_repository)
 
 
 # Powerpoint
@@ -256,6 +300,15 @@ def get_delete_template_use_case(
         template_file_storage_service=template_file_storage_service,
         template_file_repository=template_file_repository,
         template_repository=template_repository,
+    )
+
+
+def get_get_partial_templates_use_case(
+    template_repository: TemplateRepository = Depends(get_template_repository),
+    template_file_repository: TemplateFileRepository = Depends(get_template_file_repository),
+) -> GetPartialTemplatesUseCase:
+    return GetPartialTemplatesUseCase(
+        template_repository=template_repository, template_file_repository=template_file_repository
     )
 
 
@@ -340,6 +393,18 @@ def get_delete_project_use_case(
     return DeleteProjectUseCase(project_repository=project_repository)
 
 
+def get_get_paged_projects_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> GetPagedProjectsUseCase:
+    return GetPagedProjectsUseCase(project_repository=project_repository)
+
+
+def get_get_partial_projects_use_case(
+    project_repository: ProjectRepository = Depends(get_project_repository),
+) -> GetPartialProjectsUseCase:
+    return GetPartialProjectsUseCase(project_repository=project_repository)
+
+
 def get_get_project_containers_use_case(
     project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
 ) -> GetProjectContainersUseCase:
@@ -364,6 +429,12 @@ def get_patch_project_use_case(
     return PatchProjectUseCase(project_repository=project_repository)
 
 
+def get_get_paged_project_containers_use_case(
+    project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
+) -> GetPagedProjectContainersUseCase:
+    return GetPagedProjectContainersUseCase(project_container_repository=project_container_repository)
+
+
 def get_export_ppt_use_case(
     project_container_repository: ProjectContainerRepository = Depends(get_project_container_repository),
     project_repository: ProjectRepository = Depends(get_project_repository),
@@ -382,3 +453,33 @@ def get_insert_part_use_case(
     project_repository: ProjectRepository = Depends(get_project_repository),
 ) -> InsertPartUseCase:
     return InsertPartUseCase(project_repository=project_repository)
+
+
+def get_get_all_variables_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> GetAllVariablesUseCase:
+    return GetAllVariablesUseCase(variable_repository=variable_repository)
+
+
+def get_get_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> GetVariableUseCase:
+    return GetVariableUseCase(variable_repository=variable_repository)
+
+
+def get_create_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> CreateVariableUseCase:
+    return CreateVariableUseCase(variable_repository=variable_repository)
+
+
+def get_delete_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> DeleteVariableUseCase:
+    return DeleteVariableUseCase(variable_repository=variable_repository)
+
+
+def get_patch_variable_use_case(
+    variable_repository: VariableRepository = Depends(get_variable_repository),
+) -> PatchVariableUseCase:
+    return PatchVariableUseCase(variable_repository=variable_repository)

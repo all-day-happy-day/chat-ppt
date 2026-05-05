@@ -11,7 +11,6 @@ class ProjectContainerMapper:
         return ProjectContainer(
             id=ULID.from_str(alchemy_entity.id),
             project_id=ULID.from_str(alchemy_entity.project_id),
-            user_id=ULID.from_str(alchemy_entity.user_id),
             container_name=alchemy_entity.container_name,
             parts=[PartMapper.to_domain_entity(part) for part in alchemy_entity.parts],
             created_at=alchemy_entity.created_at,
@@ -24,7 +23,6 @@ class ProjectContainerMapper:
         return ProjectContainerAlchemyEntity(
             id=str(domain_entity.id),
             project_id=str(domain_entity.project_id),
-            user_id=str(domain_entity.user_id),
             container_name=domain_entity.container_name,
             parts=[PartMapper.to_alchemy_entity(part) for part in domain_entity.parts],
             created_at=domain_entity.created_at,

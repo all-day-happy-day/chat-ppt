@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from ulid import ULID
 
 from app.song.application.types import UnSet
@@ -17,4 +19,5 @@ class PatchSongUseCase:
         if not isinstance(artist, UnSet):
             song_entity.artist = artist
 
+        song_entity.updated_at = datetime.now(tz=timezone.utc)
         return self.song_repository.save(song=song_entity)

@@ -1,3 +1,4 @@
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 from ulid import ULID
 
@@ -20,9 +21,8 @@ class AlchemyLayoutRepository(LayoutRepository):
         return LayoutMapper.to_domain_entity(alchemy_entity)
 
     def get_by_id(self, id: ULID) -> Layout:
-        alchemy_entity: LayoutAlchemyEntity | None = (
-            self.db.query(LayoutAlchemyEntity).filter(LayoutAlchemyEntity.id == str(id)).first()
-        )
+        stmt: Select = select(LayoutAlchemyEntity).filter(LayoutAlchemyEntity.id == str(id))
+        alchemy_entity: LayoutAlchemyEntity | None = self.db.execute(stmt).scalar_one_or_none()
         if alchemy_entity is None:
             raise LayoutNotFound(f"Layout not found: {id}")
         return LayoutMapper.to_domain_entity(alchemy_entity)

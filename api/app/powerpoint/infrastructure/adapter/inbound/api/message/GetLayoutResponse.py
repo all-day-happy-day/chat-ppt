@@ -1,12 +1,14 @@
 from typing import Self
 
 from pydantic import BaseModel
+from ulid import ULID
 
 from app.powerpoint.domain.entity import Layout, Shape
 from app.powerpoint.domain.valueobject import ColorConfig, Size
 
 
 class GetLayoutResponse(BaseModel):
+    id: ULID
     name: str
     shapes: list[Shape]
     slide_size: Size
@@ -15,6 +17,7 @@ class GetLayoutResponse(BaseModel):
     @classmethod
     def from_domain_entity(cls, layout: Layout, slide_size: Size) -> Self:
         return cls(
+            id=layout.id,
             name=layout.name,
             shapes=layout.shapes,
             slide_size=slide_size,

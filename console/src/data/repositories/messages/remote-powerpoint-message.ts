@@ -1,0 +1,72 @@
+import type { Shape } from '@/domain/models/powerpoint'
+import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
+import type { ColorConfig, Size } from '@/domain/valueobjects/powerpoint'
+
+export interface BaseTemplateResponse {
+  templateId: string
+  userId: string
+  name: string
+  filename: string
+  layoutSize: Size
+  createdAt: string
+  updatedAt: string
+}
+
+export function toTemplateResponse(response: BaseTemplateResponse): TemplateResponse {
+  return {
+    templateId: response.templateId,
+    userId: response.userId,
+    name: response.name,
+    filename: response.filename ?? '',
+    layoutSize: response.layoutSize ?? { width: 1, height: 1 },
+    createdAt: new Date(response.createdAt),
+    updatedAt: new Date(response.updatedAt),
+  }
+}
+
+// ReadTemplates
+export type ReadTemplateRequest = {
+  file: File
+  userId: string
+  templateName: string
+}
+export type ReadTemplateResponse = BaseTemplateResponse
+
+// UpdateTemplates
+export type UpdateTemplateRequest = {
+  file: File
+  userId: string
+  templateId: string
+}
+export type UpdateTemplateResponse = BaseTemplateResponse
+
+// ChangeTemplateName — JSON body keys match FastAPI/Pydantic (snake_case).
+export type ChangeTemplateNameRequest = {
+  new_name: string
+}
+export type ChangeTemplateNameResponse = BaseTemplateResponse
+
+// DeleteTemplate
+export type DeleteTemplateResponse = void
+
+// ListTemplates
+export type ListTemplatesResponse = BaseTemplateResponse[]
+
+export type TemplatePageResponse = {
+  items: BaseTemplateResponse[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}
+
+// GET /powerpoint/template/layouts/{template_id} → list[GetLayoutResponse]
+export type LayoutWire = {
+  id: string
+  name: string
+  shapes: Shape[]
+  slideSize: Size
+  backgroundColor: ColorConfig
+}
+
+export type ListLayoutsResponse = LayoutWire[]
