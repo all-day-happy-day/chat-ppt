@@ -9,6 +9,5 @@ class CreateVariableUseCase:
         self.variable_repository: VariableRepository = variable_repository
 
     def __call__(self, project_id: ULID, name: str, value: str) -> Variable:
-        self.variable_repository.get_by_name(name=name, project_id=project_id)
         variable: Variable = Variable(project_id=project_id, name=name, value=value)
         return self.variable_repository.save(variable=variable)

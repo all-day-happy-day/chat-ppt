@@ -8,7 +8,7 @@ class VariableMapper:
     @staticmethod
     def to_alchemy_entity(variable: Variable) -> VariableAlchemyEntity:
         return VariableAlchemyEntity(
-            project_id=variable.project_id,
+            project_id=str(variable.project_id),
             name=variable.name,
             value=variable.value,
         )

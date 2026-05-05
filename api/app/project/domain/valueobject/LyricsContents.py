@@ -21,4 +21,4 @@ class LyricsContents(BaseModel):
     type: Literal[PartType.LYRICS] = Field(default=PartType.LYRICS)
     contents: list[LyricsContent]
     lyrics_placeholder_shape_id: int
-    title_placeholder_shape_id: int | None = None
+    title_placeholder_values: dict[int, str] | None = None

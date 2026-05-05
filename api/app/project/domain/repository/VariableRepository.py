@@ -11,6 +11,10 @@ class VariableRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def patch(self, variable: Variable) -> Variable:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_all(self, project_id: ULID) -> list[Variable]:
         raise NotImplementedError
 

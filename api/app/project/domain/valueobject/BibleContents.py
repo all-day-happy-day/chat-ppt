@@ -22,3 +22,6 @@ class BibleContentRange(BaseModel):
 class BibleContents(BaseModel):
     type: Literal[PartType.BIBLE] = Field(default=PartType.BIBLE)
     contents: list[BibleContentRange]
+    phrase_placeholder_id: int
+    phrase_range_placeholder_id: int | None
+    title_placeholder_values: dict[int, str] | None = None
