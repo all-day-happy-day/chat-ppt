@@ -222,7 +222,7 @@ export function useExportPPT() {
       workspace,
     }: {
       projectContainerId: string
-      requestBody: { savePath: string }
+      requestBody: { savePptFilename: string; projectId: string; userId: string }
       /** When set, the mutation rejects if any slide fails Bible/Lyrics export readiness. */
       workspace?: {
         readonly slides: readonly LocalSlideLike[]
@@ -230,7 +230,7 @@ export function useExportPPT() {
         /** Part ids with Bible editor validation/probe errors (incomplete export). */
         readonly bibleUiBlockedPartIds?: ReadonlySet<string> | undefined
       }
-    }): Promise<string> => {
+    }): Promise<{ downloadUrl?: string; path?: string; filename?: string; exportId?: string }> => {
       if (
         workspace !== undefined &&
         workspaceHasIncompletePartsForPptExport(

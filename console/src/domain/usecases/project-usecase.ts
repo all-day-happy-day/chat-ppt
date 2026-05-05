@@ -60,7 +60,10 @@ export class ProjectUseCase {
     return this.projectRepository.deleteProjectContainer(projectContainerId)
   }
 
-  async exportPPT(projectContainerId: string, requestBody: { savePath: string }): Promise<string> {
+  async exportPPT(
+    projectContainerId: string,
+    requestBody: { savePptFilename: string; projectId: string; userId: string }
+  ): Promise<{ downloadUrl?: string; path?: string; filename?: string; exportId?: string }> {
     return this.projectRepository.exportPPT(projectContainerId, requestBody)
   }
 

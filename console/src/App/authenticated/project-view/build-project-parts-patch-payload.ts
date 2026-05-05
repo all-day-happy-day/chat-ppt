@@ -64,8 +64,13 @@ function remapLyricsPartSequenceAfterLineDedupe(
 function lyricsContentsWithUniqueLineParts(lyricsContents: LyricsContents): LyricsContents {
   const blocks: LyricsContent[] = lyricsContents.contents ?? []
   return {
-    ...lyricsContents,
     type: 'LYRICS',
+    lyricsPlaceholderShapeId:
+      Number.isInteger(lyricsContents.lyricsPlaceholderShapeId) && lyricsContents.lyricsPlaceholderShapeId > 0
+        ? lyricsContents.lyricsPlaceholderShapeId
+        : 0,
+    titlePlaceholderShapeId: normalizeOptionalLyricsPlaceholderId(lyricsContents.titlePlaceholderShapeId),
+    includeTitleForFirstCard: lyricsContents.includeTitleForFirstCard,
     contents: blocks.map((block: LyricsContent): LyricsContent => {
       const { lines, oldIndexToNew } = uniqueLyricsLinesByPartWithIndexMap(block.lyrics ?? [])
       return {
@@ -106,12 +111,19 @@ function hydrateLyricsContentsRows(body: LyricsContents): LyricsContents {
   })
   const includeFirstCard: boolean = nextRows.length === 0 ? true : nextRows[0]!.includeTitleSlide !== false
   return {
-    ...body,
+    type: 'LYRICS',
     contents: nextRows,
     lyricsPlaceholderShapeId: body.lyricsPlaceholderShapeId ?? 0,
-    titlePlaceholderShapeId: body.titlePlaceholderShapeId ?? null,
+    titlePlaceholderShapeId: normalizeOptionalLyricsPlaceholderId(body.titlePlaceholderShapeId),
     includeTitleForFirstCard: includeFirstCard,
   }
+}
+
+function normalizeOptionalLyricsPlaceholderId(raw: number | null | undefined): number | null {
+  if (!Number.isInteger(raw) || raw === null || raw <= 0) {
+    return null
+  }
+  return raw
 }
 
 /** Resolves `contents` from API payloads or legacy client state that used `content`. */

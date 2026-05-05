@@ -101,9 +101,16 @@ export type DeleteProjectContainerResponse = void
 
 // ExportPPT
 export type ExportPPTRequest = {
-  savePath: string
+  savePptFilename: string
+  projectId: string
+  userId: string
 }
-export type ExportPPTResponse = string
+export type ExportPPTResponse = {
+  downloadUrl?: string
+  path?: string
+  filename?: string
+  exportId?: string
+}
 
 // Project variables (`/project/{project_id}/variables`)
 export type GetVariablesResponse = BaseVariableResponse[]

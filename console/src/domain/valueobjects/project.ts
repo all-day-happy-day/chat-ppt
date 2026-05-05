@@ -11,7 +11,7 @@ export interface BibleContent {
 
 export interface BibleContentRange {
   type: 'phrase' | 'title'
-  start: BibleContent
+  start: BibleContent | null
   end: BibleContent | null
 }
 
@@ -43,8 +43,8 @@ export interface LyricsContents {
   contents: LyricsContent[]
   /** Lyrics slide: placeholder `shapeId` (int) that receives lyrics text. */
   lyricsPlaceholderShapeId: number
-  /** Title slide: placeholder `shapeId` (int) that receives title text. */
-  titlePlaceholderShapeId?: number | null
+  /** Title slide: placeholder `shapeId` (int), nullable when no title slot is used. */
+  titlePlaceholderShapeId: number | null
   /** @deprecated Synced from the first song's `includeTitleSlide` for older consumers. */
   includeTitleForFirstCard?: boolean
 }

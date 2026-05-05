@@ -37,7 +37,6 @@ export interface ProjectBibleEditorProps {
 
 interface BibleTitleEditorRow {
   readonly rowType: 'title'
-  readonly titleStart: BibleContent
 }
 
 interface BiblePhraseEditorRow {
@@ -123,19 +122,21 @@ function rangesToRows(contents: readonly BibleContentRange[] | undefined): Bible
   if (list.length === 0) {
     return []
   }
-  return list.map(
-    (r: BibleContentRange): BibleEditorRow =>
-      r.type === 'title'
-        ? { rowType: 'title', titleStart: { ...r.start } }
-        : {
-            rowType: 'phrase',
-            version: r.start.version,
-            book: r.start.book,
-            chapterInput: String(r.start.chapter),
-            verseInput:
-              r.start.verse === 0 ? '' : formatVerseInput(r.start, r.end),
-          }
-  )
+  return list.map((r: BibleContentRange): BibleEditorRow => {
+    if (r.type === 'title') {
+      return { rowType: 'title' }
+    }
+    if (r.start === null) {
+      return emptyPhraseRow()
+    }
+    return {
+      rowType: 'phrase',
+      version: r.start.version,
+      book: r.start.book,
+      chapterInput: String(r.start.chapter),
+      verseInput: r.start.verse === 0 ? '' : formatVerseInput(r.start, r.end),
+    }
+  })
 }
 
 /**
@@ -274,7 +275,7 @@ function rowsToRangesForCommit(rows: readonly BibleEditorRow[]): BibleContentRan
   const out: BibleContentRange[] = []
   for (const row of rows) {
     if (row.rowType === 'title') {
-      out.push({ type: 'title', start: { ...row.titleStart }, end: null })
+      out.push({ type: 'title', start: null, end: null })
       continue
     }
     const built: BibleContentRange | null = phraseRowToRange(row)
@@ -290,49 +291,6 @@ function rowsToRangesForCommit(rows: readonly BibleEditorRow[]): BibleContentRan
     out.push(phraseRowToPersistedDraft(row))
   }
   return out
-}
-
-function resolveTitleAnchor(rows: readonly BibleEditorRow[], afterIndex: number): BibleContent {
-  for (let j: number = afterIndex + 1; j < rows.length; j++) {
-    const row: BibleEditorRow | undefined = rows[j]
-    if (row !== undefined && row.rowType === 'phrase') {
-      const g: BibleContentRange | null = phraseRowToRange(row)
-      if (g !== null) {
-        return { ...g.start }
-      }
-      const v: AvailableBibleVersion | null = normalizeVersionInput(row.version)
-      const ch: number = Number.parseInt(row.chapterInput.trim(), 10)
-      return {
-        version: v ?? AvailableBibleVersionsTypes.NIV,
-        book: row.book.trim().length > 0 ? row.book.trim() : '',
-        chapter: Number.isInteger(ch) && ch > 0 ? ch : 1,
-        verse: 1,
-      }
-    }
-  }
-  for (let j: number = afterIndex; j >= 0; j--) {
-    const row: BibleEditorRow | undefined = rows[j]
-    if (row !== undefined && row.rowType === 'phrase') {
-      const g: BibleContentRange | null = phraseRowToRange(row)
-      if (g !== null) {
-        return { ...g.start }
-      }
-      const v: AvailableBibleVersion | null = normalizeVersionInput(row.version)
-      const ch: number = Number.parseInt(row.chapterInput.trim(), 10)
-      return {
-        version: v ?? AvailableBibleVersionsTypes.NIV,
-        book: row.book.trim().length > 0 ? row.book.trim() : '',
-        chapter: Number.isInteger(ch) && ch > 0 ? ch : 1,
-        verse: 1,
-      }
-    }
-  }
-  return {
-    version: AvailableBibleVersionsTypes.NIV,
-    book: '',
-    chapter: 1,
-    verse: 1,
-  }
 }
 
 interface BibleComboboxFieldProps {
@@ -1040,8 +998,7 @@ export function ProjectBibleEditor({
         return
       }
       const prev: BibleEditorRow[] = rowsRef.current
-      const anchor: BibleContent = resolveTitleAnchor(prev, afterIndex)
-      const titleRow: BibleTitleEditorRow = { rowType: 'title', titleStart: { ...anchor } }
+      const titleRow: BibleTitleEditorRow = { rowType: 'title' }
       const next: BibleEditorRow[] = [
         ...prev.slice(0, afterIndex + 1),
         titleRow,

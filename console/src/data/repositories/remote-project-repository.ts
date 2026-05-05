@@ -42,6 +42,85 @@ const projectVariablesBasePath = (projectId: string): string => `/project/${proj
 const projectVariablePath = (projectId: string, variableName: string): string =>
   `${projectVariablesBasePath(projectId)}/${encodeURIComponent(variableName)}`
 
+function normalizeOptionalShapeId(raw: number | null | undefined): number | null {
+  if (raw === null || raw === undefined || !Number.isInteger(raw) || raw <= 0) {
+    return null
+  }
+  return raw
+}
+
+function sanitizePartRequestBody(part: PartRequestBody): PartRequestBody {
+  switch (part.type) {
+    case 'LYRICS':
+      return {
+        id: part.id,
+        order: part.order,
+        type: 'LYRICS',
+        lyricsLayoutId: part.lyricsLayoutId ?? null,
+        titleLayoutId: part.titleLayoutId ?? null,
+        contents: {
+          type: 'LYRICS',
+          contents: part.contents.contents ?? [],
+          lyricsPlaceholderShapeId:
+            Number.isInteger(part.contents.lyricsPlaceholderShapeId) && part.contents.lyricsPlaceholderShapeId > 0
+              ? part.contents.lyricsPlaceholderShapeId
+              : 0,
+          titlePlaceholderShapeId: normalizeOptionalShapeId(part.contents.titlePlaceholderShapeId),
+          includeTitleForFirstCard: part.contents.includeTitleForFirstCard,
+        },
+      }
+    case 'BIBLE':
+      return {
+        id: part.id,
+        order: part.order,
+        type: 'BIBLE',
+        phraseLayoutId: part.phraseLayoutId ?? null,
+        titleLayoutId: part.titleLayoutId ?? null,
+        contents: {
+          type: 'BIBLE',
+          contents: part.contents.contents ?? [],
+          phrasePlaceholderId:
+            Number.isInteger(part.contents.phrasePlaceholderId) && part.contents.phrasePlaceholderId > 0
+              ? part.contents.phrasePlaceholderId
+              : 0,
+          phraseRangePlaceholderId:
+            part.contents.phraseRangePlaceholderId !== undefined &&
+            Number.isInteger(part.contents.phraseRangePlaceholderId) &&
+            part.contents.phraseRangePlaceholderId > 0
+              ? part.contents.phraseRangePlaceholderId
+              : null,
+          titlePlaceholderValues: part.contents.titlePlaceholderValues ?? {},
+        },
+      }
+    case 'VALUE':
+      return {
+        id: part.id,
+        order: part.order,
+        type: 'VALUE',
+        layoutId: part.layoutId ?? null,
+        contents: {
+          type: 'VALUE',
+          contents: part.contents.contents ?? [],
+        },
+      }
+    case 'PLAIN':
+      return {
+        id: part.id,
+        order: part.order,
+        type: 'PLAIN',
+        layoutId: part.layoutId ?? null,
+        contents: { type: 'PLAIN' },
+      }
+  }
+}
+
+function sanitizeParts(parts: PartRequestBody[] | null): PartRequestBody[] | null {
+  if (parts === null) {
+    return null
+  }
+  return parts.map((part: PartRequestBody): PartRequestBody => sanitizePartRequestBody(part))
+}
+
 export class RemoteProjectRepository implements ProjectRepository {
   async getProjects(userId: string): Promise<Project[]> {
     const { response } = await httpClient.get<GetProjectsResponse>(`/project/${userId}`)
@@ -83,9 +162,13 @@ export class RemoteProjectRepository implements ProjectRepository {
     projectId: string,
     requestBody: { name: string | null; templateId: string | null; parts: PartRequestBody[] | null }
   ): Promise<Project> {
+    const payload: PatchProjectRequest = {
+      ...requestBody,
+      parts: sanitizeParts(requestBody.parts),
+    }
     const { response } = await httpClient.patch<PatchProjectRequest, PatchProjectResponse>(
       `/project/${projectId}`,
-      requestBody
+      payload
     )
     return toProject(response)
   }
@@ -115,9 +198,13 @@ export class RemoteProjectRepository implements ProjectRepository {
     projectContainerId: string,
     requestBody: { containerName: string | null; completed: boolean | null; parts: PartRequestBody[] | null }
   ): Promise<ProjectContainer> {
+    const payload: PatchProjectContainerRequest = {
+      ...requestBody,
+      parts: sanitizeParts(requestBody.parts),
+    }
     const { response } = await httpClient.patch<PatchProjectContainerRequest, PatchProjectContainerResponse>(
       `/project/container/${projectContainerId}`,
-      requestBody
+      payload
     )
     return toProjectContainer(response)
   }
@@ -126,7 +213,10 @@ export class RemoteProjectRepository implements ProjectRepository {
     await httpClient.delete<DeleteProjectContainerResponse>(`/project/container/${projectContainerId}`)
   }
 
-  async exportPPT(projectContainerId: string, requestBody: { savePath: string }): Promise<string> {
+  async exportPPT(
+    projectContainerId: string,
+    requestBody: { savePptFilename: string; projectId: string; userId: string }
+  ): Promise<{ downloadUrl?: string; path?: string; filename?: string; exportId?: string }> {
     const { response } = await httpClient.post<ExportPPTRequest, ExportPPTResponse>(
       `/project/container/${projectContainerId}/export`,
       requestBody

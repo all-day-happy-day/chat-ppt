@@ -22,7 +22,10 @@ export abstract class ProjectRepository {
     requestBody: { containerName: string | null; completed: boolean | null; parts: PartRequestBody[] | null }
   ): Promise<ProjectContainer>
   abstract deleteProjectContainer(projectContainerId: string): Promise<void>
-  abstract exportPPT(projectContainerId: string, requestBody: { savePath: string }): Promise<string>
+  abstract exportPPT(
+    projectContainerId: string,
+    requestBody: { savePptFilename: string; projectId: string; userId: string }
+  ): Promise<{ downloadUrl?: string; path?: string; filename?: string; exportId?: string }>
   abstract getProjectVariables(projectId: string): Promise<ProjectVariable[]>
   abstract getProjectVariable(projectId: string, name: string): Promise<ProjectVariable>
   abstract createProjectVariable(

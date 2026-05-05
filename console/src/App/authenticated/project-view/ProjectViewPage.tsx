@@ -8,13 +8,16 @@ import { toast } from 'sonner'
 
 import { useGetCurrentUser } from '@/api/query/auth.query'
 import { QUERY_KEY } from '@/api/query/key'
+import { API_BASE_URL } from '@/api/client'
 import { useListLayouts, useListTemplates } from '@/api/query/powerpoint.query'
 import {
   useCreateProjectContainer,
+  useExportPPT,
   useGetProjectContainers,
   useGetProjects,
   usePatchProject,
   usePatchProjectContainer,
+  WorkspaceExportIncompleteError,
 } from '@/api/query/project.query'
 import { TemplateLayoutSlide } from '@/App/authenticated/template/components/TemplateLayoutSlide'
 import { Button } from '@/components/ui/button/Button'
@@ -178,13 +181,17 @@ function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | un
     return {
       ...serverPart,
       contents: {
-        ...serverContents,
+        type: 'LYRICS',
         lyricsPlaceholderShapeId:
           serverContents.lyricsPlaceholderShapeId > 0
             ? serverContents.lyricsPlaceholderShapeId
             : localContents.lyricsPlaceholderShapeId,
         titlePlaceholderShapeId:
-          serverContents.titlePlaceholderShapeId ?? localContents.titlePlaceholderShapeId,
+          serverContents.titlePlaceholderShapeId > 0
+            ? serverContents.titlePlaceholderShapeId
+            : (localContents.titlePlaceholderShapeId ?? null),
+        includeTitleForFirstCard:
+          serverContents.includeTitleForFirstCard ?? localContents.includeTitleForFirstCard ?? true,
         contents: serverContents.contents.map((serverRow: LyricsContent, index: number): LyricsContent => {
           const localRow: LyricsContent | undefined = localContents.contents[index]
           if (localRow === undefined) {
@@ -525,6 +532,126 @@ function ContainerNameDialog({
             {confirmLabel}
           </Button>
         </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+type ExportPptDialogStage = 'name_input' | 'generating' | 'done'
+
+interface ExportPptDialogProps {
+  readonly open: boolean
+  readonly stage: ExportPptDialogStage
+  readonly filename: string
+  readonly onFilenameChange: (value: string) => void
+  readonly onCancel: () => void
+  readonly onGenerate: () => void
+  readonly onDownload: () => void
+  readonly downloadReady: boolean
+}
+
+function ExportPptDialog({
+  open,
+  stage,
+  filename,
+  onFilenameChange,
+  onCancel,
+  onGenerate,
+  onDownload,
+  downloadReady,
+}: ExportPptDialogProps): ReactElement | null {
+  const { t } = useTranslation()
+
+  React.useEffect((): void | (() => void) => {
+    if (!open) {
+      return
+    }
+    const onKeyDown = (e: globalThis.KeyboardEvent): void => {
+      if (e.key === 'Escape' && stage !== 'generating') {
+        onCancel()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return (): void => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open, onCancel, stage])
+
+  if (!open) {
+    return null
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4" role="presentation">
+      <div
+        className="absolute inset-0 bg-black/50"
+        role="presentation"
+        onClick={(): void => {
+          if (stage === 'generating') {
+            return
+          }
+          onCancel()
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-ppt-dialog-title"
+        className={cn(
+          'border-border bg-popover text-popover-foreground relative z-10 w-full max-w-md rounded-lg border p-6 shadow-lg'
+        )}
+        onClick={(e: React.MouseEvent<HTMLDivElement>): void => {
+          e.stopPropagation()
+        }}
+      >
+        <h2 id="export-ppt-dialog-title" className="text-foreground text-lg font-semibold">
+          {t('page.project_view.save_file')}
+        </h2>
+        {stage === 'name_input' ? (
+          <>
+            <label className="mt-4 block text-left">
+              <span className="text-muted-foreground text-xs font-medium">
+                {t('page.project_view.export_filename_label')}
+              </span>
+              <input
+                type="text"
+                autoComplete="off"
+                value={filename}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                  onFilenameChange(e.target.value)
+                }}
+                placeholder={t('page.project_view.export_filename_placeholder')}
+                className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/50 mt-1 w-full rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
+              />
+            </label>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                {t('common.global.cancel')}
+              </Button>
+              <Button type="button" onClick={onGenerate}>
+                {t('page.project_view.export_generate')}
+              </Button>
+            </div>
+          </>
+        ) : stage === 'generating' ? (
+          <div className="mt-5 flex items-center gap-3">
+            <Spinner className="text-foreground" width={20} height={20} />
+            <p className="text-foreground text-sm">{t('page.project_view.export_generating_message')}</p>
+          </div>
+        ) : (
+          <div className="mt-5 flex flex-col gap-3">
+            <p className="text-foreground text-sm">{t('page.project_view.export_ready_message')}</p>
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                {t('page.project_view.export_close')}
+              </Button>
+              <Button type="button" onClick={onDownload} disabled={!downloadReady}>
+                {t('page.project_view.export_download')}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body
@@ -1918,12 +2045,97 @@ export function ProjectContainerViewPage(): ReactElement | null {
   const userId: string = currentUser?.id ?? ''
   const projectsQuery = useGetProjects(userId)
   const containersQuery = useGetProjectContainers(projectId)
+  const exportPptMutation = useExportPPT()
+  const patchProjectContainer = usePatchProjectContainer()
   const [workspaceExportIncomplete, setWorkspaceExportIncomplete] = React.useState<boolean>(true)
+  const [exportDialogOpen, setExportDialogOpen] = React.useState<boolean>(false)
+  const [exportDialogStage, setExportDialogStage] = React.useState<ExportPptDialogStage>('name_input')
+  const [exportFilename, setExportFilename] = React.useState<string>('')
+  const [exportDownloadUrl, setExportDownloadUrl] = React.useState<string | null>(null)
 
   const project: Project | undefined = projectsQuery.data?.find((p: Project): boolean => p.id === projectId)
   const container: ProjectContainer | undefined = containersQuery.data?.find(
     (c: ProjectContainer): boolean => c.id === containerId
   )
+
+  const openExportDialog = React.useCallback((): void => {
+    if (project === undefined || container === undefined) {
+      return
+    }
+    const suggested: string = `${project.name}-${container.containerName}`.trim()
+    setExportFilename(suggested.length > 0 ? suggested : 'chat-ppt-export')
+    setExportDownloadUrl(null)
+    setExportDialogStage('name_input')
+    setExportDialogOpen(true)
+  }, [container, project])
+
+  const handleExportGenerate = React.useCallback(async (): Promise<void> => {
+    if (project === undefined || container === undefined) {
+      return
+    }
+    const trimmedFilename: string = exportFilename.trim()
+    if (trimmedFilename.length === 0) {
+      toast.error(t('page.project_view.export_filename_required'))
+      return
+    }
+    if (projectWorkspaceRef.current?.isExportIncomplete() === true) {
+      toast.error(t('page.project_view.save_file_disabled_incomplete'))
+      return
+    }
+    setExportDialogStage('generating')
+    setExportDownloadUrl(null)
+    try {
+      await projectWorkspaceRef.current?.persistPendingWorkspace()
+      const result = await exportPptMutation.mutateAsync({
+        projectContainerId: container.id,
+        requestBody: {
+          savePptFilename: trimmedFilename,
+          projectId: project.id,
+          userId,
+        },
+      })
+      await patchProjectContainer.mutateAsync({
+        projectContainerId: container.id,
+        requestBody: { containerName: null, completed: true, parts: null },
+      })
+      const maybeDownloadUrl: string = (result.downloadUrl ?? result.path ?? '').trim()
+      if (maybeDownloadUrl.length === 0) {
+        throw new Error('Export completed but download URL is missing.')
+      }
+      setExportDownloadUrl(maybeDownloadUrl)
+      setExportDialogStage('done')
+    } catch (error: unknown) {
+      setExportDialogStage('name_input')
+      if (error instanceof WorkspaceExportIncompleteError) {
+        toast.error(t('page.project_view.save_file_disabled_incomplete'))
+        return
+      }
+      const detail: string = error instanceof Error ? error.message : ''
+      toast.error(
+        detail.length > 0 ? `${t('page.project_view.export_failed')} (${detail})` : t('page.project_view.export_failed')
+      )
+    }
+  }, [container, exportFilename, exportPptMutation, patchProjectContainer, project, t, userId])
+
+  const handleExportDownload = React.useCallback((): void => {
+    if (exportDownloadUrl === null || exportDownloadUrl.trim().length === 0) {
+      return
+    }
+    const rawDownloadPath: string = exportDownloadUrl.trim()
+    const normalizedPath: string = rawDownloadPath.startsWith('/pptx/download/')
+      ? rawDownloadPath.replace('/pptx/download/', '/project/container/export/download/')
+      : rawDownloadPath
+    const href: string = normalizedPath.startsWith('http')
+      ? normalizedPath
+      : `${API_BASE_URL}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`
+    const anchor: HTMLAnchorElement = document.createElement('a')
+    anchor.href = href
+    anchor.rel = 'noopener noreferrer'
+    anchor.download = ''
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+  }, [exportDownloadUrl])
 
   if (projectId.length === 0 || containerId.length === 0) {
     return <div className="text-muted-foreground text-center text-sm">{t('page.project_view.missing_id')}</div>
@@ -1973,10 +2185,10 @@ export function ProjectContainerViewPage(): ReactElement | null {
               variant="secondary"
               size="sm"
               className="min-w-28 shrink-0 justify-center gap-1 text-xs"
-              disabled={workspaceExportIncomplete}
+              disabled={workspaceExportIncomplete || exportPptMutation.isPending}
               title={workspaceExportIncomplete ? t('page.project_view.save_file_disabled_incomplete') : undefined}
               onClick={(): void => {
-                /* TODO: export / save file pipeline */
+                openExportDialog()
               }}
             >
               {t('page.project_view.save_file')}
@@ -2002,6 +2214,23 @@ export function ProjectContainerViewPage(): ReactElement | null {
             </ProjectVariablesScopeProvider>
           </div>
         )}
+        <ExportPptDialog
+          open={exportDialogOpen}
+          stage={exportDialogStage}
+          filename={exportFilename}
+          onFilenameChange={setExportFilename}
+          onCancel={(): void => {
+            if (exportDialogStage === 'generating') {
+              return
+            }
+            setExportDialogOpen(false)
+          }}
+          onGenerate={(): void => {
+            void handleExportGenerate()
+          }}
+          onDownload={handleExportDownload}
+          downloadReady={exportDownloadUrl !== null && exportDownloadUrl.trim().length > 0}
+        />
       </div>
     </div>
   )
