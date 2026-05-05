@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.bible.domain.repository import BibleRepository
 from app.bible.infrastructure.repository import AlchemyBibleRepository
-from app.powerpoint.domain.repository import TemplateFileRepository, TemplateRepository
+from app.powerpoint.domain.repository import LayoutRepository, TemplateFileRepository, TemplateRepository
+from app.powerpoint.infrastructure.repository.layout import AlchemyLayoutRepository
 from app.powerpoint.infrastructure.repository.template import AlchemyTemplateRepository
 from app.powerpoint.infrastructure.repository.template_file import AlchemyTemplateFileRepository
 from app.project.domain.repository import ProjectContainerRepository, ProjectRepository, VariableRepository
@@ -56,6 +57,10 @@ def get_template_file_repository(db: Session = Depends(get_db)) -> TemplateFileR
 
 def get_template_repository(db: Session = Depends(get_db)) -> TemplateRepository:
     return AlchemyTemplateRepository(db)
+
+
+def get_layout_repository(db: Session = Depends(get_db)) -> LayoutRepository:
+    return AlchemyLayoutRepository(db)
 
 
 # Project

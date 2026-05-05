@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi.responses import FileResponse
 from ulid import ULID
 
 from app.di.application.usecase import (
@@ -23,6 +24,7 @@ from app.di.application.usecase import (
     get_patch_project_use_case,
     get_patch_variable_use_case,
 )
+from app.di.infrastructure.registry import get_export_registry
 from app.project.application.command import PatchProjectCommand, PatchProjectContainerCommand
 from app.project.application.usecase import (
     CreateProjectContainerUseCase,
@@ -71,6 +73,7 @@ from app.project.infrastructure.adapter.inbound.api.message import (
     PatchVariableRequest,
     PatchVariableResponse,
 )
+from app.project.infrastructure.repository.ppt_file.inmemory_registry import ExportRecord, ExportRegistry
 from app.shared.page import Page, PagingOptions
 
 router: APIRouter = APIRouter(tags=["Project"])
@@ -217,22 +220,64 @@ def get_paged_project_containers(
 
 
 @router.post(
-    "/container/export/{project_container_id}", status_code=status.HTTP_200_OK, response_model=ExportPPTResponse
+    "/container/{project_container_id}/export", status_code=status.HTTP_200_OK, response_model=ExportPPTResponse
 )
 def export_ppt(
     project_container_id: ULID,
     request_model: ExportPPTRequest,
+    export_registry: Annotated[ExportRegistry, Depends(get_export_registry)],
     usecase: Annotated[ExportPPTUseCase, Depends(get_export_ppt_use_case)],
 ):
     try:
-        path: Path = usecase(project_container_id=project_container_id, save_path=request_model.save_path)
-        return ExportPPTResponse(path=path)
+        path: Path = usecase(
+            project_container_id=project_container_id,
+            save_ppt_filename=request_model.save_ppt_filename,
+            project_id=request_model.project_id,
+            user_id=request_model.user_id,
+        )
+        export_record: ExportRecord = export_registry.put(
+            file_path=path,
+            filename=request_model.save_ppt_filename,
+            user_id=request_model.user_id,
+            project_id=request_model.project_id,
+        )
+
+        return ExportPPTResponse(
+            export_id=export_record.export_id,
+            download_url=f"/project/container/export/download/{export_record.export_id}",
+            filename=export_record.filename,
+            expires_at=export_record.expires_at,
+        )
     except ProjectNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ProjectContainerNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ProjectContainerNotCompleted as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/container/export/download/{export_id}", status_code=status.HTTP_200_OK)
+def download_ppt(
+    export_id: str,
+    background_task: BackgroundTasks,
+    export_registry: Annotated[ExportRegistry, Depends(get_export_registry)],
+):
+    record: ExportRecord | None = export_registry.pop_valid(export_id=export_id)
+    if record is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Export record {export_id} not found")
+    if not record.file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Export file {record.file_path} not found")
+
+    def delete_export_file(path: Path) -> None:
+        path.unlink(missing_ok=True)
+
+    background_task.add_task(delete_export_file, record.file_path)
+
+    return FileResponse(
+        path=record.file_path,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        filename=record.filename,
+    )
 
 
 @router.get("/{project_id}/variables", status_code=status.HTTP_200_OK, response_model=list[GetVariableResponse])

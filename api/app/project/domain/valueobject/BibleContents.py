@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.project.domain.enum import PartType
 from app.shared.bible.domain.enum import AvailableBibleVersions
@@ -15,8 +15,16 @@ class BibleContent(BaseModel):
 
 class BibleContentRange(BaseModel):
     type: Literal["phrase", "title"]
-    start: BibleContent
+    start: BibleContent | None = None
     end: BibleContent | None = None
+
+    @model_validator(mode="after")
+    def validate_start(self) -> Self:
+        if self.type == "phrase" and self.start is None:
+            raise ValueError("Start is required")
+        elif self.type == "title" and self.start is not None:
+            raise ValueError("Start is not allowed for title")
+        return self
 
 
 class BibleContents(BaseModel):

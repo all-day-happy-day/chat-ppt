@@ -1,7 +1,10 @@
-from pathlib import Path
+from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class ExportPPTResponse(BaseModel):
-    path: Path
+    export_id: str
+    download_url: str
+    filename: str
+    expires_at: datetime
