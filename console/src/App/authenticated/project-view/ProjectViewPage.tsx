@@ -187,7 +187,7 @@ function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | un
             ? serverContents.lyricsPlaceholderShapeId
             : localContents.lyricsPlaceholderShapeId,
         titlePlaceholderShapeId:
-          serverContents.titlePlaceholderShapeId > 0
+          serverContents.titlePlaceholderShapeId !== null && serverContents.titlePlaceholderShapeId > 0
             ? serverContents.titlePlaceholderShapeId
             : (localContents.titlePlaceholderShapeId ?? null),
         includeTitleForFirstCard:
@@ -2052,6 +2052,7 @@ export function ProjectContainerViewPage(): ReactElement | null {
   const [exportDialogStage, setExportDialogStage] = React.useState<ExportPptDialogStage>('name_input')
   const [exportFilename, setExportFilename] = React.useState<string>('')
   const [exportDownloadUrl, setExportDownloadUrl] = React.useState<string | null>(null)
+  const [exportDownloadFilename, setExportDownloadFilename] = React.useState<string | null>(null)
 
   const project: Project | undefined = projectsQuery.data?.find((p: Project): boolean => p.id === projectId)
   const container: ProjectContainer | undefined = containersQuery.data?.find(
@@ -2065,6 +2066,7 @@ export function ProjectContainerViewPage(): ReactElement | null {
     const suggested: string = `${project.name}-${container.containerName}`.trim()
     setExportFilename(suggested.length > 0 ? suggested : 'chat-ppt-export')
     setExportDownloadUrl(null)
+    setExportDownloadFilename(null)
     setExportDialogStage('name_input')
     setExportDialogOpen(true)
   }, [container, project])
@@ -2084,6 +2086,7 @@ export function ProjectContainerViewPage(): ReactElement | null {
     }
     setExportDialogStage('generating')
     setExportDownloadUrl(null)
+    setExportDownloadFilename(null)
     try {
       await projectWorkspaceRef.current?.persistPendingWorkspace()
       const result = await exportPptMutation.mutateAsync({
@@ -2103,6 +2106,7 @@ export function ProjectContainerViewPage(): ReactElement | null {
         throw new Error('Export completed but download URL is missing.')
       }
       setExportDownloadUrl(maybeDownloadUrl)
+      setExportDownloadFilename((result.filename ?? trimmedFilename).trim())
       setExportDialogStage('done')
     } catch (error: unknown) {
       setExportDialogStage('name_input')
@@ -2118,24 +2122,55 @@ export function ProjectContainerViewPage(): ReactElement | null {
   }, [container, exportFilename, exportPptMutation, patchProjectContainer, project, t, userId])
 
   const handleExportDownload = React.useCallback((): void => {
-    if (exportDownloadUrl === null || exportDownloadUrl.trim().length === 0) {
-      return
-    }
-    const rawDownloadPath: string = exportDownloadUrl.trim()
-    const normalizedPath: string = rawDownloadPath.startsWith('/pptx/download/')
-      ? rawDownloadPath.replace('/pptx/download/', '/project/container/export/download/')
-      : rawDownloadPath
-    const href: string = normalizedPath.startsWith('http')
-      ? normalizedPath
-      : `${API_BASE_URL}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`
-    const anchor: HTMLAnchorElement = document.createElement('a')
-    anchor.href = href
-    anchor.rel = 'noopener noreferrer'
-    anchor.download = ''
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-  }, [exportDownloadUrl])
+    void (async (): Promise<void> => {
+      if (exportDownloadUrl === null || exportDownloadUrl.trim().length === 0) {
+        return
+      }
+      const ensurePptxSuffix = (raw: string): string => {
+        const trimmed: string = raw.trim()
+        if (trimmed.length === 0) {
+          return 'chat-ppt-export.pptx'
+        }
+        return trimmed.toLowerCase().endsWith('.pptx') ? trimmed : `${trimmed}.pptx`
+      }
+      const rawDownloadPath: string = exportDownloadUrl.trim()
+      const normalizedPath: string = rawDownloadPath.startsWith('/pptx/download/')
+        ? rawDownloadPath.replace('/pptx/download/', '/project/container/export/download/')
+        : rawDownloadPath
+      const fallbackFilename: string = exportDownloadFilename ?? exportFilename
+      const downloadFilename: string = ensurePptxSuffix(fallbackFilename)
+      const href: string = normalizedPath.startsWith('http')
+        ? normalizedPath
+        : `${API_BASE_URL}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`
+
+      try {
+        const response: Response = await fetch(href, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to download file: ${response.status} ${response.statusText}`)
+        }
+        const blob: Blob = await response.blob()
+        const objectUrl: string = window.URL.createObjectURL(blob)
+        const anchor: HTMLAnchorElement = document.createElement('a')
+        anchor.href = objectUrl
+        anchor.download = downloadFilename
+        anchor.rel = 'noopener noreferrer'
+        document.body.appendChild(anchor)
+        anchor.click()
+        document.body.removeChild(anchor)
+        window.URL.revokeObjectURL(objectUrl)
+        setExportDialogOpen(false)
+      } catch (error: unknown) {
+        const detail: string = error instanceof Error ? error.message : ''
+        toast.error(
+          detail.length > 0 ? `${t('page.project_view.export_failed')} (${detail})` : t('page.project_view.export_failed')
+        )
+      }
+    })()
+  }, [exportDownloadFilename, exportDownloadUrl, exportFilename, t])
 
   if (projectId.length === 0 || containerId.length === 0) {
     return <div className="text-muted-foreground text-center text-sm">{t('page.project_view.missing_id')}</div>

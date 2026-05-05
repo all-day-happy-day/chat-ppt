@@ -114,7 +114,7 @@ class PPTXTemplateReadService(TemplateReadService):
             raise ValueError(f"Invalid shape type: {type(shape)}")
         return shape_list
 
-    def _get_layout(self, slide_layout: SlideLayout, template_id: ULID) -> Layout:
+    def _get_layout(self, ppt: Presentation, slide_layout: SlideLayout, template_id: ULID) -> Layout:
         layout_id: ULID = ULID()
         shape_list: list[Shape] = []
         self.theme_color = _ThemeColor.from_slide_layout(slide_layout=slide_layout)
@@ -140,7 +140,8 @@ class PPTXTemplateReadService(TemplateReadService):
         template_id = template.id if template is not None else ULID()
         slide_layouts: list[SlideLayout] = self._get_template_slide_layouts(ppt=ppt)
         layouts: list[Layout] = [
-            self._get_layout(slide_layout=slide_layout, template_id=template_id) for slide_layout in slide_layouts
+            self._get_layout(ppt=ppt, slide_layout=slide_layout, template_id=template_id)
+            for slide_layout in slide_layouts
         ]
         now: datetime = datetime.now(tz=timezone.utc)
         if template is not None:

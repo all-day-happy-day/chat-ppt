@@ -50,12 +50,14 @@ class PPTXPresentationService(PresentationService):
         slide: Slide = ppt.slides.add_slide(layouts_dict[layout_entity.name])
 
         # ppt_placeholders: SlidePlaceholders = slide.placeholders
-        ppt_placeholders: list[BaseShape] = [
+        placeholders: list[BaseShape] = [
             ppt_shape for ppt_shape in slide.slide_layout.shapes if ppt_shape.is_placeholder
         ]
-        for ppt_placeholder in ppt_placeholders:
-            if ppt_placeholder.shape_id in placeholder_content_dict:
-                cast(AutoShape, ppt_placeholder).text = placeholder_content_dict[ppt_placeholder.shape_id]
+        ppt_placeholders: list[BaseShape] = [shape for shape in slide.placeholders]
+
+        for ph, ppt_ph in zip(placeholders, ppt_placeholders):
+            if ph.shape_id in placeholder_content_dict:
+                cast(AutoShape, ppt_ph).text = placeholder_content_dict[ph.shape_id]
 
     def _write_lyrics(self, ppt: Presentation, layouts_dict: dict[str, SlideLayout], part: LyricsPart) -> None:
         if part.lyrics_layout_id is None:
@@ -83,7 +85,11 @@ class PPTXPresentationService(PresentationService):
 
             # write lyrics
             for song_part_idx in content.lyrics_part_sequence:
-                lyrics_text: str = content.lyrics[song_part_idx].lyrics
+                lyrics_text: str
+                if song_part_idx == -1:
+                    lyrics_text = ""
+                else:
+                    lyrics_text = content.lyrics[song_part_idx].lyrics
                 lyrics_lines: list[str] = lyrics_text.split("\n")
                 for lyrics_line_idx in range(0, len(lyrics_lines), self.LYRICS_LINES_PER_SLIDE):
                     lyrics_lines_slice: list[str] = lyrics_lines[
@@ -128,11 +134,16 @@ class PPTXPresentationService(PresentationService):
                         version=version, book=book, chapter=chapter, verse=verse
                     )
                     # TODO: Slide overflow check and fallback
+                    placeholder_content_dict: dict[int, str] = {part.contents.phrase_placeholder_id: phrase.phrase}
+                    if part.contents.phrase_range_placeholder_id is not None:
+                        placeholder_content_dict[part.contents.phrase_range_placeholder_id] = (
+                            f"{book} {chapter}:{verse}"
+                        )
                     self._write_value(
                         ppt=ppt,
                         layouts_dict=layouts_dict,
                         layout_id=phrase_layout_entity.id,
-                        placeholder_content_dict={part.contents.phrase_placeholder_id: phrase.phrase},
+                        placeholder_content_dict=placeholder_content_dict,
                     )
             elif phrase_range.type == "title" and title_layout_entity:
                 # write title
@@ -155,6 +166,7 @@ class PPTXPresentationService(PresentationService):
         layouts: list[SlideLayout] = self.template_read_service._get_template_slide_layouts(ppt=ppt)
         layouts_dict: dict[str, SlideLayout] = {layout.name: layout for layout in layouts}
 
+        parts.sort(key=lambda part: part.order)
         for part in parts:
             if isinstance(part, PlainPart):
                 self._write_plain(ppt=ppt, layouts_dict=layouts_dict, part=part)

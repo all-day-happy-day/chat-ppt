@@ -237,7 +237,7 @@ def export_ppt(
         )
         export_record: ExportRecord = export_registry.put(
             file_path=path,
-            filename=request_model.save_ppt_filename,
+            filename=path.name.strip(),
             user_id=request_model.user_id,
             project_id=request_model.project_id,
         )
