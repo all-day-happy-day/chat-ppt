@@ -188,7 +188,9 @@ export const en_US = {
 
   'page.project_view.bible_title_slide_heading': 'Title slide (optional)',
   'page.project_view.bible_title_slide_hint':
-    'Pick a layout for title / divider slides between verses, or None to use only the phrase layout.',
+    'Pick a layout for title / divider slides between verses, or None to use only the phrase layout. Then fill each placeholder on that layout.',
+  'page.project_view.bible_title_placeholder_values_intro':
+    'Optional text shown in each title-layout placeholder (variables supported via /).',
   'page.project_view.bible_title_target_sermon_title': 'Title slide: sermon title placeholder',
   'page.project_view.bible_title_target_scripture_range': 'Title slide: scripture range placeholder',
   'page.project_view.bible_title_target_preacher': 'Title slide: preacher placeholder',
@@ -196,6 +198,8 @@ export const en_US = {
   'page.project_view.bible_phrase_slide_hint': 'Only layouts with at least one text placeholder can be used.',
   'page.project_view.bible_phrase_target_phrase_text': 'Phrase slide: phrase text placeholder',
   'page.project_view.bible_phrase_target_scripture_range': 'Phrase slide: scripture range placeholder',
+  'page.project_view.bible_phrase_single_placeholder_hint':
+    'This layout has one text placeholder; it is used for phrase text. No separate mapping is needed.',
   'page.project_view.bible_cards_heading': 'Slides (order)',
   'page.project_view.bible_cards_hint':
     'Each phrase card is one slide. Drag cards to reorder. Use a hyphen or tilde for a verse range (e.g. 3-5).',
@@ -226,6 +230,22 @@ export const en_US = {
   'page.project_view.bible_probe_multiple_numbers': 'Verse input has invalid numbers for the range format.',
   'page.project_view.bible_probe_generic': 'Could not verify this reference: {{detail}}',
   'page.project_view.bible_probe_network': 'Could not reach the server to verify this reference.',
+
+  'page.project_view.variables_add_aria': 'Add project variable',
+  'page.project_view.variables_new_name_placeholder': 'name',
+  'page.project_view.variables_new_value_placeholder': 'default value',
+  'page.project_view.variables_create': 'Add',
+  'page.project_view.variables_cancel_create': 'Cancel',
+  'page.project_view.variables_delete_aria': 'Delete variable',
+  'page.project_view.variables_name_label': 'Name',
+  'page.project_view.variables_value_label': 'Value',
+  'page.project_view.variables_name_required': 'Enter a variable name.',
+  'page.project_view.variables_create_failed': 'Could not create variable.',
+  'page.project_view.variables_patch_failed': 'Could not save variable value.',
+  'page.project_view.variables_delete_failed': 'Could not delete variable.',
+  'page.project_view.variables_insert_hint': 'Type / in any text field to insert {name}.',
+  'page.project_view.variables_slash_empty': 'No matching variables',
+  'page.project_view.variables_bar_title': 'Variables',
 
   // Project new
   'page.project_new.title': 'Add project',

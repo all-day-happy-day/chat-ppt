@@ -58,7 +58,15 @@ export function buildPagingSearchParams(query: PagingQuery): URLSearchParams {
   const params: URLSearchParams = new URLSearchParams()
   params.set('page', String(query.page))
   params.set('size', String(query.size))
+  // Backward + forward compatibility:
+  // - Legacy servers read `sort`
+  // - Current servers read `sort_by` + `sort_order`
   params.set('sort', query.sort)
+  const [sortByRaw, sortOrderRaw] = query.sort.split('_')
+  const sortBy: string = sortByRaw === 'date' ? 'created_at' : sortByRaw
+  const sortOrder: string = sortOrderRaw === 'asc' ? 'asc' : 'desc'
+  params.set('sort_by', sortBy)
+  params.set('sort_order', sortOrder)
   return params
 }
 

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { VariableChipTextField } from '@/App/authenticated/project-view/VariableSlashField'
 import { TemplateLayoutSlide } from '@/App/authenticated/template/components/TemplateLayoutSlide'
 import type { Layout, Shape } from '@/domain/models/powerpoint'
 import { shapePlaceholderApiName } from '@/domain/models/powerpoint'
@@ -204,15 +205,14 @@ export function ProjectValuePlainEditor({
                   <span title={row.placeholderName} className="text-muted-foreground truncate font-mono text-xs">
                     {row.placeholderName}
                   </span>
-                  <input
-                    type="text"
+                  <VariableChipTextField
                     placeholder={inputPlaceholder}
                     value={row.value ?? ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                    onValueChange={(next: string): void => {
                       if (shapeId === null) {
                         return
                       }
-                      updatePlaceholderValue(shapeId, e.target.value)
+                      updatePlaceholderValue(shapeId, next)
                     }}
                     onFocus={(): void => {
                       if (shapeForRow === undefined) {
@@ -223,7 +223,7 @@ export function ProjectValuePlainEditor({
                     onBlur={(): void => {
                       onActivePlaceholderChange(null)
                     }}
-                    className="border-input bg-background focus:border-ring w-full min-w-0 rounded-md border px-2 py-1.5 text-sm outline-none"
+                    className="border-input bg-background focus-within:border-ring w-full min-w-0 rounded-md border px-2 py-1.5 text-sm outline-none"
                   />
                 </label>
               )

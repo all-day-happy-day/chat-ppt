@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 
 import { QUERY_KEY } from '@/api/query/key'
 import { useListAllSongs, usePatchLyrics } from '@/api/query/song.query'
+import { useOptionalProjectVariablesScope } from '@/App/authenticated/project-view/project-variables-scope-context'
+import { useVariableSlash } from '@/App/authenticated/project-view/use-variable-slash'
+import { VariableSlashTextInput } from '@/App/authenticated/project-view/VariableSlashField'
 import { TemplateLayoutSlide } from '@/App/authenticated/template/components/TemplateLayoutSlide'
 import { Button } from '@/components/ui/button/Button'
 import { songUseCase } from '@/di/usecases'
@@ -275,6 +278,18 @@ function SongTitleCombobox({
   pickAriaLabel,
   titleFieldsLocked,
 }: SongTitleComboboxProps): React.ReactElement {
+  const { t } = useTranslation()
+  const scope = useOptionalProjectVariablesScope()
+  const inputRef = React.useRef<HTMLInputElement | null>(null)
+  const variables = scope?.variables ?? []
+  const slash = useVariableSlash({
+    value: song.title,
+    onValueChange: onTitleChange,
+    variables,
+    inputRef,
+    emptyListLabel: t('page.project_view.variables_slash_empty'),
+    enabled: scope !== null && variables.length > 0 && !titleFieldsLocked,
+  })
   const [open, setOpen] = React.useState<boolean>(false)
   const blurTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -293,14 +308,26 @@ function SongTitleCombobox({
     }
   }, [])
 
+  const showList: boolean = !titleFieldsLocked && !slash.menuOpen && open && matches.length > 0
+
   return (
     <div className={cn('relative min-w-0', titleFieldsLocked && 'opacity-80')}>
       <input
+        ref={inputRef}
         type="text"
         value={song.title}
         disabled={titleFieldsLocked}
         onChange={(ev: React.ChangeEvent<HTMLInputElement>): void => {
           onTitleChange(ev.target.value)
+        }}
+        onKeyDown={(ev: React.KeyboardEvent<HTMLInputElement>): void => {
+          slash.onKeyDown(ev)
+        }}
+        onInput={(): void => {
+          slash.onInput()
+        }}
+        onSelect={(): void => {
+          slash.onSelectCapture()
         }}
         onFocus={(): void => {
           if (titleFieldsLocked) {
@@ -329,7 +356,7 @@ function SongTitleCombobox({
         )}
         placeholder={titlePlaceholder}
         aria-autocomplete="list"
-        aria-expanded={!titleFieldsLocked && open && matches.length > 0}
+        aria-expanded={showList}
       />
       {!titleFieldsLocked ? (
         <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{searchHint}</p>
@@ -338,7 +365,7 @@ function SongTitleCombobox({
         <p className="text-muted-foreground mt-1 text-xs">{loadingLabel}</p>
       ) : null}
       {!titleFieldsLocked && songsError ? <p className="text-destructive mt-1 text-xs">{errorLabel}</p> : null}
-      {!titleFieldsLocked && open && matches.length > 0 ? (
+      {!titleFieldsLocked && showList ? (
         <ul
           className="border-border bg-background scrollbar-hide absolute z-30 mt-1 max-h-48 w-full min-w-0 overflow-y-auto rounded-md border py-1 shadow-md"
           role="listbox"
@@ -361,6 +388,7 @@ function SongTitleCombobox({
           ))}
         </ul>
       ) : null}
+      {slash.menuPortal}
     </div>
   )
 }
@@ -820,24 +848,28 @@ export function ProjectLyricsEditor({
             <h4 className="text-foreground text-xs font-semibold tracking-wide uppercase">
               {t('page.project_view.lyrics_title_placeholder_target')}
             </h4>
-            {titlePlaceholders.map((shape: Shape): React.ReactElement => {
-              const label: string = placeholderLabel(shape)
-              const checked: boolean = selectedTitlePlaceholderShapeId === shape.shapeId
-              return (
-                <label key={shape.id} className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="radio"
-                    name={`lyrics-title-placeholder-${part.id}`}
-                    className="border-input size-4"
-                    checked={checked}
-                    onChange={(): void => {
+            <div className="flex flex-wrap gap-1.5">
+              {titlePlaceholders.map((shape: Shape): React.ReactElement => {
+                const label: string = placeholderLabel(shape)
+                const checked: boolean = selectedTitlePlaceholderShapeId === shape.shapeId
+                return (
+                  <button
+                    key={shape.shapeId}
+                    type="button"
+                    aria-pressed={checked}
+                    onClick={(): void => {
                       setTitlePlaceholderShapeId(shape.shapeId)
                     }}
-                  />
-                  <span className="text-foreground truncate text-sm">{label}</span>
-                </label>
-              )
-            })}
+                    className={cn(
+                      'border-input bg-background text-foreground hover:bg-muted/70 w-fit rounded-md border px-2 py-1 text-xs transition-colors',
+                      checked ? 'border-primary bg-primary/10 text-primary font-semibold' : ''
+                    )}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         ) : null}
       </section>
@@ -885,23 +917,25 @@ export function ProjectLyricsEditor({
           <h3 className="text-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
             {t('page.project_view.lyrics_placeholder_targets')}
           </h3>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {lyricsPlaceholders.map((shape: Shape): React.ReactElement => {
               const label: string = placeholderLabel(shape)
               const checked: boolean = selectedLyricsPlaceholderShapeId === shape.shapeId
               return (
-                <label key={shape.id} className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="radio"
-                    name={`lyrics-lyrics-placeholder-${part.id}`}
-                    className="border-input size-4"
-                    checked={checked}
-                    onChange={(): void => {
-                      setLyricsPlaceholderShapeId(shape.shapeId)
-                    }}
-                  />
-                  <span className="text-foreground truncate text-sm">{label}</span>
-                </label>
+                <button
+                  key={shape.shapeId}
+                  type="button"
+                  aria-pressed={checked}
+                  onClick={(): void => {
+                    setLyricsPlaceholderShapeId(shape.shapeId)
+                  }}
+                  className={cn(
+                    'border-input bg-background text-foreground hover:bg-muted/70 w-fit rounded-md border px-2 py-1 text-xs transition-colors',
+                    checked ? 'border-primary bg-primary/10 text-primary font-semibold' : ''
+                  )}
+                >
+                  {label}
+                </button>
               )
             })}
           </div>
@@ -1055,12 +1089,12 @@ export function ProjectLyricsEditor({
                   </div>
                   <label className="flex min-w-0 flex-col gap-1">
                     <span className="text-muted-foreground text-xs">{t('page.project_view.lyrics_song_artist')}</span>
-                    <input
+                    <VariableSlashTextInput
                       type="text"
                       value={song.artist ?? ''}
                       disabled={fieldsLocked}
-                      onChange={(ev: React.ChangeEvent<HTMLInputElement>): void => {
-                        updateSongField(index, 'artist', ev.target.value)
+                      onValueChange={(next: string): void => {
+                        updateSongField(index, 'artist', next)
                       }}
                       className={cn(
                         'w-full min-w-0 rounded-md border px-2 py-1.5 text-sm outline-none',

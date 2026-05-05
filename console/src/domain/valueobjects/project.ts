@@ -18,16 +18,12 @@ export interface BibleContentRange {
 export interface BibleContents {
   type: 'BIBLE'
   contents: BibleContentRange[]
-  /** Title slide: placeholder shape id for sermon title text. */
-  titleSermonTitlePlaceholderShapeId?: string | null
-  /** Title slide: placeholder shape id for scripture range text. */
-  titleScriptureRangePlaceholderShapeId?: string | null
-  /** Title slide: placeholder shape id for preacher text. */
-  titlePreacherPlaceholderShapeId?: string | null
-  /** Phrase slide: placeholder shape id for main scripture phrase text. */
-  phraseTextPlaceholderShapeId?: string | null
-  /** Phrase slide: placeholder shape id for scripture range text. */
-  phraseScriptureRangePlaceholderShapeId?: string | null
+  /** Phrase slide: placeholder `shapeId` (int) that receives phrase text. */
+  phrasePlaceholderId: number
+  /** Phrase slide: optional placeholder `shapeId` (int) for scripture range text. */
+  phraseRangePlaceholderId?: number | null
+  /** Title slide: optional static text by placeholder `shapeId` (int); values may include variables. */
+  titlePlaceholderValues: Readonly<Record<number, string>>
 }
 
 export interface LyricsContent {

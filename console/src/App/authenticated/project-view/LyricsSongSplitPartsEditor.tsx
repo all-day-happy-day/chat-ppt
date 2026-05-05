@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+import { VariableSlashTextarea, VariableSlashTextInput } from '@/App/authenticated/project-view/VariableSlashField'
 import type { LyricsPart } from '@/domain/valueobjects/song'
 import {
   LYRIC_BLANK_PART_NAME,
@@ -9,7 +10,7 @@ import {
 } from '@/lib/lyrics-part-sequence'
 import { cn } from '@/lib/utils'
 
-import type { ChangeEvent, DragEvent, KeyboardEvent, ReactElement } from 'react'
+import type { DragEvent, KeyboardEvent, ReactElement } from 'react'
 
 const MIN_LYRIC_PART_COUNT: number = 1
 
@@ -147,13 +148,13 @@ function PartFieldsBlock({
         >
           {partNameLabel}
         </label>
-        <input
+        <VariableSlashTextInput
           id={`${fieldIdPrefix}-part-name-${String(index)}`}
           type="text"
           className="border-input bg-background focus:border-ring mt-1 w-full rounded-md border px-2 py-1.5 text-sm outline-none"
           value={line.part}
-          onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-            onPartNameChange(index, event.target.value)
+          onValueChange={(next: string): void => {
+            onPartNameChange(index, next)
           }}
           autoComplete="off"
         />
@@ -165,12 +166,12 @@ function PartFieldsBlock({
         >
           {partLyricsLabel}
         </label>
-        <textarea
+        <VariableSlashTextarea
           id={`${fieldIdPrefix}-part-body-${String(index)}`}
           className="border-input bg-background focus:border-ring mt-1 min-h-22 w-full resize-y rounded-md border px-2 py-1.5 text-sm outline-none"
           value={line.lyrics}
-          onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
-            onLyricsChange(index, event.target.value)
+          onValueChange={(next: string): void => {
+            onLyricsChange(index, next)
           }}
           spellCheck
         />

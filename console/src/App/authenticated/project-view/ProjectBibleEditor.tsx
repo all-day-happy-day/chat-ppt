@@ -5,6 +5,9 @@ import { toast } from 'sonner'
 
 import { bibleProbeDetailToI18nKey, probeBibleReference } from '@/api/bible-reference-probe'
 import { useBibleBooks, useBibleChapters } from '@/api/query/bible.query'
+import { useOptionalProjectVariablesScope } from '@/App/authenticated/project-view/project-variables-scope-context'
+import { useVariableSlash } from '@/App/authenticated/project-view/use-variable-slash'
+import { VariableChipTextField, VariableSlashTextInput } from '@/App/authenticated/project-view/VariableSlashField'
 import { TemplateLayoutSlide } from '@/App/authenticated/template/components/TemplateLayoutSlide'
 import { Button } from '@/components/ui/button/Button'
 import { type AvailableBibleVersion, AvailableBibleVersionsTypes } from '@/domain/enums/project'
@@ -61,12 +64,11 @@ function sortedPlaceholderShapes(layout: Layout): Shape[] {
     })
 }
 
-function layoutPlaceholderCount(layout: Layout): number {
-  return sortedPlaceholderShapes(layout).length
-}
-
-function effectiveSinglePlaceholderSelection(stored: string | null | undefined, placeholders: readonly Shape[]): string | null {
-  const allIds: string[] = placeholders.map((s: Shape): string => s.id)
+function effectiveSinglePlaceholderSelection(
+  stored: number | null | undefined,
+  placeholders: readonly Shape[]
+): number | null {
+  const allIds: number[] = placeholders.map((s: Shape): number => s.shapeId)
   if (allIds.length === 0) {
     return null
   }
@@ -119,7 +121,7 @@ function formatVerseInput(start: BibleContent, end: BibleContent | null | undefi
 function rangesToRows(contents: readonly BibleContentRange[] | undefined): BibleEditorRow[] {
   const list: BibleContentRange[] = contents !== undefined ? [...contents] : []
   if (list.length === 0) {
-    return [emptyPhraseRow()]
+    return []
   }
   return list.map(
     (r: BibleContentRange): BibleEditorRow =>
@@ -290,16 +292,6 @@ function rowsToRangesForCommit(rows: readonly BibleEditorRow[]): BibleContentRan
   return out
 }
 
-function countPhrases(rows: readonly BibleEditorRow[]): number {
-  let n: number = 0
-  for (const row of rows) {
-    if (row.rowType === 'phrase') {
-      n++
-    }
-  }
-  return n
-}
-
 function resolveTitleAnchor(rows: readonly BibleEditorRow[], afterIndex: number): BibleContent {
   for (let j: number = afterIndex + 1; j < rows.length; j++) {
     const row: BibleEditorRow | undefined = rows[j]
@@ -362,6 +354,18 @@ function BibleComboboxField({
   'aria-label': ariaLabel,
   invalid = false,
 }: BibleComboboxFieldProps): ReactElement {
+  const { t } = useTranslation()
+  const scope = useOptionalProjectVariablesScope()
+  const inputRef = React.useRef<HTMLInputElement | null>(null)
+  const variables = scope?.variables ?? []
+  const slash = useVariableSlash({
+    value,
+    onValueChange: onChange,
+    variables,
+    inputRef,
+    emptyListLabel: t('page.project_view.variables_slash_empty'),
+    enabled: scope !== null && variables.length > 0 && !disabled,
+  })
   const [open, setOpen] = React.useState<boolean>(false)
   const blurTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -382,11 +386,12 @@ function BibleComboboxField({
     }
   }, [])
 
-  const showList: boolean = !disabled && open && filtered.length > 0
+  const showList: boolean = !slash.menuOpen && !disabled && open && filtered.length > 0
 
   return (
     <div className="relative min-w-0">
       <input
+        ref={inputRef}
         type="text"
         value={value}
         disabled={disabled}
@@ -400,6 +405,15 @@ function BibleComboboxField({
         }}
         onChange={(ev: React.ChangeEvent<HTMLInputElement>): void => {
           onChange(ev.target.value)
+        }}
+        onKeyDown={(ev: React.KeyboardEvent<HTMLInputElement>): void => {
+          slash.onKeyDown(ev)
+        }}
+        onInput={(): void => {
+          slash.onInput()
+        }}
+        onSelect={(): void => {
+          slash.onSelectCapture()
         }}
         onFocus={(): void => {
           if (disabled) {
@@ -449,6 +463,7 @@ function BibleComboboxField({
           ))}
         </ul>
       ) : null}
+      {slash.menuPortal}
     </div>
   )
 }
@@ -656,7 +671,7 @@ function BiblePhraseCard({
             </label>
             <div className="flex min-w-0 flex-col gap-0.5 sm:col-span-2">
               <span className="text-muted-foreground text-xs">{t('page.project_view.bible_verse')}</span>
-              <input
+              <VariableSlashTextInput
                 type="text"
                 inputMode="numeric"
                 autoComplete="off"
@@ -671,8 +686,8 @@ function BiblePhraseCard({
                   verseFieldInvalid ? 'border-destructive/80' : ''
                 )}
                 value={row.verseInput}
-                onChange={(ev: React.ChangeEvent<HTMLInputElement>): void => {
-                  onPatch({ verseInput: ev.target.value })
+                onValueChange={(next: string): void => {
+                  onPatch({ verseInput: next })
                 }}
               />
               <div className="min-h-9 pt-1" aria-live="polite">
@@ -766,21 +781,24 @@ export function ProjectBibleEditor({
     return phraseLayout !== undefined ? sortedPlaceholderShapes(phraseLayout) : []
   }, [phraseLayout])
 
-  const selectedTitleSermonTitlePlaceholderShapeId: string | null = React.useMemo((): string | null => {
-    return effectiveSinglePlaceholderSelection(part.contents.titleSermonTitlePlaceholderShapeId, titlePlaceholders)
-  }, [part.contents.titleSermonTitlePlaceholderShapeId, titlePlaceholders])
-  const selectedTitleScriptureRangePlaceholderShapeId: string | null = React.useMemo((): string | null => {
-    return effectiveSinglePlaceholderSelection(part.contents.titleScriptureRangePlaceholderShapeId, titlePlaceholders)
-  }, [part.contents.titleScriptureRangePlaceholderShapeId, titlePlaceholders])
-  const selectedTitlePreacherPlaceholderShapeId: string | null = React.useMemo((): string | null => {
-    return effectiveSinglePlaceholderSelection(part.contents.titlePreacherPlaceholderShapeId, titlePlaceholders)
-  }, [part.contents.titlePreacherPlaceholderShapeId, titlePlaceholders])
-  const selectedPhraseTextPlaceholderShapeId: string | null = React.useMemo((): string | null => {
-    return effectiveSinglePlaceholderSelection(part.contents.phraseTextPlaceholderShapeId, phrasePlaceholders)
-  }, [part.contents.phraseTextPlaceholderShapeId, phrasePlaceholders])
-  const selectedPhraseScriptureRangePlaceholderShapeId: string | null = React.useMemo((): string | null => {
-    return effectiveSinglePlaceholderSelection(part.contents.phraseScriptureRangePlaceholderShapeId, phrasePlaceholders)
-  }, [part.contents.phraseScriptureRangePlaceholderShapeId, phrasePlaceholders])
+  const titlePlaceholderIdsKey: string = React.useMemo((): string => {
+    return titlePlaceholders.map((s: Shape): string => String(s.shapeId)).join('\0')
+  }, [titlePlaceholders])
+  const phrasePlaceholderIdsKey: string = React.useMemo((): string => {
+    return phrasePlaceholders.map((s: Shape): string => String(s.shapeId)).join('\0')
+  }, [phrasePlaceholders])
+
+  const titlePlaceholderFillRef = React.useRef(part.contents.titlePlaceholderValues)
+  React.useLayoutEffect((): void => {
+    titlePlaceholderFillRef.current = part.contents.titlePlaceholderValues
+  })
+
+  const selectedPhrasePlaceholderId: number | null = React.useMemo((): number | null => {
+    return effectiveSinglePlaceholderSelection(part.contents.phrasePlaceholderId, phrasePlaceholders)
+  }, [part.contents.phrasePlaceholderId, phrasePlaceholders])
+  const selectedPhraseRangePlaceholderId: number | null = React.useMemo((): number | null => {
+    return effectiveSinglePlaceholderSelection(part.contents.phraseRangePlaceholderId, phrasePlaceholders)
+  }, [part.contents.phraseRangePlaceholderId, phrasePlaceholders])
 
   const patchBibleContents = React.useCallback(
     (
@@ -793,6 +811,67 @@ export function ProjectBibleEditor({
     },
     [onCommit, part]
   )
+
+  React.useEffect((): void => {
+    if (titleLayout === undefined) {
+      return
+    }
+    const allowedIds: ReadonlySet<number> = new Set(
+      titlePlaceholderIdsKey
+        .split('\0')
+        .map((s: string): number => Number.parseInt(s, 10))
+        .filter((n: number): boolean => Number.isInteger(n) && n > 0)
+    )
+    const prevFill: Readonly<Record<number, string>> | undefined = titlePlaceholderFillRef.current
+    if (prevFill === undefined) {
+      return
+    }
+    const orphanKeys: number[] = Object.keys(prevFill)
+      .map((k: string): number => Number.parseInt(k, 10))
+      .filter((k: number): boolean => Number.isInteger(k) && k > 0 && !allowedIds.has(k))
+    if (orphanKeys.length === 0) {
+      return
+    }
+    const nextFill: Record<number, string> = { ...prevFill }
+    for (const k of orphanKeys) {
+      delete nextFill[k]
+    }
+    patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
+      ...prev,
+      titlePlaceholderValues: nextFill,
+    }))
+  }, [titleLayout, titlePlaceholderIdsKey, patchBibleContents])
+
+  React.useEffect((): void => {
+    if (phraseLayout === undefined) {
+      return
+    }
+    const ids: number[] = phrasePlaceholderIdsKey
+      .split('\0')
+      .map((s: string): number => Number.parseInt(s, 10))
+      .filter((n: number): boolean => Number.isInteger(n) && n > 0)
+    if (ids.length !== 1) {
+      return
+    }
+    const onlyId: number = ids[0]!
+    if (
+      part.contents.phrasePlaceholderId === onlyId &&
+      (part.contents.phraseRangePlaceholderId === undefined || part.contents.phraseRangePlaceholderId === null)
+    ) {
+      return
+    }
+    patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
+      ...prev,
+      phrasePlaceholderId: onlyId,
+      phraseRangePlaceholderId: null,
+    }))
+  }, [
+    phraseLayout,
+    phrasePlaceholderIdsKey,
+    part.contents.phrasePlaceholderId,
+    part.contents.phraseRangePlaceholderId,
+    patchBibleContents,
+  ])
 
   const setTitleLayoutId = React.useCallback(
     (layoutId: string | null): void => {
@@ -811,9 +890,7 @@ export function ProjectBibleEditor({
             ...part.contents,
             type: 'BIBLE',
             contents: withoutTitles,
-            titleSermonTitlePlaceholderShapeId: undefined,
-            titleScriptureRangePlaceholderShapeId: undefined,
-            titlePreacherPlaceholderShapeId: undefined,
+            titlePlaceholderValues: {},
           },
         })
         return
@@ -823,9 +900,7 @@ export function ProjectBibleEditor({
         titleLayoutId: layoutId,
         contents: {
           ...part.contents,
-          titleSermonTitlePlaceholderShapeId: undefined,
-          titleScriptureRangePlaceholderShapeId: undefined,
-          titlePreacherPlaceholderShapeId: undefined,
+          titlePlaceholderValues: {},
         },
       })
     },
@@ -835,7 +910,8 @@ export function ProjectBibleEditor({
   const trySelectPhraseLayout = React.useCallback(
     (layout: Layout): void => {
       onPreviewLayoutSelect?.(layout.id)
-      if (layoutPlaceholderCount(layout) === 0) {
+      const placeholders: Shape[] = sortedPlaceholderShapes(layout)
+      if (placeholders.length === 0) {
         toast.error(t('page.project_view.lyrics_layout_requires_placeholder'))
         return
       }
@@ -847,59 +923,48 @@ export function ProjectBibleEditor({
         phraseLayoutId: layout.id,
         contents: {
           ...part.contents,
-          phraseTextPlaceholderShapeId: undefined,
-          phraseScriptureRangePlaceholderShapeId: undefined,
+          phrasePlaceholderId: placeholders[0]!.shapeId,
+          phraseRangePlaceholderId: placeholders.length > 1 ? placeholders[1]!.shapeId : null,
         },
       })
     },
     [onCommit, onPreviewLayoutSelect, part, t]
   )
 
-  const setTitleSermonTitlePlaceholderShapeId = React.useCallback(
-    (shapeId: string): void => {
+  const setTitlePlaceholderShapeText = React.useCallback(
+    (shapeId: number, raw: string): void => {
+      const next: string = raw.trim()
+      patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => {
+        const prevMap: Record<number, string> = { ...prev.titlePlaceholderValues }
+        if (next.length === 0) {
+          delete prevMap[shapeId]
+        } else {
+          prevMap[shapeId] = next
+        }
+        return {
+          ...prev,
+          titlePlaceholderValues: prevMap,
+        }
+      })
+    },
+    [patchBibleContents]
+  )
+
+  const setPhrasePlaceholderId = React.useCallback(
+    (shapeId: number): void => {
       patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
         ...prev,
-        titleSermonTitlePlaceholderShapeId: shapeId,
+        phrasePlaceholderId: shapeId,
       }))
     },
     [patchBibleContents]
   )
 
-  const setTitleScriptureRangePlaceholderShapeId = React.useCallback(
-    (shapeId: string): void => {
+  const setPhraseRangePlaceholderId = React.useCallback(
+    (shapeId: number): void => {
       patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
         ...prev,
-        titleScriptureRangePlaceholderShapeId: shapeId,
-      }))
-    },
-    [patchBibleContents]
-  )
-
-  const setTitlePreacherPlaceholderShapeId = React.useCallback(
-    (shapeId: string): void => {
-      patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
-        ...prev,
-        titlePreacherPlaceholderShapeId: shapeId,
-      }))
-    },
-    [patchBibleContents]
-  )
-
-  const setPhraseTextPlaceholderShapeId = React.useCallback(
-    (shapeId: string): void => {
-      patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
-        ...prev,
-        phraseTextPlaceholderShapeId: shapeId,
-      }))
-    },
-    [patchBibleContents]
-  )
-
-  const setPhraseScriptureRangePlaceholderShapeId = React.useCallback(
-    (shapeId: string): void => {
-      patchBibleContents((prev: BiblePart['contents']): BiblePart['contents'] => ({
-        ...prev,
-        phraseScriptureRangePlaceholderShapeId: shapeId,
+        phraseRangePlaceholderId: shapeId,
       }))
     },
     [patchBibleContents]
@@ -912,7 +977,7 @@ export function ProjectBibleEditor({
       const toSave: BibleContentRange[] = rowsToRangesForCommit(next)
       onCommit({
         ...part,
-        contents: { type: 'BIBLE', contents: toSave },
+        contents: { ...part.contents, type: 'BIBLE', contents: toSave },
       })
     },
     [onCommit, part]
@@ -960,13 +1025,9 @@ export function ProjectBibleEditor({
       if (target === undefined) {
         return
       }
-      if (target.rowType === 'phrase' && countPhrases(prev) <= 1) {
-        toast.error(t('page.project_view.bible_keep_one_phrase'))
-        return
-      }
       flushRows(prev.filter((_: BibleEditorRow, i: number): boolean => i !== rowIndex))
     },
-    [flushRows, t]
+    [flushRows]
   )
 
   const addPhrase = React.useCallback((): void => {
@@ -1071,55 +1132,30 @@ export function ProjectBibleEditor({
           })}
         </div>
         {titleLayout !== undefined && titlePlaceholders.length > 0 ? (
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="text-muted-foreground text-xs">{t('page.project_view.bible_title_target_sermon_title')}</span>
-              <select
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2"
-                value={selectedTitleSermonTitlePlaceholderShapeId ?? ''}
-                onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => {
-                  setTitleSermonTitlePlaceholderShapeId(ev.target.value)
-                }}
-              >
-                {titlePlaceholders.map((shape: Shape): ReactElement => (
-                  <option key={shape.id} value={shape.id}>
-                    {placeholderLabel(shape)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="text-muted-foreground text-xs">{t('page.project_view.bible_title_target_scripture_range')}</span>
-              <select
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2"
-                value={selectedTitleScriptureRangePlaceholderShapeId ?? ''}
-                onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => {
-                  setTitleScriptureRangePlaceholderShapeId(ev.target.value)
-                }}
-              >
-                {titlePlaceholders.map((shape: Shape): ReactElement => (
-                  <option key={shape.id} value={shape.id}>
-                    {placeholderLabel(shape)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-0 flex-col gap-1 sm:col-span-2">
-              <span className="text-muted-foreground text-xs">{t('page.project_view.bible_title_target_preacher')}</span>
-              <select
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2"
-                value={selectedTitlePreacherPlaceholderShapeId ?? ''}
-                onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => {
-                  setTitlePreacherPlaceholderShapeId(ev.target.value)
-                }}
-              >
-                {titlePlaceholders.map((shape: Shape): ReactElement => (
-                  <option key={shape.id} value={shape.id}>
-                    {placeholderLabel(shape)}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className="mt-3 flex flex-col gap-2">
+            <p className="text-muted-foreground m-0 text-xs">{t('page.project_view.bible_title_placeholder_values_intro')}</p>
+            {titlePlaceholders.map((shape: Shape): ReactElement => (
+              <label key={shape.shapeId} className="flex min-w-0 flex-col gap-1">
+                <span className="text-muted-foreground text-xs">{placeholderLabel(shape)}</span>
+                <div
+                  className={
+                    'border-input bg-background text-foreground w-full min-w-0 rounded-md border px-2 py-1.5 text-sm outline-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-2'
+                  }
+                >
+                  <VariableChipTextField
+                    aria-label={placeholderLabel(shape)}
+                    spellCheck={false}
+                    onPointerDown={(ev: React.PointerEvent<HTMLDivElement>): void => {
+                      ev.stopPropagation()
+                    }}
+                    value={part.contents.titlePlaceholderValues[shape.shapeId] ?? ''}
+                    onValueChange={(next: string): void => {
+                      setTitlePlaceholderShapeText(shape.shapeId, next)
+                    }}
+                  />
+                </div>
+              </label>
+            ))}
           </div>
         ) : null}
       </section>
@@ -1161,39 +1197,59 @@ export function ProjectBibleEditor({
           })}
         </div>
         {phraseLayout !== undefined && phrasePlaceholders.length > 0 ? (
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="text-muted-foreground text-xs">{t('page.project_view.bible_phrase_target_phrase_text')}</span>
-              <select
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2"
-                value={selectedPhraseTextPlaceholderShapeId ?? ''}
-                onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => {
-                  setPhraseTextPlaceholderShapeId(ev.target.value)
-                }}
-              >
-                {phrasePlaceholders.map((shape: Shape): ReactElement => (
-                  <option key={shape.id} value={shape.id}>
-                    {placeholderLabel(shape)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-0 flex-col gap-1">
-              <span className="text-muted-foreground text-xs">{t('page.project_view.bible_phrase_target_scripture_range')}</span>
-              <select
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2"
-                value={selectedPhraseScriptureRangePlaceholderShapeId ?? ''}
-                onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => {
-                  setPhraseScriptureRangePlaceholderShapeId(ev.target.value)
-                }}
-              >
-                {phrasePlaceholders.map((shape: Shape): ReactElement => (
-                  <option key={shape.id} value={shape.id}>
-                    {placeholderLabel(shape)}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className="mt-3 flex flex-col gap-2">
+            {phrasePlaceholders.length === 1 ? (
+              <p className="text-muted-foreground m-0 text-xs">{t('page.project_view.bible_phrase_single_placeholder_hint')}</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="text-muted-foreground text-xs">{t('page.project_view.bible_phrase_target_phrase_text')}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {phrasePlaceholders.map((shape: Shape): ReactElement => (
+                      <button
+                        key={shape.shapeId}
+                        type="button"
+                        aria-pressed={selectedPhrasePlaceholderId === shape.shapeId}
+                        onClick={(): void => {
+                          setPhrasePlaceholderId(shape.shapeId)
+                        }}
+                        className={cn(
+                          'border-input bg-background text-foreground hover:bg-muted/70 w-fit rounded-md border px-2 py-1 text-xs transition-colors',
+                          selectedPhrasePlaceholderId === shape.shapeId
+                            ? 'border-primary bg-primary/10 text-primary font-semibold'
+                            : ''
+                        )}
+                      >
+                        {placeholderLabel(shape)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="text-muted-foreground text-xs">{t('page.project_view.bible_phrase_target_scripture_range')}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {phrasePlaceholders.map((shape: Shape): ReactElement => (
+                      <button
+                        key={shape.shapeId}
+                        type="button"
+                        aria-pressed={selectedPhraseRangePlaceholderId === shape.shapeId}
+                        onClick={(): void => {
+                          setPhraseRangePlaceholderId(shape.shapeId)
+                        }}
+                        className={cn(
+                          'border-input bg-background text-foreground hover:bg-muted/70 w-fit rounded-md border px-2 py-1 text-xs transition-colors',
+                          selectedPhraseRangePlaceholderId === shape.shapeId
+                            ? 'border-primary bg-primary/10 text-primary font-semibold'
+                            : ''
+                        )}
+                      >
+                        {placeholderLabel(shape)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : null}
       </section>
@@ -1305,7 +1361,7 @@ export function ProjectBibleEditor({
                   index={index}
                   row={row}
                   phraseOrdinal={thisPhraseIndex}
-                  canRemovePhrase={countPhrases(rows) > 1}
+                  canRemovePhrase={true}
                   showInsertTitleBelow={hasTitleSlide}
                   registerBlocking={registerPhraseCardBlocking}
                   onPatch={(patch: Partial<BiblePhraseEditorRow>): void => {

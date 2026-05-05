@@ -188,7 +188,9 @@ export const ko_KR = {
 
   'page.project_view.bible_title_slide_heading': '타이틀 슬라이드(선택)',
   'page.project_view.bible_title_slide_hint':
-    '절 사이에 넣을 타이틀/구역 구분 슬라이드 레이아웃을 고르거나, 없음을 선택해 성절 슬라이드만 쓸 수 있습니다.',
+    '절 사이에 넣을 타이틀/구역 구분 슬라이드 레이아웃을 고르거나, 없음을 선택해 성절 슬라이드만 쓸 수 있습니다. 레이아웃을 고른 뒤 각 플레이스홀더에 들어갈 내용을 입력하세요.',
+  'page.project_view.bible_title_placeholder_values_intro':
+    '타이틀 레이아웃의 각 플레이스홀더에 넣을 문구(선택, /로 변수 입력 가능).',
   'page.project_view.bible_title_target_sermon_title': '타이틀 슬라이드: 설교 제목 플레이스홀더',
   'page.project_view.bible_title_target_scripture_range': '타이틀 슬라이드: 말씀 구절 범위 플레이스홀더',
   'page.project_view.bible_title_target_preacher': '타이틀 슬라이드: 설교자 플레이스홀더',
@@ -196,6 +198,8 @@ export const ko_KR = {
   'page.project_view.bible_phrase_slide_hint': '텍스트 플레이스홀더가 하나 이상 있는 레이아웃만 선택할 수 있습니다.',
   'page.project_view.bible_phrase_target_phrase_text': '구절 슬라이드: 본문 텍스트 플레이스홀더',
   'page.project_view.bible_phrase_target_scripture_range': '구절 슬라이드: 말씀 구절 범위 플레이스홀더',
+  'page.project_view.bible_phrase_single_placeholder_hint':
+    '플레이스홀더가 하나뿐이면 본문(phrase) 텍스트용으로만 쓰이며, 별도로 고를 항목이 없습니다.',
   'page.project_view.bible_cards_heading': '슬라이드(순서)',
   'page.project_view.bible_cards_hint':
     '각 구절 카드가 한 장의 슬라이드입니다. 카드를 드래그해 순서를 바꿉니다. 절 범위는 하이픈 또는 물결표로 입력하세요(예: 3-5).',
@@ -226,6 +230,22 @@ export const ko_KR = {
   'page.project_view.bible_probe_multiple_numbers': '절 범위 형식에 맞지 않는 숫자 입력입니다.',
   'page.project_view.bible_probe_generic': '참조를 확인하지 못했습니다: {{detail}}',
   'page.project_view.bible_probe_network': '서버에 연결해 참조를 확인하지 못했습니다.',
+
+  'page.project_view.variables_add_aria': '프로젝트 변수 추가',
+  'page.project_view.variables_new_name_placeholder': '이름',
+  'page.project_view.variables_new_value_placeholder': '기본 값',
+  'page.project_view.variables_create': '추가',
+  'page.project_view.variables_cancel_create': '취소',
+  'page.project_view.variables_delete_aria': '변수 삭제',
+  'page.project_view.variables_name_label': '이름',
+  'page.project_view.variables_value_label': '값',
+  'page.project_view.variables_name_required': '변수 이름을 입력하세요.',
+  'page.project_view.variables_create_failed': '변수를 만들지 못했습니다.',
+  'page.project_view.variables_patch_failed': '변수 값을 저장하지 못했습니다.',
+  'page.project_view.variables_delete_failed': '변수를 삭제하지 못했습니다.',
+  'page.project_view.variables_insert_hint': '텍스트 필드에서 / 를 입력하면 {name} 형태로 변수를 넣을 수 있습니다.',
+  'page.project_view.variables_slash_empty': '일치하는 변수가 없습니다',
+  'page.project_view.variables_bar_title': '변수',
 
   // Project new
   'page.project_new.title': '프로젝트 추가',

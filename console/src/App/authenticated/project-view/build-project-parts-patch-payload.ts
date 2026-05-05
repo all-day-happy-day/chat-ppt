@@ -134,9 +134,52 @@ function bibleContentsFromPart(part: BiblePart): BibleContents {
   const legacy = part as BiblePart & { content?: BibleContents }
   const body: BibleContents | undefined = legacy.contents ?? legacy.content
   if (body === undefined) {
-    return { type: 'BIBLE', contents: [] }
+    return { type: 'BIBLE', contents: [], phrasePlaceholderId: 0, phraseRangePlaceholderId: null, titlePlaceholderValues: {} }
   }
-  return body
+  return {
+    ...body,
+    phrasePlaceholderId: normalizeBiblePlaceholderId(body.phrasePlaceholderId),
+    phraseRangePlaceholderId: normalizeOptionalBiblePlaceholderId(body.phraseRangePlaceholderId),
+    titlePlaceholderValues: normalizeBibleTitlePlaceholderValues(body.titlePlaceholderValues),
+  }
+}
+
+function normalizeBiblePlaceholderId(raw: number | null | undefined): number {
+  if (raw === null || raw === undefined || !Number.isInteger(raw) || raw <= 0) {
+    return 0
+  }
+  return raw
+}
+
+function normalizeOptionalBiblePlaceholderId(raw: number | null | undefined): number | null {
+  if (raw === null || raw === undefined || !Number.isInteger(raw) || raw <= 0) {
+    return null
+  }
+  return raw
+}
+
+function normalizeBibleTitlePlaceholderValues(
+  raw: Readonly<Record<number, string>> | null | undefined
+): Readonly<Record<number, string>> {
+  if (raw === null || raw === undefined) {
+    return {}
+  }
+  const out: Record<number, string> = {}
+  const entries: Array<readonly [string, string]> = Object.entries(raw as Readonly<Record<string, string>>)
+  for (const [key, value] of entries) {
+    const id: number = Number.parseInt(key, 10)
+    if (!Number.isInteger(id) || id <= 0) {
+      continue
+    }
+    if (typeof value !== 'string') {
+      continue
+    }
+    if (value.trim().length === 0) {
+      continue
+    }
+    out[id] = value
+  }
+  return out
 }
 
 /**
@@ -144,7 +187,16 @@ function bibleContentsFromPart(part: BiblePart): BibleContents {
  */
 export function normalizeBiblePartForStore(part: BiblePart): BiblePart {
   const r = part as BiblePart & { content?: BibleContents }
-  const bodyRaw: BibleContents = r.contents ?? r.content ?? ({ type: 'BIBLE', contents: [] } satisfies BibleContents)
+  const bodyRaw: BibleContents =
+    r.contents ??
+    r.content ??
+    ({
+      type: 'BIBLE',
+      contents: [],
+      phrasePlaceholderId: 0,
+      phraseRangePlaceholderId: null,
+      titlePlaceholderValues: {},
+    } satisfies BibleContents)
   return {
     id: r.id,
     projectId: r.projectId,
@@ -156,12 +208,122 @@ export function normalizeBiblePartForStore(part: BiblePart): BiblePart {
     contents: {
       type: 'BIBLE',
       contents: bodyRaw.contents ?? [],
-      titleSermonTitlePlaceholderShapeId: bodyRaw.titleSermonTitlePlaceholderShapeId ?? undefined,
-      titleScriptureRangePlaceholderShapeId: bodyRaw.titleScriptureRangePlaceholderShapeId ?? undefined,
-      titlePreacherPlaceholderShapeId: bodyRaw.titlePreacherPlaceholderShapeId ?? undefined,
-      phraseTextPlaceholderShapeId: bodyRaw.phraseTextPlaceholderShapeId ?? undefined,
-      phraseScriptureRangePlaceholderShapeId: bodyRaw.phraseScriptureRangePlaceholderShapeId ?? undefined,
+      phrasePlaceholderId: normalizeBiblePlaceholderId(bodyRaw.phrasePlaceholderId),
+      phraseRangePlaceholderId: normalizeOptionalBiblePlaceholderId(bodyRaw.phraseRangePlaceholderId),
+      titlePlaceholderValues: normalizeBibleTitlePlaceholderValues(bodyRaw.titlePlaceholderValues),
     },
+  }
+}
+
+/**
+ * Existing part id, changed type: keep `id` so server can replace row.
+ */
+function partRequestBodyForTypeChange(serverPartId: string, order: number, kind: Part['type']): PartRequestBody {
+  switch (kind) {
+    case 'PLAIN':
+      return {
+        id: serverPartId,
+        order,
+        type: 'PLAIN',
+        contents: { type: 'PLAIN' },
+        layoutId: null,
+      }
+    case 'VALUE':
+      return {
+        id: serverPartId,
+        order,
+        type: 'VALUE',
+        contents: {
+          type: 'VALUE',
+          contents: [],
+        },
+        layoutId: null,
+      }
+    case 'LYRICS':
+      return {
+        id: serverPartId,
+        order,
+        type: 'LYRICS',
+        contents: {
+          type: 'LYRICS',
+          contents: [],
+          lyricsPlaceholderShapeId: 0,
+          titlePlaceholderShapeId: null,
+          includeTitleForFirstCard: true,
+        },
+        lyricsLayoutId: null,
+        titleLayoutId: null,
+      }
+    case 'BIBLE':
+      return {
+        id: serverPartId,
+        order,
+        type: 'BIBLE',
+        contents: {
+          type: 'BIBLE',
+          contents: [],
+          phrasePlaceholderId: 0,
+          phraseRangePlaceholderId: null,
+          titlePlaceholderValues: {},
+        },
+        phraseLayoutId: null,
+        titleLayoutId: null,
+      }
+  }
+}
+
+/** Defaults for a part; `partUlid` is client-generated ULID for inserts not yet in `partsById`. */
+function newPartRequestBody(partUlid: string, order: number, kind: Part['type']): PartRequestBody {
+  switch (kind) {
+    case 'PLAIN':
+      return {
+        id: partUlid,
+        order,
+        type: 'PLAIN',
+        contents: { type: 'PLAIN' },
+        layoutId: null,
+      }
+    case 'VALUE':
+      return {
+        id: partUlid,
+        order,
+        type: 'VALUE',
+        contents: {
+          type: 'VALUE',
+          contents: [],
+        },
+        layoutId: null,
+      }
+    case 'LYRICS':
+      return {
+        id: partUlid,
+        order,
+        type: 'LYRICS',
+        contents: {
+          type: 'LYRICS',
+          contents: [],
+          lyricsPlaceholderShapeId: 0,
+          titlePlaceholderShapeId: null,
+          includeTitleForFirstCard: true,
+        },
+        lyricsLayoutId: null,
+        titleLayoutId: null,
+      }
+    case 'BIBLE':
+      return {
+        id: partUlid,
+        order,
+        type: 'BIBLE',
+        contents: {
+          type: 'BIBLE',
+          contents: [],
+          phrasePlaceholderId: 0,
+          phraseRangePlaceholderId: null,
+          titlePlaceholderValues: {},
+        },
+        phraseLayoutId: null,
+        titleLayoutId: null,
+      }
   }
 }
 
@@ -215,103 +377,6 @@ function partToRequestBody(part: Part, order: number): PartRequestBody {
   }
 }
 
-/** Defaults for a part; `partUlid` is client-generated ULID for inserts not yet in `partsById`. */
-function newPartRequestBody(partUlid: string, order: number, kind: Part['type']): PartRequestBody {
-  switch (kind) {
-    case 'PLAIN':
-      return {
-        id: partUlid,
-        order,
-        type: 'PLAIN',
-        contents: { type: 'PLAIN' },
-        layoutId: null,
-      }
-    case 'VALUE':
-      return {
-        id: partUlid,
-        order,
-        type: 'VALUE',
-        contents: {
-          type: 'VALUE',
-          contents: [],
-        },
-        layoutId: null,
-      }
-    case 'LYRICS':
-      return {
-        id: partUlid,
-        order,
-        type: 'LYRICS',
-        contents: {
-          type: 'LYRICS',
-          contents: [],
-          lyricsPlaceholderShapeId: 0,
-          titlePlaceholderShapeId: null,
-          includeTitleForFirstCard: true,
-        },
-        lyricsLayoutId: null,
-        titleLayoutId: null,
-      }
-    case 'BIBLE':
-      return {
-        id: partUlid,
-        order,
-        type: 'BIBLE',
-        contents: { type: 'BIBLE', contents: [] },
-        phraseLayoutId: null,
-        titleLayoutId: null,
-      }
-  }
-}
-
-/** Existing part id, changed type: keep `id` so server can replace row. */
-function partRequestBodyForTypeChange(serverPartId: string, order: number, kind: Part['type']): PartRequestBody {
-  switch (kind) {
-    case 'PLAIN':
-      return {
-        id: serverPartId,
-        order,
-        type: 'PLAIN',
-        contents: { type: 'PLAIN' },
-        layoutId: null,
-      }
-    case 'VALUE':
-      return {
-        id: serverPartId,
-        order,
-        type: 'VALUE',
-        contents: {
-          type: 'VALUE',
-          contents: [],
-        },
-        layoutId: null,
-      }
-    case 'LYRICS':
-      return {
-        id: serverPartId,
-        order,
-        type: 'LYRICS',
-        contents: {
-          type: 'LYRICS',
-          contents: [],
-          lyricsPlaceholderShapeId: 0,
-          titlePlaceholderShapeId: null,
-          includeTitleForFirstCard: true,
-        },
-        lyricsLayoutId: null,
-        titleLayoutId: null,
-      }
-    case 'BIBLE':
-      return {
-        id: serverPartId,
-        order,
-        type: 'BIBLE',
-        contents: { type: 'BIBLE', contents: [] },
-        phraseLayoutId: null,
-        titleLayoutId: null,
-      }
-  }
-}
 
 /**
  * Ensures lyrics body is stored on `contents`. Migrates a stray legacy `content` field if present.
@@ -425,13 +490,15 @@ export function buildProjectPartsPatchPayload(
 ): PartRequestBody[] {
   return localSlides.map((slide: LocalSlideLike, order: number): PartRequestBody => {
     const existing: Part | undefined = partsById.get(slide.id)
+    let raw: PartRequestBody
     if (existing !== undefined && existing.type === slide.partType) {
-      return partToRequestBody(existing, order)
+      raw = partToRequestBody(existing, order)
+    } else if (existing !== undefined && existing.type !== slide.partType) {
+      raw = partRequestBodyForTypeChange(existing.id, order, slide.partType)
+    } else {
+      raw = newPartRequestBody(slide.id, order, slide.partType)
     }
-    if (existing !== undefined && existing.type !== slide.partType) {
-      return partRequestBodyForTypeChange(existing.id, order, slide.partType)
-    }
-    return newPartRequestBody(slide.id, order, slide.partType)
+    return raw
   })
 }
 
@@ -443,9 +510,6 @@ export function slidesSignature(slides: readonly LocalSlideLike[]): string {
  * Full workspace fingerprint for autosave: slide order/types plus each part's PATCH body (layout, contents).
  * Prefer this over `slidesSignature` when editing VALUE/PLAIN (or any part fields mirrored in the payload).
  */
-export function workspaceSignature(
-  localSlides: readonly LocalSlideLike[],
-  partsById: ReadonlyMap<string, Part>
-): string {
+export function workspaceSignature(localSlides: readonly LocalSlideLike[], partsById: ReadonlyMap<string, Part>): string {
   return JSON.stringify(buildProjectPartsPatchPayload(localSlides, partsById))
 }

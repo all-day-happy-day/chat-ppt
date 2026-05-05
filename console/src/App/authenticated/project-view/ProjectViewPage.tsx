@@ -49,9 +49,11 @@ import {
   workspaceHasIncompletePartsForPptExport,
   workspaceSignature,
 } from './build-project-parts-patch-payload'
+import { ProjectVariablesScopeProvider, useProjectVariablesScope } from './project-variables-scope-context'
 import { ProjectBibleEditor } from './ProjectBibleEditor'
 import { ProjectLyricsEditor } from './ProjectLyricsEditor'
 import { ProjectValuePlainEditor } from './ProjectValuePlainEditor'
+import { ProjectVariablesBar } from './ProjectVariablesBar'
 
 import type { TFunction } from 'i18next'
 import type { DragEvent, KeyboardEvent as ReactKeyboardEvent, ReactElement } from 'react'
@@ -127,7 +129,13 @@ function createSyntheticPartForInsert(id: string, kind: PartKind, projectId: str
       return {
         ...base,
         type: 'BIBLE',
-        contents: { type: 'BIBLE', contents: [] },
+        contents: {
+          type: 'BIBLE',
+          contents: [],
+          phrasePlaceholderId: 0,
+          phraseRangePlaceholderId: null,
+          titlePlaceholderValues: {},
+        },
         phraseLayoutId: null,
         titleLayoutId: null,
       }
@@ -145,20 +153,22 @@ function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | un
   if (serverPart.type === 'BIBLE' && localPart.type === 'BIBLE') {
     const serverContents: BibleContents = serverPart.contents
     const localContents: BibleContents = localPart.contents
+    const serverTitlePlaceholderValues: Readonly<Record<number, string>> =
+      normalizeTitlePlaceholderValues(serverContents.titlePlaceholderValues)
+    const localTitlePlaceholderValues: Readonly<Record<number, string>> =
+      normalizeTitlePlaceholderValues(localContents.titlePlaceholderValues)
     return {
       ...serverPart,
       contents: {
         ...serverContents,
-        titleSermonTitlePlaceholderShapeId:
-          serverContents.titleSermonTitlePlaceholderShapeId ?? localContents.titleSermonTitlePlaceholderShapeId,
-        titleScriptureRangePlaceholderShapeId:
-          serverContents.titleScriptureRangePlaceholderShapeId ?? localContents.titleScriptureRangePlaceholderShapeId,
-        titlePreacherPlaceholderShapeId:
-          serverContents.titlePreacherPlaceholderShapeId ?? localContents.titlePreacherPlaceholderShapeId,
-        phraseTextPlaceholderShapeId:
-          serverContents.phraseTextPlaceholderShapeId ?? localContents.phraseTextPlaceholderShapeId,
-        phraseScriptureRangePlaceholderShapeId:
-          serverContents.phraseScriptureRangePlaceholderShapeId ?? localContents.phraseScriptureRangePlaceholderShapeId,
+        phrasePlaceholderId:
+          Number.isInteger(serverContents.phrasePlaceholderId) && serverContents.phrasePlaceholderId > 0
+            ? serverContents.phrasePlaceholderId
+            : localContents.phrasePlaceholderId,
+        phraseRangePlaceholderId:
+          serverContents.phraseRangePlaceholderId ?? localContents.phraseRangePlaceholderId ?? null,
+        titlePlaceholderValues:
+          Object.keys(serverTitlePlaceholderValues).length > 0 ? serverTitlePlaceholderValues : localTitlePlaceholderValues,
       },
     }
   }
@@ -189,6 +199,27 @@ function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | un
     }
   }
   return serverPart
+}
+
+function normalizeTitlePlaceholderValues(
+  raw: Readonly<Record<number, string>> | null | undefined
+): Readonly<Record<number, string>> {
+  if (raw === null || raw === undefined) {
+    return {}
+  }
+  const out: Record<number, string> = {}
+  const entries: Array<readonly [string, string]> = Object.entries(raw as Readonly<Record<string, string>>)
+  for (const [key, value] of entries) {
+    const shapeId: number = Number.parseInt(key, 10)
+    if (!Number.isInteger(shapeId) || shapeId <= 0) {
+      continue
+    }
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      continue
+    }
+    out[shapeId] = value
+  }
+  return out
 }
 
 function mergeServerPartsWithLocalFallback(updatedParts: Part[], localRecord: PartsRecord): Part[] {
@@ -535,6 +566,8 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
   const queryClient = useQueryClient()
   const patchProject = usePatchProject()
   const patchContainer = usePatchProjectContainer()
+
+  void useProjectVariablesScope()
 
   const templatesQuery = useListTemplates(userId)
   const templates: TemplateResponse[] | undefined = getQueryData(templatesQuery)
@@ -911,7 +944,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     setPlaceholderFocus(null)
     setEditPanelPreview(null)
     setBibleBlockingUiByPartId({})
-  }, [workspaceKind, project, container])
+  }, [workspaceKind, project, container, queryClient])
 
   const selectedSlide: LocalSlide | undefined = localSlides.find((s: LocalSlide): boolean => s.id === selectedId)
   const selectedPart: Part | undefined =
@@ -1479,6 +1512,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                 </Button>
               </div>
             </div>
+            <ProjectVariablesBar />
             <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col p-0">
               <div
                 ref={slideStageSlotRef}
@@ -1956,14 +1990,16 @@ export function ProjectContainerViewPage(): ReactElement | null {
           <p className="text-muted-foreground text-sm">{t('page.project_view.container_not_found')}</p>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            <ProjectWorkspace
-              ref={projectWorkspaceRef}
-              workspaceKind="container"
-              project={project}
-              userId={userId}
-              container={container}
-              onWorkspaceExportIncompleteChange={setWorkspaceExportIncomplete}
-            />
+            <ProjectVariablesScopeProvider projectId={project.id}>
+              <ProjectWorkspace
+                ref={projectWorkspaceRef}
+                workspaceKind="container"
+                project={project}
+                userId={userId}
+                container={container}
+                onWorkspaceExportIncompleteChange={setWorkspaceExportIncomplete}
+              />
+            </ProjectVariablesScopeProvider>
           </div>
         )}
       </div>
@@ -2101,13 +2137,15 @@ export function ProjectViewPage(): ReactElement | null {
           <p className="text-muted-foreground text-sm">{t('page.project_view.not_found')}</p>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            <ProjectWorkspace
-              ref={projectWorkspaceRef}
-              workspaceKind="project"
-              project={project}
-              userId={userId}
-              container={undefined}
-            />
+            <ProjectVariablesScopeProvider projectId={project.id}>
+              <ProjectWorkspace
+                ref={projectWorkspaceRef}
+                workspaceKind="project"
+                project={project}
+                userId={userId}
+                container={undefined}
+              />
+            </ProjectVariablesScopeProvider>
           </div>
         )}
 
