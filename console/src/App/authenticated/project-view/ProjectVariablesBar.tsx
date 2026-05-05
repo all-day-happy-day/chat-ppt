@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { PlusIcon, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 
-import {
-  useCreateProjectVariable,
-  useDeleteProjectVariable,
-  usePatchProjectVariable,
-} from '@/api/query/project.query'
+import { useCreateProjectVariable, useDeleteProjectVariable, usePatchProjectVariable } from '@/api/query/project.query'
 import type { ProjectVariable } from '@/domain/models/project'
 import { cn } from '@/lib/utils'
 
@@ -50,8 +46,7 @@ export function ProjectVariablesBar(): React.ReactElement {
       setPopoverCoords(null)
       return
     }
-    const anchorEl: HTMLButtonElement | null =
-      panel.mode === 'create' ? createAnchorRef.current : editAnchorRef.current
+    const anchorEl: HTMLButtonElement | null = panel.mode === 'create' ? createAnchorRef.current : editAnchorRef.current
     if (anchorEl === null) {
       setPopoverCoords(null)
       return
@@ -83,8 +78,7 @@ export function ProjectVariablesBar(): React.ReactElement {
     if (panel.mode === 'closed') {
       return
     }
-    const anchorEl: HTMLButtonElement | null =
-      panel.mode === 'create' ? createAnchorRef.current : editAnchorRef.current
+    const anchorEl: HTMLButtonElement | null = panel.mode === 'create' ? createAnchorRef.current : editAnchorRef.current
     if (anchorEl === null) {
       return
     }
@@ -219,8 +213,8 @@ export function ProjectVariablesBar(): React.ReactElement {
               }}
               className={cn(
                 'shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium shadow-sm transition',
-                'border-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                isEditOpen && 'ring-ring ring-2 ring-offset-1 ring-offset-background'
+                'focus-visible:ring-ring border-transparent outline-none focus-visible:ring-2',
+                isEditOpen && 'ring-ring ring-offset-background ring-2 ring-offset-1'
               )}
               style={{ backgroundColor: colors.background, color: colors.foreground }}
             >
@@ -235,8 +229,8 @@ export function ProjectVariablesBar(): React.ReactElement {
           title={t('page.project_view.variables_add_aria')}
           onClick={openCreate}
           className={cn(
-            'border-border text-muted-foreground hover:bg-muted/80 hover:text-foreground flex size-6 shrink-0 items-center justify-center rounded-full border bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            panel.mode === 'create' && 'ring-ring ring-2 ring-offset-1 ring-offset-background'
+            'border-border text-muted-foreground hover:bg-muted/80 hover:text-foreground focus-visible:ring-ring flex size-6 shrink-0 items-center justify-center rounded-full border bg-transparent outline-none focus-visible:ring-2',
+            panel.mode === 'create' && 'ring-ring ring-offset-background ring-2 ring-offset-1'
           )}
         >
           <PlusIcon aria-hidden className="size-3.5" />
@@ -247,8 +241,10 @@ export function ProjectVariablesBar(): React.ReactElement {
         <div
           id={POPOVER_ELEMENT_ID}
           role="dialog"
-          aria-label={showCreatePanel ? t('page.project_view.variables_add_aria') : panel.mode === 'edit' ? panel.name : ''}
-          className="border-border bg-popover text-popover-foreground fixed z-[120] w-[13.5rem] rounded-lg border p-2.5 text-xs shadow-lg"
+          aria-label={
+            showCreatePanel ? t('page.project_view.variables_add_aria') : panel.mode === 'edit' ? panel.name : ''
+          }
+          className="border-border bg-popover text-popover-foreground w-13.5rem fixed z-120 rounded-lg border p-2.5 text-xs shadow-lg"
           style={{ top: popoverCoords.top, left: popoverCoords.left }}
         >
           {showCreatePanel ? (
@@ -265,7 +261,7 @@ export function ProjectVariablesBar(): React.ReactElement {
                   }}
                   placeholder={t('page.project_view.variables_new_name_placeholder')}
                   autoComplete="off"
-                  className="border-input bg-background text-foreground w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
+                  className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/40 w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
                 />
               </label>
               <label className="block">
@@ -280,13 +276,13 @@ export function ProjectVariablesBar(): React.ReactElement {
                   }}
                   placeholder={t('page.project_view.variables_new_value_placeholder')}
                   autoComplete="off"
-                  className="border-input bg-background text-foreground w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
+                  className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/40 w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
                 />
               </label>
               <div className="flex items-center justify-end gap-1.5 pt-0.5">
                 <button
                   type="button"
-                  className="text-muted-foreground hover:text-foreground rounded-md px-2 py-1 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-md px-2 py-1 text-[11px] outline-none focus-visible:ring-2"
                   onClick={(): void => {
                     setPanel({ mode: 'closed' })
                   }}
@@ -296,7 +292,7 @@ export function ProjectVariablesBar(): React.ReactElement {
                 <button
                   type="button"
                   disabled={createMut.isPending}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-2.5 py-1 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring rounded-md px-2.5 py-1 text-[11px] font-medium outline-none focus-visible:ring-2 disabled:opacity-50"
                   onClick={(): void => {
                     void handleCreate()
                   }}
@@ -326,14 +322,14 @@ export function ProjectVariablesBar(): React.ReactElement {
                   onBlur={(): void => {
                     void handlePopoverBlurSave()
                   }}
-                  className="border-input bg-background w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
+                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/40 w-full rounded-md border px-2 py-1 text-xs outline-none focus-visible:ring-2"
                 />
               </label>
-              <div className="flex justify-end border-border/40 border-t pt-1.5">
+              <div className="border-border/40 flex justify-end border-t pt-1.5">
                 <button
                   type="button"
                   aria-label={t('page.project_view.variables_delete_aria')}
-                  className="text-muted-foreground hover:text-destructive rounded-md p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring rounded-md p-1 outline-none focus-visible:ring-2"
                   onClick={(): void => {
                     void handleDelete(editVariable.name)
                   }}
