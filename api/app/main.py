@@ -8,6 +8,7 @@ from pydantic_core import ValidationError as CoreValidationError
 
 from app.auth.infrastructure.adapter.inbound.api import router as auth_api_router
 from app.bible.infrastructure.adapter.inbound.api.router import router as bible_api_router
+from app.config import config
 from app.powerpoint.infrastructure.adapter.inbound.api import router as powerpoint_api_router
 from app.project.infrastructure.adapter.inbound.api import router as project_api_router
 from app.song.infrastructure.adapter.inbound.api import router as song_api_router
@@ -18,8 +19,8 @@ app: FastAPI = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:8000",
+        f"{config.domain}:5173",
+        f"{config.domain}:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -50,4 +51,4 @@ async def handle_core_validation_error(request, exc: CoreValidationError):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="app.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(app="app.main:app", host=config.domain, port=80, reload=True)

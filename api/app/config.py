@@ -10,6 +10,7 @@ class Config(BaseSettings):
     bible_data_path: str = Field(alias="BIBLE_DATA_PATH")
     ppt_upload_directory: str = Field(alias="PPT_UPLOAD_DIRECTORY")
     ppt_save_temp_directory: str = Field(alias="PPT_SAVE_TEMP_DIRECTORY")
+    domain: str = Field(alias="DOMAIN", default="http://localhost")
     model_config = SettingsConfigDict(env_file=".env")
 
 
