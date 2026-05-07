@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic_core import ValidationError as CoreValidationError
 
 from app.auth.infrastructure.adapter.inbound.api import router as auth_api_router
@@ -33,6 +34,8 @@ app.include_router(powerpoint_api_router, prefix="/powerpoint")
 app.include_router(project_api_router, prefix="/project")
 app.include_router(song_api_router, prefix="/song")
 app.include_router(user_api_router, prefix="/user")
+
+app.mount(path="/", app=StaticFiles(directory="../../console/dist"), name="static")
 
 
 @app.exception_handler(RequestValidationError)
