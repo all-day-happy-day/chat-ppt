@@ -35,7 +35,7 @@ app.include_router(project_api_router, prefix="/project")
 app.include_router(song_api_router, prefix="/song")
 app.include_router(user_api_router, prefix="/user")
 
-app.mount(path="/", app=StaticFiles(directory="../../console/dist"), name="static")
+app.mount(path="/", app=StaticFiles(directory="../console/dist"), name="static")
 
 
 @app.exception_handler(RequestValidationError)
