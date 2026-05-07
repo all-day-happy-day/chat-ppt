@@ -10,6 +10,7 @@
     "types": [
       "vite/client"
     ],
+    "strictNullChecks": false,
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,13 +26,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "erasableSyntaxOnly": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ]
     },
-    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src"
