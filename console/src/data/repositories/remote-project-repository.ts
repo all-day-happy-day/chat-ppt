@@ -85,6 +85,7 @@ function sanitizePartRequestBody(part: PartRequestBody): PartRequestBody {
               : 0,
           phraseRangePlaceholderId:
             part.contents.phraseRangePlaceholderId !== undefined &&
+            part.contents.phraseRangePlaceholderId !== null &&
             Number.isInteger(part.contents.phraseRangePlaceholderId) &&
             part.contents.phraseRangePlaceholderId > 0
               ? part.contents.phraseRangePlaceholderId
@@ -145,11 +146,7 @@ export class RemoteProjectRepository implements ProjectRepository {
   async getProjectsPartial(userId: string, size: number): Promise<Project[]> {
     const params: URLSearchParams = new URLSearchParams()
     params.set('size', String(size))
-    const { response } = await httpClient.get<GetProjectsPartialResponse>(
-      projectPartialPath(userId),
-      undefined,
-      params
-    )
+    const { response } = await httpClient.get<GetProjectsPartialResponse>(projectPartialPath(userId), undefined, params)
     return response.map((row) => toProject(row))
   }
 
