@@ -9,7 +9,6 @@ from pydantic_core import ValidationError as CoreValidationError
 
 from app.auth.infrastructure.adapter.inbound.api import router as auth_api_router
 from app.bible.infrastructure.adapter.inbound.api.router import router as bible_api_router
-from app.config import config
 from app.powerpoint.infrastructure.adapter.inbound.api import router as powerpoint_api_router
 from app.project.infrastructure.adapter.inbound.api import router as project_api_router
 from app.song.infrastructure.adapter.inbound.api import router as song_api_router
@@ -20,7 +19,6 @@ app: FastAPI = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        config.domain,
         "http://localhost:5173",
         "http://localhost:8000",
     ],
@@ -35,7 +33,7 @@ app.include_router(project_api_router, prefix="/project")
 app.include_router(song_api_router, prefix="/song")
 app.include_router(user_api_router, prefix="/user")
 
-app.mount(path="/", app=StaticFiles(directory="../console/dist"), name="static")
+# app.mount(path="/", app=StaticFiles(directory="../console/dist", html=True), name="static")
 
 
 @app.exception_handler(RequestValidationError)
