@@ -68,7 +68,7 @@ console/src/
 
 ### Backend
 
-Copy `.env.example` to `.env` and configure:
+Configure `api/.env`:
 
 | Variable                  | Description                            |
 | ------------------------- | -------------------------------------- |
@@ -78,4 +78,15 @@ Copy `.env.example` to `.env` and configure:
 | `PPT_UPLOAD_DIRECTORY`    | Directory for uploaded template files  |
 | `PPT_SAVE_TEMP_DIRECTORY` | Temporary directory for PPT generation |
 | `EMAIL_SENDER_EMAIL`      | Email address for notifications        |
-| `EMAIL_SENDER_PASSWORD`   | Email password for notifications       |
+| `EMAIL_SENDER_PASSWORD`   | Email app password for notifications   |
+
+Configure `api/.env.db`:
+
+| Variable       | Description                     |
+| -------------- | ------------------------------- |
+| `DB_HOST`      | PostgreSQL host                 |
+| `DB_PORT`      | PostgreSQL port                 |
+| `DB_NAME`      | Database name                   |
+| `DB_USERNAME`  | Database user                   |
+| `DB_PASSWORD`  | Database password               |
+| `DB_POOL_SIZE` | SQLAlchemy connection pool size |
