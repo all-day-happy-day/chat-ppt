@@ -5,11 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ShapeTypes } from '@/domain/enums/powerpoint'
 import { type Layout, type Shape } from '@/domain/models/powerpoint'
 import { type ColorConfig, imageDataToDataUrl, type Size } from '@/domain/valueobjects/powerpoint'
-import {
-  cn,
-  LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT,
-  PLACEHOLDER_FILL_BASE_CHROME,
-} from '@/lib/utils'
+import { cn, LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT, PLACEHOLDER_FILL_BASE_CHROME } from '@/lib/utils'
 
 import '@/i18n/i18n'
 
@@ -24,11 +20,7 @@ function fillStyle(fill: ColorConfig): React.CSSProperties {
   return { backgroundColor: color }
 }
 
-function outlineRingClass(
-  placeholder: boolean,
-  highlightPlaceholder: boolean,
-  filledPlaceholderTint: boolean,
-): string {
+function outlineRingClass(placeholder: boolean, highlightPlaceholder: boolean, filledPlaceholderTint: boolean): string {
   if (highlightPlaceholder) {
     return LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT
   }
@@ -77,8 +69,7 @@ function ShapeView({
   const hPct: number = (shape.size.height / slideH) * 100
   const rot: number = shape.position.rotation
   const ring: string = outlineRingClass(shape.placeholder, highlightPlaceholder, filledPlaceholderTint)
-  const showLayoutFillLayer: boolean =
-    !shape.placeholder || (!filledPlaceholderTint && !highlightPlaceholder)
+  const showLayoutFillLayer: boolean = !shape.placeholder || (!filledPlaceholderTint && !highlightPlaceholder)
 
   const base: React.CSSProperties = {
     position: 'absolute',
@@ -122,7 +113,7 @@ function ShapeView({
         <img
           src={imageDataToDataUrl(shape.image)}
           alt=""
-          className="relative z-10 block h-full w-full object-contain pointer-events-none select-none"
+          className="pointer-events-none relative z-10 block h-full w-full object-contain select-none"
           draggable={false}
         />
       </div>
@@ -173,11 +164,8 @@ function resolveSlideDimensions(layout: Layout, fallback: Size): { width: number
 function ShapeHoverTooltip({ tip }: { readonly tip: HoverTipState }): React.ReactElement {
   const { t } = useTranslation()
   const { shape, clientX, clientY } = tip
-  const textPreview: string | null =
-    shape.text !== null && shape.text.trim().length > 0 ? shape.text : null
-  const kindLabel: string = shape.placeholder
-    ? t('page.template_layout.tooltip_placeholder')
-    : shape.type
+  const textPreview: string | null = shape.text !== null && shape.text.trim().length > 0 ? shape.text : null
+  const kindLabel: string = shape.placeholder ? t('page.template_layout.tooltip_placeholder') : shape.type
 
   return (
     <div
@@ -195,7 +183,7 @@ function ShapeHoverTooltip({ tip }: { readonly tip: HoverTipState }): React.Reac
         {String(shape.shapeId)}:{shape.name}
       </div>
       {textPreview !== null ? (
-        <pre className="border-border text-foreground mt-2 max-h-40 max-w-full overflow-auto whitespace-pre-wrap rounded border bg-transparent p-2 text-[11px] leading-snug">
+        <pre className="border-border text-foreground mt-2 max-h-40 max-w-full overflow-auto rounded border bg-transparent p-2 text-[11px] leading-snug whitespace-pre-wrap">
           {textPreview}
         </pre>
       ) : null}
@@ -270,7 +258,7 @@ export function TemplateLayoutSlide({
       className={cn(
         'flex min-w-0 flex-col items-center',
         fitWidth ? 'w-auto max-w-full' : 'w-full',
-        showLayoutTitle ? 'gap-2' : 'gap-0 p-0 leading-none',
+        showLayoutTitle ? 'gap-2' : 'gap-0 p-0 leading-none'
       )}
     >
       {showLayoutTitle ? (
@@ -279,9 +267,7 @@ export function TemplateLayoutSlide({
       <div
         className={cn(
           'relative mx-auto max-w-full overflow-hidden rounded-lg',
-          hideSlideChrome
-            ? 'rounded-[inherit]'
-            : 'border-border bg-muted/10 border shadow-sm',
+          hideSlideChrome ? 'rounded-[inherit]' : 'border-border bg-muted/10 border shadow-sm'
         )}
         style={{ width: displayW, height: displayH }}
       >

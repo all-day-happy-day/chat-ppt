@@ -25,8 +25,7 @@ export function TemplateNewPage(): React.ReactElement | null {
   const nameInputId: string = 'template-new-name'
   const fileInputId: string = 'template-new-file'
 
-  const canSubmit: boolean =
-    name.trim().length > 0 && file !== null && !readTemplate.isPending && userId.length > 0
+  const canSubmit: boolean = name.trim().length > 0 && file !== null && !readTemplate.isPending && userId.length > 0
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
@@ -52,7 +51,7 @@ export function TemplateNewPage(): React.ReactElement | null {
   }
 
   return (
-    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pb-16 pt-8 md:px-16">
+    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pt-8 pb-16 md:px-16">
       <div className="flex w-full max-w-4xl flex-col items-center gap-8">
         <div className="flex w-full justify-start">
           <button
@@ -71,11 +70,7 @@ export function TemplateNewPage(): React.ReactElement | null {
           <h1 className="text-2xl font-bold tracking-tight">{t('page.template_new.title')}</h1>
         </div>
 
-        <form
-          className="flex w-full flex-col gap-6"
-          onSubmit={handleSubmit}
-          noValidate
-        >
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit} noValidate>
           <div className="flex w-full flex-col gap-2">
             <label htmlFor={nameInputId} className="text-muted-foreground text-sm font-medium">
               {t('page.template_new.name_label')}
@@ -108,11 +103,9 @@ export function TemplateNewPage(): React.ReactElement | null {
                 const next: File | undefined = ev.target.files?.[0]
                 setFile(next ?? null)
               }}
-              className="border-input bg-background focus:border-ring text-foreground w-full cursor-pointer rounded-lg border px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-sm file:font-medium"
+              className="border-input bg-background focus:border-ring text-foreground file:bg-secondary w-full cursor-pointer rounded-lg border px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:px-3 file:py-1 file:text-sm file:font-medium"
             />
-            {file !== null ? (
-              <p className="text-muted-foreground wrap-break-word text-xs">{file.name}</p>
-            ) : null}
+            {file !== null ? <p className="text-muted-foreground text-xs wrap-break-word">{file.name}</p> : null}
           </div>
 
           {readTemplate.isError ? (

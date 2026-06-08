@@ -79,10 +79,7 @@ export function bibleProbeDetailToI18nKey(detail: string): string {
   if (d.includes('phrase not found') || d.includes('verse not found')) {
     return 'bible_probe_verse_not_found'
   }
-  if (
-    compact.includes('unsupportedversion') ||
-    compact.includes('versionnotfound')
-  ) {
+  if (compact.includes('unsupportedversion') || compact.includes('versionnotfound')) {
     return 'bible_probe_unsupported_version'
   }
   if (d.includes('version not found') || d.includes('unsupported version')) {

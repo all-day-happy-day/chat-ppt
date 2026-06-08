@@ -50,7 +50,7 @@ export function ProjectNewPage(): ReactElement | null {
       (tpl: TemplateResponse): SelectMenuOption => ({
         value: tpl.templateId,
         label: tpl.name,
-      }),
+      })
     )
   }, [sortedTemplates])
 
@@ -86,7 +86,7 @@ export function ProjectNewPage(): ReactElement | null {
 
   if (userId.length > 0 && templatesQuery.isError) {
     return (
-      <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pb-16 pt-8 md:px-16">
+      <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pt-8 pb-16 md:px-16">
         <div className="flex w-full max-w-4xl flex-col gap-6">
           <button
             type="button"
@@ -109,7 +109,7 @@ export function ProjectNewPage(): ReactElement | null {
   }
 
   return (
-    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pb-16 pt-8 md:px-16">
+    <div className="scrollbar-hide flex h-full min-h-0 w-full flex-col items-center overflow-y-auto px-8 pt-8 pb-16 md:px-16">
       <div className="flex w-full max-w-4xl flex-col items-center gap-8">
         <div className="flex w-full justify-start">
           <button

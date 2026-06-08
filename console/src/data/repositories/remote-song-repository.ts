@@ -81,7 +81,11 @@ export class RemoteSongRepository implements SongRepository {
     search.set('title', params.title)
     search.set('artist', params.artist ?? '')
     search.set('page', String(params.page))
-    const { response } = await httpClient.get<ScrapeSearchSongsResponseWire>(songScrapeSearchSongsPath, undefined, search)
+    const { response } = await httpClient.get<ScrapeSearchSongsResponseWire>(
+      songScrapeSearchSongsPath,
+      undefined,
+      search
+    )
     return toScrapeSearchSongsResult(response)
   }
 

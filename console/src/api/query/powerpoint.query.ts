@@ -12,7 +12,7 @@ import { QUERY_KEY } from './key'
 function evictDeletedTemplateFromListCaches(
   queryClient: ReturnType<typeof useQueryClient>,
   userId: string,
-  templateId: string,
+  templateId: string
 ): void {
   queryClient.setQueriesData<PageResult<TemplateResponse>>(
     { queryKey: ['powerpoint', 'page', userId] },
@@ -21,7 +21,7 @@ function evictDeletedTemplateFromListCaches(
         return undefined
       }
       const nextItems: TemplateResponse[] = previous.items.filter(
-        (item: TemplateResponse): boolean => item.templateId !== templateId,
+        (item: TemplateResponse): boolean => item.templateId !== templateId
       )
       if (nextItems.length === previous.items.length) {
         return previous
@@ -35,7 +35,7 @@ function evictDeletedTemplateFromListCaches(
         totalItems: nextTotalItems,
         totalPages: nextTotalPages,
       }
-    },
+    }
   )
 
   queryClient.setQueriesData<TemplateResponse[]>(
@@ -45,10 +45,10 @@ function evictDeletedTemplateFromListCaches(
         return undefined
       }
       const next: TemplateResponse[] = previous.filter(
-        (item: TemplateResponse): boolean => item.templateId !== templateId,
+        (item: TemplateResponse): boolean => item.templateId !== templateId
       )
       return next.length === previous.length ? previous : next
-    },
+    }
   )
 
   queryClient.setQueriesData<TemplateResponse[]>(
@@ -58,16 +58,16 @@ function evictDeletedTemplateFromListCaches(
         return undefined
       }
       const next: TemplateResponse[] = previous.filter(
-        (item: TemplateResponse): boolean => item.templateId !== templateId,
+        (item: TemplateResponse): boolean => item.templateId !== templateId
       )
       return next.length === previous.length ? previous : next
-    },
+    }
   )
 }
 
 async function invalidatePowerpointListQueries(
   queryClient: ReturnType<typeof useQueryClient>,
-  userId: string,
+  userId: string
 ): Promise<void> {
   await Promise.all([
     queryClient.invalidateQueries({

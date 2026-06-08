@@ -21,12 +21,10 @@ import type { Size } from '@/domain/valueobjects/powerpoint'
 import type { LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
 import type { LyricsPart as LyricLine } from '@/domain/valueobjects/song'
 import { normalizeLyricsPartSequence, readLyricsPartSequenceFromRow } from '@/lib/lyrics-part-sequence'
+import { formatSongLibraryLabel, rankUserSongsByTitle, resolveSongIdForLyricsFetch } from '@/lib/song-search'
 import { cn, LAYOUT_SELECTION_ACTIVE_CHROME } from '@/lib/utils'
 
-import {
-  LyricsSongConfigureOverlay,
-  type LyricsSongConfigureSnapshot,
-} from './LyricsSongConfigureOverlay'
+import { LyricsSongConfigureOverlay, type LyricsSongConfigureSnapshot } from './LyricsSongConfigureOverlay'
 
 const MIME_LYRICS_SONG_REORDER: string = 'application/x-chat-ppt-lyrics-song-reorder'
 
@@ -95,158 +93,6 @@ function syncLegacyIncludeTitleForFirstCard(contents: LyricsContents): LyricsCon
   const first: LyricsContent | undefined = rows[0]
   const includeFirst: boolean = first === undefined ? true : first.includeTitleSlide !== false
   return { ...contents, includeTitleForFirstCard: includeFirst }
-}
-
-function normalizeMatchKey(raw: string): string {
-  return raw.trim().toLowerCase().replace(/\s+/g, ' ')
-}
-
-function levenshteinDistance(a: string, b: string): number {
-  if (a.length === 0) {
-    return b.length
-  }
-  if (b.length === 0) {
-    return a.length
-  }
-  const row: number[] = Array.from({ length: b.length + 1 }, (_, j): number => j)
-  for (let i = 1; i <= a.length; i++) {
-    let prevDiagonal: number = row[0]!
-    row[0] = i
-    for (let j = 1; j <= b.length; j++) {
-      const buffer: number = row[j]!
-      const cost: number = a[i - 1] === b[j - 1] ? 0 : 1
-      row[j] = Math.min(row[j]! + 1, row[j - 1]! + 1, prevDiagonal + cost)
-      prevDiagonal = buffer
-    }
-  }
-  return row[b.length]!
-}
-
-function levenshteinRatio(a: string, b: string): number {
-  const maxLen: number = Math.max(a.length, b.length)
-  if (maxLen === 0) {
-    return 1
-  }
-  const dist: number = levenshteinDistance(a, b)
-  return 1 - dist / maxLen
-}
-
-function subsequenceMatchRatio(query: string, text: string): number {
-  if (query.length === 0) {
-    return 0
-  }
-  let qi = 0
-  for (let ti = 0; ti < text.length && qi < query.length; ti++) {
-    if (text[ti] === query[qi]) {
-      qi++
-    }
-  }
-  return qi / query.length
-}
-
-function tokenHitRatio(queryNorm: string, haystackNorm: string): number {
-  const tokens: string[] = queryNorm.split(' ').filter((tok: string): boolean => tok.length > 0)
-  if (tokens.length === 0) {
-    return 0
-  }
-  let hits = 0
-  for (const tok of tokens) {
-    if (haystackNorm.includes(tok)) {
-      hits++
-    }
-  }
-  return hits / tokens.length
-}
-
-function scoreSongAgainstQuery(queryNorm: string, title: string, artist: string | null): number {
-  if (queryNorm.length === 0) {
-    return 0
-  }
-  const titleNorm: string = normalizeMatchKey(title)
-  const artistNorm: string = artist !== null ? normalizeMatchKey(artist) : ''
-  const haystack: string = `${titleNorm} ${artistNorm}`.trim()
-  let score = 0
-  if (titleNorm.startsWith(queryNorm)) {
-    score += 130
-  } else if (titleNorm.includes(queryNorm)) {
-    score += 100
-  }
-  score += subsequenceMatchRatio(queryNorm, titleNorm) * 75
-  score += tokenHitRatio(queryNorm, haystack) * 55
-  if (artistNorm.length > 0) {
-    if (artistNorm.includes(queryNorm)) {
-      score += 45
-    }
-    score += subsequenceMatchRatio(queryNorm, artistNorm) * 30
-  }
-  const maxSl: number = Math.max(queryNorm.length, titleNorm.length)
-  if (maxSl <= 48) {
-    score += levenshteinRatio(queryNorm, titleNorm) * 65
-  }
-  return score
-}
-
-const SONG_SEARCH_SCORE_THRESHOLD = 28
-const SONG_SEARCH_MAX_RESULTS = 8
-
-function rankUserSongsByTitle(songs: readonly Song[], rawQuery: string): Song[] {
-  const queryNorm: string = normalizeMatchKey(rawQuery)
-  if (queryNorm.length === 0) {
-    return []
-  }
-  const threshold: number = queryNorm.length <= 2 ? 18 : SONG_SEARCH_SCORE_THRESHOLD
-  const scored: { song: Song; score: number }[] = []
-  for (const song of songs) {
-    const s: number = scoreSongAgainstQuery(queryNorm, song.title, song.artist)
-    if (s >= threshold) {
-      scored.push({ song, score: s })
-    }
-  }
-  scored.sort((a: { song: Song; score: number }, b: { song: Song; score: number }): number => {
-    if (b.score !== a.score) {
-      return b.score - a.score
-    }
-    return normalizeMatchKey(a.song.title).localeCompare(normalizeMatchKey(b.song.title))
-  })
-  return scored.slice(0, SONG_SEARCH_MAX_RESULTS).map((row: { song: Song; score: number }): Song => row.song)
-}
-
-function formatSongLibraryLabel(song: Song): string {
-  if (song.artist !== null && song.artist.trim().length > 0) {
-    return `${song.title} - ${song.artist}`
-  }
-  return song.title
-}
-
-/**
- * Resolves library song id for `/song/lyrics/get/:id`: explicit link first, else a single unambiguous
- * title (+ artist) match in the loaded library list.
- */
-function resolveSongIdForLyricsFetch(row: LyricsContent, library: readonly Song[] | undefined): string {
-  const explicit: string = row.songId?.trim() ?? ''
-  if (explicit.length > 0) {
-    return explicit
-  }
-  if (library === undefined || library.length === 0) {
-    return ''
-  }
-  const titleNorm: string = normalizeMatchKey(row.title)
-  if (titleNorm.length === 0) {
-    return ''
-  }
-  const cardArtistNorm: string = row.artist !== null ? normalizeMatchKey(row.artist) : ''
-  const byTitle: Song[] = library.filter((s: Song): boolean => normalizeMatchKey(s.title) === titleNorm)
-  if (byTitle.length === 0) {
-    return ''
-  }
-  if (cardArtistNorm.length > 0) {
-    const withArtist: Song[] = byTitle.filter((s: Song): boolean => {
-      const libArtistNorm: string = s.artist !== null ? normalizeMatchKey(s.artist) : ''
-      return libArtistNorm === cardArtistNorm
-    })
-    return withArtist.length === 1 ? withArtist[0]!.id : ''
-  }
-  return byTitle.length === 1 ? byTitle[0]!.id : ''
 }
 
 interface SongTitleComboboxProps {
@@ -361,31 +207,31 @@ function SongTitleCombobox({
       {!titleFieldsLocked ? (
         <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{searchHint}</p>
       ) : null}
-      {!titleFieldsLocked && songsLoading ? (
-        <p className="text-muted-foreground mt-1 text-xs">{loadingLabel}</p>
-      ) : null}
+      {!titleFieldsLocked && songsLoading ? <p className="text-muted-foreground mt-1 text-xs">{loadingLabel}</p> : null}
       {!titleFieldsLocked && songsError ? <p className="text-destructive mt-1 text-xs">{errorLabel}</p> : null}
       {!titleFieldsLocked && showList ? (
         <ul
           className="border-border bg-background scrollbar-hide absolute z-30 mt-1 max-h-48 w-full min-w-0 overflow-y-auto rounded-md border py-1 shadow-md"
           role="listbox"
         >
-          {matches.map((hit: Song): React.ReactElement => (
-            <li key={hit.id} role="option">
-              <button
-                type="button"
-                className="hover:bg-muted/80 focus:bg-muted/80 w-full px-2 py-1.5 text-left text-sm outline-none"
-                aria-label={`${pickAriaLabel}: ${formatSongLibraryLabel(hit)}`}
-                onMouseDown={(ev: React.MouseEvent<HTMLButtonElement>): void => {
-                  ev.preventDefault()
-                  onPickLibrarySong(hit)
-                  setOpen(false)
-                }}
-              >
-                <span className="block min-w-0 truncate">{formatSongLibraryLabel(hit)}</span>
-              </button>
-            </li>
-          ))}
+          {matches.map(
+            (hit: Song): React.ReactElement => (
+              <li key={hit.id} role="option">
+                <button
+                  type="button"
+                  className="hover:bg-muted/80 focus:bg-muted/80 w-full px-2 py-1.5 text-left text-sm outline-none"
+                  aria-label={`${pickAriaLabel}: ${formatSongLibraryLabel(hit)}`}
+                  onMouseDown={(ev: React.MouseEvent<HTMLButtonElement>): void => {
+                    ev.preventDefault()
+                    onPickLibrarySong(hit)
+                    setOpen(false)
+                  }}
+                >
+                  <span className="block min-w-0 truncate">{formatSongLibraryLabel(hit)}</span>
+                </button>
+              </li>
+            )
+          )}
         </ul>
       ) : null}
       {slash.menuPortal}
@@ -419,8 +265,7 @@ export function ProjectLyricsEditor({
   const [configureSnapshot, setConfigureSnapshot] = React.useState<LyricsSongConfigureSnapshot | null>(null)
   const [configureLoadingSongIndex, setConfigureLoadingSongIndex] = React.useState<number | null>(null)
 
-  const isSongListReorderLocked: boolean =
-    configureSnapshot !== null || configureLoadingSongIndex !== null
+  const isSongListReorderLocked: boolean = configureSnapshot !== null || configureLoadingSongIndex !== null
 
   const openSongConfigure = React.useCallback(
     (songIndex: number): void => {
@@ -458,16 +303,17 @@ export function ProjectLyricsEditor({
             }
           }
           const shouldPersistLink: boolean =
-            fetchOk &&
-            backendId.length > 0 &&
-            (song.songId?.trim() ?? '') !== backendId
+            fetchOk && backendId.length > 0 && (song.songId?.trim() ?? '') !== backendId
           if (shouldPersistLink) {
-            patchContents((prev: LyricsContents): LyricsContents => ({
-              ...prev,
-              contents: prev.contents.map(
-                (row: LyricsContent, i: number): LyricsContent => (i === songIndex ? { ...row, songId: backendId } : row)
-              ),
-            }))
+            patchContents(
+              (prev: LyricsContents): LyricsContents => ({
+                ...prev,
+                contents: prev.contents.map(
+                  (row: LyricsContent, i: number): LyricsContent =>
+                    i === songIndex ? { ...row, songId: backendId } : row
+                ),
+              })
+            )
           }
           setConfigureSnapshot({
             songIndex,
@@ -589,8 +435,7 @@ export function ProjectLyricsEditor({
       }
       const selectedLayout: Layout | undefined =
         layoutId === null ? undefined : layouts.find((l: Layout): boolean => l.id === layoutId)
-      const nextTitlePlaceholders: Shape[] =
-        selectedLayout !== undefined ? sortedPlaceholderShapes(selectedLayout) : []
+      const nextTitlePlaceholders: Shape[] = selectedLayout !== undefined ? sortedPlaceholderShapes(selectedLayout) : []
       onCommit({
         ...part,
         titleLayoutId: layoutId,
@@ -635,10 +480,8 @@ export function ProjectLyricsEditor({
         lyricsLayoutId: layout.id,
         contents: syncLegacyIncludeTitleForFirstCard({
           ...part.contents,
-          lyricsPlaceholderShapeId: effectiveSinglePlaceholderSelection(
-            part.contents.lyricsPlaceholderShapeId,
-            nextLyricsPlaceholders
-          ) ?? 0,
+          lyricsPlaceholderShapeId:
+            effectiveSinglePlaceholderSelection(part.contents.lyricsPlaceholderShapeId, nextLyricsPlaceholders) ?? 0,
         }),
       })
     },
@@ -663,18 +506,16 @@ export function ProjectLyricsEditor({
       patchContents(
         (prev: LyricsContents): LyricsContents => ({
           ...prev,
-          contents: prev.contents.map(
-            (row: LyricsContent, i: number): LyricsContent => {
-              if (i !== index) {
-                return row
-              }
-              if (field === 'title') {
-                return { ...row, title: raw, songId: null }
-              }
-              const artist: string | null = raw.length === 0 ? null : raw
-              return { ...row, artist, songId: null }
+          contents: prev.contents.map((row: LyricsContent, i: number): LyricsContent => {
+            if (i !== index) {
+              return row
             }
-          ),
+            if (field === 'title') {
+              return { ...row, title: raw, songId: null }
+            }
+            const artist: string | null = raw.length === 0 ? null : raw
+            return { ...row, artist, songId: null }
+          }),
         })
       )
     },
@@ -732,9 +573,7 @@ export function ProjectLyricsEditor({
       patchContents(
         (prev: LyricsContents): LyricsContents => ({
           ...prev,
-          contents: prev.contents.filter(
-            (_: LyricsContent, i: number): boolean => i !== index
-          ),
+          contents: prev.contents.filter((_: LyricsContent, i: number): boolean => i !== index),
         })
       )
     },
@@ -750,12 +589,7 @@ export function ProjectLyricsEditor({
         return
       }
       patchContents((prev: LyricsContents): LyricsContents => {
-        if (
-          fromIndex < 0 ||
-          toIndex < 0 ||
-          fromIndex >= prev.contents.length ||
-          toIndex >= prev.contents.length
-        ) {
+        if (fromIndex < 0 || toIndex < 0 || fromIndex >= prev.contents.length || toIndex >= prev.contents.length) {
           return prev
         }
         const next: LyricsContent[] = [...prev.contents]
@@ -958,7 +792,7 @@ export function ProjectLyricsEditor({
                   key={`${part.id}-song-${String(index)}`}
                   className={cn(
                     'border-border/60 flex flex-col gap-2 rounded-lg border p-3 transition-shadow',
-                    dropTargetSongIndex === index && 'ring-ring ring-2 ring-offset-2 ring-offset-background'
+                    dropTargetSongIndex === index && 'ring-ring ring-offset-background ring-2 ring-offset-2'
                   )}
                   onDragOver={(e: React.DragEvent<HTMLDivElement>): void => {
                     if (isSongListReorderLocked) {
@@ -979,9 +813,7 @@ export function ProjectLyricsEditor({
                     if (nextTarget !== null && e.currentTarget.contains(nextTarget)) {
                       return
                     }
-                    setDropTargetSongIndex((prev: number | null): number | null =>
-                      prev === index ? null : prev
-                    )
+                    setDropTargetSongIndex((prev: number | null): number | null => (prev === index ? null : prev))
                   }}
                   onDrop={(e: React.DragEvent<HTMLDivElement>): void => {
                     if (isSongListReorderLocked) {
@@ -1011,7 +843,7 @@ export function ProjectLyricsEditor({
                           ev.dataTransfer.effectAllowed = 'move'
                         }}
                         className={cn(
-                          'text-muted-foreground hover:text-foreground mt-px shrink-0 rounded p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          'text-muted-foreground hover:text-foreground focus-visible:ring-ring mt-px shrink-0 rounded p-0.5 outline-none focus-visible:ring-2',
                           isSongListReorderLocked
                             ? 'cursor-not-allowed opacity-40'
                             : 'cursor-grab active:cursor-grabbing'
@@ -1027,7 +859,7 @@ export function ProjectLyricsEditor({
                     <div className="flex shrink-0 items-center gap-1.5">
                       {song.lyricsPartsConfigured ? (
                         <span
-                          className="text-muted-foreground border-border bg-muted/50 inline-flex max-w-40 items-center truncate rounded-md border px-2 py-0.5 text-[10px] font-semibold leading-normal tracking-wide uppercase"
+                          className="text-muted-foreground border-border bg-muted/50 inline-flex max-w-40 items-center truncate rounded-md border px-2 py-0.5 text-[10px] leading-normal font-semibold tracking-wide uppercase"
                           title={t('page.project_view.lyrics_song_configured_badge')}
                         >
                           {t('page.project_view.lyrics_song_configured_badge')}

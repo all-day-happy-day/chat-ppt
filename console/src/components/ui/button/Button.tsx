@@ -60,7 +60,7 @@ export function Button({
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={loading ? 'loading-text' : 'normal-text'}
-              className="flex min-w-0 max-w-full items-center justify-center gap-2 whitespace-nowrap"
+              className="flex max-w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

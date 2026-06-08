@@ -245,7 +245,7 @@ export function TemplateEditPage(): React.ReactElement | null {
               onSettled: (): void => {
                 setDeleteDialogOpen(false)
               },
-            },
+            }
           )
         }}
       />

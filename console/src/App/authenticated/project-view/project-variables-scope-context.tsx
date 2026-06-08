@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useGetProjectVariables } from '@/api/query/project.query'
 import type { ProjectVariable } from '@/domain/models/project'
 
-import { type VariableTagColorPair,variableTagColors } from './variable-color'
+import { type VariableTagColorPair, variableTagColors } from './variable-color'
 
 export interface ProjectVariablesScopeValue {
   readonly projectId: string

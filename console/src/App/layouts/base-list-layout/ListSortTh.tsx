@@ -24,7 +24,7 @@ export function ListSortTh({ label, column, sort, onSortChange, className }: Lis
     <th className={cn('bg-secondary text-md h-fit min-w-[50px] py-4 pl-4 text-left', className)}>
       <button
         type="button"
-        className="inline-flex items-center gap-1.5 text-left font-medium outline-none focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2"
+        className="focus-visible:ring-ring inline-flex items-center gap-1.5 text-left font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         onClick={(): void => {
           onSortChange(nextSortAfterHeaderClick(column, sort))
         }}

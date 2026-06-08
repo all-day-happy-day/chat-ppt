@@ -170,14 +170,12 @@ export function useCreateProjectVariable() {
   const queryClient: ReturnType<typeof useQueryClient> = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      projectId,
-      requestBody,
-    }: {
-      projectId: string
-      requestBody: { name: string; value: string }
-    }) => projectUseCase.createProjectVariable(projectId, requestBody),
-    onSuccess: (_created: unknown, { projectId, requestBody }: { projectId: string; requestBody: { name: string } }) => {
+    mutationFn: ({ projectId, requestBody }: { projectId: string; requestBody: { name: string; value: string } }) =>
+      projectUseCase.createProjectVariable(projectId, requestBody),
+    onSuccess: (
+      _created: unknown,
+      { projectId, requestBody }: { projectId: string; requestBody: { name: string } }
+    ) => {
       invalidateProjectVariables(queryClient, projectId, requestBody.name)
     },
   })
@@ -233,11 +231,7 @@ export function useExportPPT() {
     }): Promise<{ downloadUrl?: string; path?: string; filename?: string; exportId?: string }> => {
       if (
         workspace !== undefined &&
-        workspaceHasIncompletePartsForPptExport(
-          workspace.slides,
-          workspace.partsById,
-          workspace.bibleUiBlockedPartIds
-        )
+        workspaceHasIncompletePartsForPptExport(workspace.slides, workspace.partsById, workspace.bibleUiBlockedPartIds)
       ) {
         throw new WorkspaceExportIncompleteError()
       }

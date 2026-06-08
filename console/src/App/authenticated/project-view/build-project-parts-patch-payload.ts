@@ -146,7 +146,13 @@ function bibleContentsFromPart(part: BiblePart): BibleContents {
   const legacy = part as BiblePart & { content?: BibleContents }
   const body: BibleContents | undefined = legacy.contents ?? legacy.content
   if (body === undefined) {
-    return { type: 'BIBLE', contents: [], phrasePlaceholderId: 0, phraseRangePlaceholderId: null, titlePlaceholderValues: {} }
+    return {
+      type: 'BIBLE',
+      contents: [],
+      phrasePlaceholderId: 0,
+      phraseRangePlaceholderId: null,
+      titlePlaceholderValues: {},
+    }
   }
   return {
     ...body,
@@ -389,7 +395,6 @@ function partToRequestBody(part: Part, order: number): PartRequestBody {
   }
 }
 
-
 /**
  * Ensures lyrics body is stored on `contents`. Migrates a stray legacy `content` field if present.
  */
@@ -522,6 +527,9 @@ export function slidesSignature(slides: readonly LocalSlideLike[]): string {
  * Full workspace fingerprint for autosave: slide order/types plus each part's PATCH body (layout, contents).
  * Prefer this over `slidesSignature` when editing VALUE/PLAIN (or any part fields mirrored in the payload).
  */
-export function workspaceSignature(localSlides: readonly LocalSlideLike[], partsById: ReadonlyMap<string, Part>): string {
+export function workspaceSignature(
+  localSlides: readonly LocalSlideLike[],
+  partsById: ReadonlyMap<string, Part>
+): string {
   return JSON.stringify(buildProjectPartsPatchPayload(localSlides, partsById))
 }

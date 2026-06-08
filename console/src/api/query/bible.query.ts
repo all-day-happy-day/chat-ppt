@@ -75,10 +75,6 @@ export function useBibleVerses(
       return [...response.verses].sort((a: number, b: number): number => a - b)
     },
     enabled:
-      version !== null &&
-      version.length > 0 &&
-      bookKey.length > 0 &&
-      chapter !== null &&
-      Number.isInteger(chapter),
+      version !== null && version.length > 0 && bookKey.length > 0 && chapter !== null && Number.isInteger(chapter),
   })
 }

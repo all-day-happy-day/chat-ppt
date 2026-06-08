@@ -1,4 +1,4 @@
-import { startTransition, Suspense } from 'react'
+import { startTransition, Suspense, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -19,6 +19,8 @@ export function SignIn() {
   const navigate = useNavigate()
   const { mutateAsync: signIn } = useSignIn()
 
+  const [credentialError, setCredentialError] = useState<boolean>(false)
+
   const { register, handleSubmit } = useForm<SignInForm>({
     defaultValues: {
       principal: '',
@@ -27,6 +29,7 @@ export function SignIn() {
   })
 
   const onSubmit = (data: { principal: string; password: string }) => {
+    setCredentialError(false)
     startTransition(async () => {
       try {
         await signIn({
@@ -35,7 +38,7 @@ export function SignIn() {
         })
         void navigate('/')
       } catch {
-        console.error('Error signing in')
+        setCredentialError(true)
       }
     })
   }
@@ -62,6 +65,9 @@ export function SignIn() {
                 placeholder={t('common.user.password')}
                 type="password"
               />
+              <p className={`text-xs text-red-500 ${credentialError ? 'visible' : 'invisible'}`}>
+                {t('common.auth.invalid_credentials')}
+              </p>
               <div className="mt-4 flex w-full flex-row items-center justify-around">
                 <ActionButton type="submit" label={t('common.global.sign_in')} className="h-8 w-1/3" />
               </div>

@@ -6,9 +6,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftIcon, PencilIcon, Trash2Icon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { API_BASE_URL } from '@/api/client'
 import { useGetCurrentUser } from '@/api/query/auth.query'
 import { QUERY_KEY } from '@/api/query/key'
-import { API_BASE_URL } from '@/api/client'
 import { useListLayouts, useListTemplates } from '@/api/query/powerpoint.query'
 import {
   useCreateProjectContainer,
@@ -24,8 +24,7 @@ import { Button } from '@/components/ui/button/Button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
 import { Spinner } from '@/components/ui/spinner/Spinner'
-import type { Layout, Shape } from '@/domain/models/powerpoint'
-import { shapePlaceholderApiName } from '@/domain/models/powerpoint'
+import type { Layout } from '@/domain/models/powerpoint'
 import type {
   BiblePart,
   LyricsPart,
@@ -38,14 +37,31 @@ import type {
 } from '@/domain/models/project'
 import type { TemplateResponse } from '@/domain/repositories/powerpoint-repository'
 import type { Size } from '@/domain/valueobjects/powerpoint'
-import type { BibleContents, LyricsContent, LyricsContents } from '@/domain/valueobjects/project'
-import { generatePartUlid } from '@/lib/generate-ulid'
 import { cn, formatDate, getQueryData } from '@/lib/utils'
+import type { LocalSlide, PartKind, PartsRecord } from '@/lib/workspace'
+import {
+  DEFAULT_STAGE_ASPECT_HW,
+  fitContentBoxPx,
+  fitMainStagePreviewBoxPx,
+  layoutSlideAspect,
+  MAIN_STAGE_CARD_EDGE_PADDING_PX,
+  MAIN_STAGE_CARD_PADDING_BOTTOM_PX,
+  MAIN_STAGE_CARD_PADDING_TOP_PX,
+  MAIN_STAGE_PREVIEW_TOP_CHROME_PX,
+  PART_KINDS,
+  partKindLabel,
+  partKindTypeCode,
+  partsPatchPayloadFromProject,
+  partsRecordFromParts,
+  partsToLocalSlides,
+  SIDEBAR_THUMB_LAYOUT_RESERVE_PX,
+  SIDEBAR_THUMB_SLIDE_WIDTH_FALLBACK_PX,
+  thumbLayoutForPart,
+} from '@/lib/workspace'
 
 import '@/i18n/i18n'
 
 import {
-  buildProjectPartsPatchPayload,
   isPartIncompleteForPptExport,
   normalizeBiblePartForStore,
   normalizeLyricsPartForStore,
@@ -57,359 +73,10 @@ import { ProjectBibleEditor } from './ProjectBibleEditor'
 import { ProjectLyricsEditor } from './ProjectLyricsEditor'
 import { ProjectValuePlainEditor } from './ProjectValuePlainEditor'
 import { ProjectVariablesBar } from './ProjectVariablesBar'
+import { useSlideList } from './use-slide-list'
+import { useWorkspaceAutosave } from './use-workspace-autosave'
 
-import type { TFunction } from 'i18next'
 import type { DragEvent, KeyboardEvent as ReactKeyboardEvent, ReactElement } from 'react'
-
-type PartKind = Part['type']
-
-interface LocalSlide {
-  readonly id: string
-  readonly partType: PartKind
-}
-
-/** Client-side mirror of server parts for PATCH + editor; keyed by part id (ULID). */
-type PartsRecord = Record<string, Part>
-
-function partsRecordFromParts(parts: readonly Part[]): PartsRecord {
-  const out: PartsRecord = {}
-  for (const p of parts) {
-    if (p.type === 'LYRICS') {
-      out[p.id] = normalizeLyricsPartForStore(p)
-      continue
-    }
-    if (p.type === 'BIBLE') {
-      out[p.id] = normalizeBiblePartForStore(p)
-      continue
-    }
-    out[p.id] = p
-  }
-  return out
-}
-
-function partsPatchPayloadFromProject(project: Project): PartRequestBody[] {
-  const sorted: Part[] = [...project.parts].sort((a: Part, b: Part): number => a.order - b.order)
-  const localSlides: LocalSlide[] = sorted.map((p: Part): LocalSlide => ({ id: p.id, partType: p.type }))
-  const partsById: Map<string, Part> = new Map(sorted.map((p: Part): readonly [string, Part] => [p.id, p]))
-  return buildProjectPartsPatchPayload(localSlides, partsById)
-}
-
-function createSyntheticPartForInsert(id: string, kind: PartKind, projectId: string, containerId: string): Part {
-  const base: Pick<Part, 'id' | 'projectId' | 'containerId' | 'order'> = {
-    id,
-    projectId,
-    containerId,
-    order: 0,
-  }
-  switch (kind) {
-    case 'PLAIN':
-      return { ...base, type: 'PLAIN', contents: { type: 'PLAIN' }, layoutId: null }
-    case 'VALUE':
-      return {
-        ...base,
-        type: 'VALUE',
-        contents: {
-          type: 'VALUE',
-          contents: [],
-        },
-        layoutId: null,
-      }
-    case 'LYRICS':
-      return {
-        ...base,
-        type: 'LYRICS',
-        contents: {
-          type: 'LYRICS',
-          contents: [],
-          lyricsPlaceholderShapeId: 0,
-          titlePlaceholderShapeId: null,
-          includeTitleForFirstCard: true,
-        },
-        lyricsLayoutId: null,
-        titleLayoutId: null,
-      }
-    case 'BIBLE':
-      return {
-        ...base,
-        type: 'BIBLE',
-        contents: {
-          type: 'BIBLE',
-          contents: [],
-          phrasePlaceholderId: 0,
-          phraseRangePlaceholderId: null,
-          titlePlaceholderValues: {},
-        },
-        phraseLayoutId: null,
-        titleLayoutId: null,
-      }
-    default: {
-      const _exhaustive: never = kind
-      throw new Error(`Unexpected part kind: ${String(_exhaustive)}`)
-    }
-  }
-}
-
-function mergeServerPartWithLocalFallback(serverPart: Part, localPart: Part | undefined): Part {
-  if (localPart === undefined || localPart.type !== serverPart.type) {
-    return serverPart
-  }
-  if (serverPart.type === 'BIBLE' && localPart.type === 'BIBLE') {
-    const serverContents: BibleContents = serverPart.contents
-    const localContents: BibleContents = localPart.contents
-    const serverTitlePlaceholderValues: Readonly<Record<number, string>> =
-      normalizeTitlePlaceholderValues(serverContents.titlePlaceholderValues)
-    const localTitlePlaceholderValues: Readonly<Record<number, string>> =
-      normalizeTitlePlaceholderValues(localContents.titlePlaceholderValues)
-    return {
-      ...serverPart,
-      contents: {
-        ...serverContents,
-        phrasePlaceholderId:
-          Number.isInteger(serverContents.phrasePlaceholderId) && serverContents.phrasePlaceholderId > 0
-            ? serverContents.phrasePlaceholderId
-            : localContents.phrasePlaceholderId,
-        phraseRangePlaceholderId:
-          serverContents.phraseRangePlaceholderId ?? localContents.phraseRangePlaceholderId ?? null,
-        titlePlaceholderValues:
-          Object.keys(serverTitlePlaceholderValues).length > 0 ? serverTitlePlaceholderValues : localTitlePlaceholderValues,
-      },
-    }
-  }
-  if (serverPart.type === 'LYRICS' && localPart.type === 'LYRICS') {
-    const serverContents: LyricsContents = serverPart.contents
-    const localContents: LyricsContents = localPart.contents
-    return {
-      ...serverPart,
-      contents: {
-        type: 'LYRICS',
-        lyricsPlaceholderShapeId:
-          serverContents.lyricsPlaceholderShapeId > 0
-            ? serverContents.lyricsPlaceholderShapeId
-            : localContents.lyricsPlaceholderShapeId,
-        titlePlaceholderShapeId:
-          serverContents.titlePlaceholderShapeId !== null && serverContents.titlePlaceholderShapeId > 0
-            ? serverContents.titlePlaceholderShapeId
-            : (localContents.titlePlaceholderShapeId ?? null),
-        includeTitleForFirstCard:
-          serverContents.includeTitleForFirstCard ?? localContents.includeTitleForFirstCard ?? true,
-        contents: serverContents.contents.map((serverRow: LyricsContent, index: number): LyricsContent => {
-          const localRow: LyricsContent | undefined = localContents.contents[index]
-          if (localRow === undefined) {
-            return serverRow
-          }
-          return {
-            ...serverRow,
-            songId: serverRow.songId ?? localRow.songId ?? null,
-          }
-        }),
-      },
-    }
-  }
-  return serverPart
-}
-
-function normalizeTitlePlaceholderValues(
-  raw: Readonly<Record<number, string>> | null | undefined
-): Readonly<Record<number, string>> {
-  if (raw === null || raw === undefined) {
-    return {}
-  }
-  const out: Record<number, string> = {}
-  const entries: Array<readonly [string, string]> = Object.entries(raw as Readonly<Record<string, string>>)
-  for (const [key, value] of entries) {
-    const shapeId: number = Number.parseInt(key, 10)
-    if (!Number.isInteger(shapeId) || shapeId <= 0) {
-      continue
-    }
-    if (typeof value !== 'string' || value.trim().length === 0) {
-      continue
-    }
-    out[shapeId] = value
-  }
-  return out
-}
-
-function mergeServerPartsWithLocalFallback(updatedParts: Part[], localRecord: PartsRecord): Part[] {
-  return updatedParts.map((serverPart: Part): Part => {
-    const localPart: Part | undefined = localRecord[serverPart.id]
-    return mergeServerPartWithLocalFallback(serverPart, localPart)
-  })
-}
-
-function layoutSlideAspect(layout: Layout, fallbackSlideSize: Size): number {
-  const w: number = layout.slideSize.width > 0 ? layout.slideSize.width : fallbackSlideSize.width
-  const h: number = layout.slideSize.height > 0 ? layout.slideSize.height : fallbackSlideSize.height
-  return Math.max(h, 1) / Math.max(w, 1)
-}
-
-/** Merge VALUE placeholder strings into layout shapes for sidebar / thumbnail preview. */
-function mergeValuePartIntoLayoutThumb(layout: Layout, part: ValuePart): Layout {
-  const prevByShapeId: Map<number, string | null> = new Map<number, string | null>()
-  const prevByName: Map<string, string | null> = new Map<string, string | null>()
-  for (const row of part.contents.contents) {
-    if (row.placeholderShapeId !== undefined && row.placeholderShapeId !== null) {
-      prevByShapeId.set(row.placeholderShapeId, row.value)
-    }
-    prevByName.set(row.placeholderName, row.value)
-  }
-  return {
-    ...layout,
-    shapes: layout.shapes.map((shape: Shape): Shape => {
-      if (!shape.placeholder) {
-        return shape
-      }
-      const fromId: string | null | undefined = prevByShapeId.get(shape.shapeId)
-      const value: string | null | undefined =
-        fromId !== undefined ? fromId : prevByName.get(shapePlaceholderApiName(shape))
-      if (value === null || value === undefined) {
-        return shape
-      }
-      return { ...shape, text: value }
-    }),
-  }
-}
-
-/** Resolved layout (+ merged values) for a workspace part, or undefined when no slide preview. */
-function thumbLayoutForPart(part: Part | undefined, layouts: readonly Layout[]): Layout | undefined {
-  if (part === undefined) {
-    return undefined
-  }
-  if (part.type !== 'VALUE' && part.type !== 'PLAIN') {
-    return undefined
-  }
-  if (part.layoutId === null || part.layoutId.length === 0) {
-    return undefined
-  }
-  const base: Layout | undefined = layouts.find((l: Layout): boolean => l.id === part.layoutId)
-  if (base === undefined) {
-    return undefined
-  }
-  if (part.type === 'VALUE') {
-    return mergeValuePartIntoLayoutThumb(base, part)
-  }
-  return base
-}
-
-function fitContentBoxPx(
-  slotWidthPx: number,
-  slotHeightPx: number,
-  contentHeightOverWidth: number
-): {
-  widthPx: number
-  heightPx: number
-} {
-  if (slotWidthPx <= 0 || slotHeightPx <= 0) {
-    return { widthPx: 0, heightPx: 0 }
-  }
-  let widthPx: number = slotWidthPx
-  let heightPx: number = widthPx * contentHeightOverWidth
-  if (heightPx > slotHeightPx) {
-    heightPx = slotHeightPx
-    widthPx = heightPx / contentHeightOverWidth
-  }
-  return { widthPx, heightPx }
-}
-
-function fitMainStagePreviewBoxPx(
-  slotWidthPx: number,
-  slotHeightPx: number,
-  contentAspectHW: number,
-  topChromePx: number,
-  cardPadX: number,
-  cardPadTop: number,
-  cardPadBottom: number
-): { widthPx: number; heightPx: number; slideMaxWidthPx: number } {
-  if (slotWidthPx <= 0 || slotHeightPx <= 0) {
-    return { widthPx: 0, heightPx: 0, slideMaxWidthPx: 0 }
-  }
-  const innerW: number = Math.max(0, slotWidthPx - 2 * cardPadX)
-  const innerH: number = Math.max(0, slotHeightPx - cardPadTop - cardPadBottom)
-  const slideAvailH: number = Math.max(0, innerH - topChromePx)
-  if (slideAvailH <= 0 || innerW <= 0) {
-    return {
-      widthPx: Math.min(slotWidthPx, 2 * cardPadX),
-      heightPx: Math.min(slotHeightPx, topChromePx + cardPadTop + cardPadBottom),
-      slideMaxWidthPx: 0,
-    }
-  }
-  let slideW: number = Math.min(innerW, slideAvailH / contentAspectHW)
-  let slideH: number = slideW * contentAspectHW
-  if (slideH > slideAvailH) {
-    slideH = slideAvailH
-    slideW = slideH / contentAspectHW
-  }
-  const widthPx: number = slideW + 2 * cardPadX
-  const heightPx: number = topChromePx + slideH + cardPadTop + cardPadBottom
-  return { widthPx, heightPx, slideMaxWidthPx: Math.max(1, Math.floor(slideW)) }
-}
-
-const PART_KINDS: readonly PartKind[] = ['VALUE', 'PLAIN', 'LYRICS', 'BIBLE'] as const
-
-/** Before sidebar list width is measured; also used if ref is missing. */
-const SIDEBAR_THUMB_SLIDE_WIDTH_FALLBACK_PX: number = 108
-/**
- * Subtract from list inner width for: index column, grid gap, thumbnail column horizontal padding
- * (`px-1.5`), and a little air so ring/border does not clip at the scrollbar edge.
- */
-const SIDEBAR_THUMB_LAYOUT_RESERVE_PX: number = 44
-
-function partsToLocalSlides(parts: Part[]): LocalSlide[] {
-  return [...parts]
-    .sort((a: Part, b: Part): number => a.order - b.order)
-    .map(
-      (p: Part): LocalSlide => ({
-        id: p.id,
-        partType: p.type,
-      })
-    )
-}
-
-function reorderSlides(slides: readonly LocalSlide[], fromIndex: number, toIndex: number): LocalSlide[] {
-  if (fromIndex === toIndex) {
-    return [...slides]
-  }
-  const next: LocalSlide[] = [...slides]
-  const [moved]: LocalSlide[] = next.splice(fromIndex, 1)
-  next.splice(toIndex, 0, moved)
-  return next
-}
-
-function insertSlideAt(slides: readonly LocalSlide[], insertIndex: number, slide: LocalSlide): LocalSlide[] {
-  const safeIndex: number = Math.max(0, Math.min(insertIndex, slides.length))
-  return [...slides.slice(0, safeIndex), slide, ...slides.slice(safeIndex)]
-}
-
-/** Single-line caption row + `gap-1` above slide; keep in sync with `StagePartLayoutCaption` + flex gap. */
-const MAIN_STAGE_PREVIEW_TOP_CHROME_PX = 20
-/** Card horizontal padding; vertical kept smaller so preview sits higher. */
-const MAIN_STAGE_CARD_EDGE_PADDING_PX = 8
-const MAIN_STAGE_CARD_PADDING_TOP_PX = 4
-const MAIN_STAGE_CARD_PADDING_BOTTOM_PX = 8
-
-/** `height / width` for the main stage when no template layout is selected. */
-const DEFAULT_STAGE_ASPECT_HW = 9 / 16
-
-function partKindLabel(t: TFunction, kind: PartKind): string {
-  switch (kind) {
-    case 'VALUE':
-      return t('page.project_view.part_value')
-    case 'PLAIN':
-      return t('page.project_view.part_plain')
-    case 'LYRICS':
-      return t('page.project_view.part_lyrics')
-    case 'BIBLE':
-      return t('page.project_view.part_bible')
-    default: {
-      const _exhaustive: never = kind
-      return String(_exhaustive)
-    }
-  }
-}
-
-/** API / slide caption: `VALUE · LAYOUT NAME` uses the part type code, not the translated label. */
-function partKindTypeCode(kind: PartKind): string {
-  return kind
-}
 
 /** Part kind + optional layout name — uppercase, mono, middle dot · between. */
 interface StagePartLayoutCaptionProps {
@@ -673,18 +340,6 @@ export type ProjectWorkspaceHandle = {
   readonly isExportIncomplete: () => boolean
 }
 
-function defaultContainerIdForInsert(
-  workspaceKind: 'project' | 'container',
-  project: Project,
-  container: ProjectContainer | undefined,
-  prevRecord: PartsRecord
-): string {
-  if (workspaceKind === 'container' && container !== undefined) {
-    return container.id
-  }
-  return Object.values(prevRecord)[0]?.containerId ?? project.parts[0]?.containerId ?? ''
-}
-
 const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspaceProps>(function ProjectWorkspace(
   { workspaceKind, project, userId, container, onWorkspaceExportIncompleteChange }: ProjectWorkspaceProps,
   ref: React.ForwardedRef<ProjectWorkspaceHandle>
@@ -715,23 +370,31 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
   const layouts: Layout[] = React.useMemo((): Layout[] => layoutsQuery.data?.layouts ?? [], [layoutsQuery.data])
 
   const workspaceBootstrapRef = React.useRef<string>('')
-  const [localSlides, setLocalSlides] = React.useState<LocalSlide[]>((): LocalSlide[] =>
-    partsToLocalSlides(project.parts)
-  )
   const [partsRecord, setPartsRecord] = React.useState<PartsRecord>(
     (): PartsRecord => partsRecordFromParts(project.parts)
   )
-  const [selectedId, setSelectedId] = React.useState<string | null>((): string | null => {
-    const slides: LocalSlide[] = partsToLocalSlides(project.parts)
-    return slides[0]?.id ?? null
-  })
-  const [draggingId, setDraggingId] = React.useState<string | null>(null)
-  const [dragOverThumbIndex, setDragOverThumbIndex] = React.useState<number | null>(null)
-  const [hoverInsertIndex, setHoverInsertIndex] = React.useState<number | null>(null)
-  const skipNextClickSelectRef = React.useRef<boolean>(false)
-  const partsSnapshotRef = React.useRef<Map<string, Part>>(new Map())
-  const lastSavedSignatureRef = React.useRef<string | null>(null)
-  const pendingSaveSignatureRef = React.useRef<string | null>(null)
+  /** Bible phrase cards: editor-reported errors (probe, invalid verse, books/chapters fetch errors). */
+  const [bibleBlockingUiByPartId, setBibleBlockingUiByPartId] = React.useState<Record<string, boolean>>({})
+
+  const {
+    localSlides,
+    setLocalSlides,
+    selectedId,
+    setSelectedId,
+    draggingId,
+    dragOverThumbIndex,
+    hoverInsertIndex,
+    setHoverInsertIndex,
+    skipNextClickSelectRef,
+    handleInsertAt,
+    handleRemoveSlideById,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOverThumb,
+    handleDragLeaveThumb,
+    handleDropOnThumb,
+  } = useSlideList({ workspaceKind, project, container, setPartsRecord, setBibleBlockingUiByPartId })
+
   const localSlidesRef = React.useRef<LocalSlide[]>([])
   const [isEditPanelOpen, setIsEditPanelOpen] = React.useState<boolean>(false)
   const [deleteConfirmSlideId, setDeleteConfirmSlideId] = React.useState<string | null>(null)
@@ -743,9 +406,6 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     readonly slideId: string
     readonly layoutId: string | null
   } | null>(null)
-  /** Bible phrase cards: editor-reported errors (probe, invalid verse, books/chapters fetch errors). */
-  const [bibleBlockingUiByPartId, setBibleBlockingUiByPartId] = React.useState<Record<string, boolean>>({})
-
   React.useEffect((): void | (() => void) => {
     if (!isEditPanelOpen) {
       return
@@ -805,202 +465,37 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     heightPx: 0,
   })
 
-  const patchProjectRef = React.useRef<ReturnType<typeof usePatchProject>>(patchProject)
-  const patchContainerRef = React.useRef<ReturnType<typeof usePatchProjectContainer>>(patchContainer)
-  const queryClientRef = React.useRef<ReturnType<typeof useQueryClient>>(queryClient)
   const partsRecordRef = React.useRef<PartsRecord>(partsRecord)
 
   React.useLayoutEffect((): void => {
     partsRecordRef.current = partsRecord
   }, [partsRecord])
 
-  React.useEffect((): void => {
-    patchProjectRef.current = patchProject
-  }, [patchProject])
-
-  React.useEffect((): void => {
-    patchContainerRef.current = patchContainer
-  }, [patchContainer])
-
-  React.useEffect((): void => {
-    queryClientRef.current = queryClient
-  }, [queryClient])
-
   React.useLayoutEffect((): void => {
     localSlidesRef.current = localSlides
   }, [localSlides])
 
-  const finalizePatchSuccess = React.useCallback(
-    (updatedParts: Part[], onFullSync?: (() => void) | undefined): void => {
-      const localRecord: PartsRecord = partsRecordRef.current
-      const mergedUpdatedParts: Part[] = mergeServerPartsWithLocalFallback(updatedParts, localRecord)
-      const mergedMap: Map<string, Part> = new Map(Object.entries(localRecord))
-      const currentSignature: string = workspaceSignature(localSlidesRef.current, mergedMap)
-      const nextRecord: PartsRecord = partsRecordFromParts(mergedUpdatedParts)
-      if (pendingSaveSignatureRef.current !== currentSignature) {
-        setPartsRecord(nextRecord)
-        partsSnapshotRef.current = new Map(Object.entries(nextRecord))
-        pendingSaveSignatureRef.current = null
-        return
-      }
-      const nextSlides: LocalSlide[] = partsToLocalSlides(mergedUpdatedParts)
-      setLocalSlides(nextSlides)
-      localSlidesRef.current = nextSlides
-      setPartsRecord(nextRecord)
-      partsSnapshotRef.current = new Map(Object.entries(nextRecord))
-      lastSavedSignatureRef.current = workspaceSignature(nextSlides, new Map(Object.entries(nextRecord)))
-      pendingSaveSignatureRef.current = null
-      onFullSync?.()
-    },
-    []
-  )
-
-  const flushWorkspaceToServer = React.useCallback((): void => {
-    if (lastSavedSignatureRef.current === null) {
-      return
-    }
-    const latestSlides: LocalSlide[] = localSlidesRef.current
-    const latestParts: Map<string, Part> = new Map(Object.entries(partsRecordRef.current))
-    const payloadSignature: string = workspaceSignature(latestSlides, latestParts)
-    if (payloadSignature === lastSavedSignatureRef.current) {
-      return
-    }
-
-    pendingSaveSignatureRef.current = payloadSignature
-    const partsPayload: PartRequestBody[] = buildProjectPartsPatchPayload(latestSlides, latestParts)
-
-    if (workspaceKind === 'project') {
-      patchProjectRef.current.mutate(
-        {
-          projectId: project.id,
-          userId,
-          requestBody: { name: null, templateId: null, parts: partsPayload },
-        },
-        {
-          onSuccess: (updated: Project): void => {
-            finalizePatchSuccess(updated.parts, (): void => {
-              queryClientRef.current.setQueryData(
-                QUERY_KEY.PROJECT.GET_ALL(userId),
-                (previous: Project[] | undefined): Project[] | undefined => {
-                  if (previous === undefined) {
-                    return previous
-                  }
-                  return previous.map((row: Project): Project => (row.id === updated.id ? updated : row))
-                }
-              )
-            })
-          },
-          onError: (error: unknown): void => {
-            pendingSaveSignatureRef.current = null
-            const detail: string = error instanceof Error ? error.message : ''
-            toast.error(
-              detail.length > 0
-                ? `${t('page.project_view.autosave_failed')} (${detail})`
-                : t('page.project_view.autosave_failed')
-            )
-          },
-        }
-      )
-      return
-    }
-
-    if (container === undefined) {
-      pendingSaveSignatureRef.current = null
-      return
-    }
-
-    patchContainerRef.current.mutate(
-      {
-        projectContainerId: container.id,
-        requestBody: { containerName: null, completed: null, parts: partsPayload },
-      },
-      {
-        onSuccess: (updated: ProjectContainer): void => {
-          finalizePatchSuccess(updated.parts, (): void => {
-            queryClientRef.current.setQueryData(
-              QUERY_KEY.PROJECT.GET_ALL_CONTAINERS(updated.projectId),
-              (previous: ProjectContainer[] | undefined): ProjectContainer[] | undefined => {
-                if (previous === undefined) {
-                  return [updated]
-                }
-                return previous.map(
-                  (row: ProjectContainer): ProjectContainer => (row.id === updated.id ? updated : row)
-                )
-              }
-            )
-          })
-        },
-        onError: (error: unknown): void => {
-          pendingSaveSignatureRef.current = null
-          const detail: string = error instanceof Error ? error.message : ''
-          toast.error(
-            detail.length > 0
-              ? `${t('page.project_view.autosave_container_failed')} (${detail})`
-              : t('page.project_view.autosave_container_failed')
-          )
-        },
-      }
-    )
-  }, [workspaceKind, container, project.id, finalizePatchSuccess, t, userId])
-
-  const persistWorkspaceNowAsync = React.useCallback(async (): Promise<void> => {
-    if (lastSavedSignatureRef.current === null) {
-      return
-    }
-    const latestSlides: LocalSlide[] = localSlidesRef.current
-    const latestParts: Map<string, Part> = new Map(Object.entries(partsRecordRef.current))
-    const payloadSignature: string = workspaceSignature(latestSlides, latestParts)
-    if (payloadSignature === lastSavedSignatureRef.current) {
-      return
-    }
-    pendingSaveSignatureRef.current = payloadSignature
-    const partsPayload: PartRequestBody[] = buildProjectPartsPatchPayload(latestSlides, latestParts)
-    try {
-      if (workspaceKind === 'project') {
-        const updated: Project = await patchProject.mutateAsync({
-          projectId: project.id,
-          userId,
-          requestBody: { name: null, templateId: null, parts: partsPayload },
-        })
-        finalizePatchSuccess(updated.parts, (): void => {
-          queryClient.setQueryData(
-            QUERY_KEY.PROJECT.GET_ALL(userId),
-            (previous: Project[] | undefined): Project[] | undefined => {
-              if (previous === undefined) {
-                return previous
-              }
-              return previous.map((row: Project): Project => (row.id === updated.id ? updated : row))
-            }
-          )
-        })
-        return
-      }
-      if (container === undefined) {
-        pendingSaveSignatureRef.current = null
-        throw new Error('container_missing')
-      }
-      const updatedContainer: ProjectContainer = await patchContainer.mutateAsync({
-        projectContainerId: container.id,
-        requestBody: { containerName: null, completed: null, parts: partsPayload },
-      })
-      finalizePatchSuccess(updatedContainer.parts, (): void => {
-        queryClient.setQueryData(
-          QUERY_KEY.PROJECT.GET_ALL_CONTAINERS(updatedContainer.projectId),
-          (previous: ProjectContainer[] | undefined): ProjectContainer[] | undefined => {
-            if (previous === undefined) {
-              return [updatedContainer]
-            }
-            return previous.map(
-              (row: ProjectContainer): ProjectContainer => (row.id === updatedContainer.id ? updatedContainer : row)
-            )
-          }
-        )
-      })
-    } catch (err: unknown) {
-      pendingSaveSignatureRef.current = null
-      throw err
-    }
-  }, [workspaceKind, container, finalizePatchSuccess, patchContainer, patchProject, project.id, queryClient, userId])
+  const {
+    lastSavedSignatureRef,
+    pendingSaveSignatureRef,
+    partsSnapshotRef,
+    persistWorkspaceNowAsync,
+    flushWorkspaceToServer,
+  } = useWorkspaceAutosave({
+    workspaceKind,
+    projectId: project.id,
+    userId,
+    container,
+    localSlides,
+    partsRecord,
+    localSlidesRef,
+    partsRecordRef,
+    setLocalSlides,
+    setPartsRecord,
+    patchProject,
+    patchContainer,
+    queryClient,
+  })
 
   React.useImperativeHandle(
     ref,
@@ -1071,6 +566,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     setPlaceholderFocus(null)
     setEditPanelPreview(null)
     setBibleBlockingUiByPartId({})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceKind, project, container, queryClient])
 
   const selectedSlide: LocalSlide | undefined = localSlides.find((s: LocalSlide): boolean => s.id === selectedId)
@@ -1103,8 +599,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
     return DEFAULT_STAGE_ASPECT_HW
   }, [mainStageLayout, templateFallbackSize])
 
-  const showMainLayoutSlidePreview: boolean =
-    selectedSlide !== undefined && mainStageLayout !== undefined
+  const showMainLayoutSlidePreview: boolean = selectedSlide !== undefined && mainStageLayout !== undefined
 
   const mainStageBoxPx: {
     widthPx: number
@@ -1142,10 +637,6 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
       ? placeholderFocus.shapeId
       : null
 
-  React.useLayoutEffect((): void => {
-    partsSnapshotRef.current = new Map(Object.entries(partsRecord))
-  }, [partsRecord])
-
   const commitValuePlainPart = React.useCallback(
     (slideId: string, next: ValuePart | PlainPart, nextKind: 'VALUE' | 'PLAIN'): void => {
       setPartsRecord((prev: PartsRecord): PartsRecord => ({ ...prev, [slideId]: next }))
@@ -1153,6 +644,7 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
         prev.map((s: LocalSlide): LocalSlide => (s.id === slideId ? { ...s, partType: nextKind } : s))
       )
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
@@ -1173,121 +665,6 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
       })
     )
   }, [])
-
-  const handleRemoveSlideById = React.useCallback((slideId: string): void => {
-    setBibleBlockingUiByPartId((prev: Record<string, boolean>): Record<string, boolean> => {
-      if (prev[slideId] !== true) {
-        return prev
-      }
-      const next: Record<string, boolean> = { ...prev }
-      delete next[slideId]
-      return next
-    })
-    setPartsRecord((prev: PartsRecord): PartsRecord => {
-      if (prev[slideId] === undefined) {
-        return prev
-      }
-      const next: PartsRecord = { ...prev }
-      delete next[slideId]
-      return next
-    })
-    setLocalSlides((prev: LocalSlide[]): LocalSlide[] => {
-      const idx: number = prev.findIndex((s: LocalSlide): boolean => s.id === slideId)
-      if (idx < 0) {
-        return prev
-      }
-      const next: LocalSlide[] = prev.filter((s: LocalSlide): boolean => s.id !== slideId)
-      setSelectedId((sel: string | null): string | null => {
-        if (sel !== slideId) {
-          return sel
-        }
-        if (next.length === 0) {
-          return null
-        }
-        return next[Math.max(0, idx - 1)]!.id
-      })
-      return next
-    })
-  }, [])
-
-  const handleInsertAt = React.useCallback(
-    (insertIndex: number, partType: PartKind): void => {
-      const newId: string = generatePartUlid()
-      const newSlide: LocalSlide = { id: newId, partType }
-      setLocalSlides((prev: LocalSlide[]): LocalSlide[] => insertSlideAt(prev, insertIndex, newSlide))
-      setSelectedId(newId)
-      setPartsRecord((prev: PartsRecord): PartsRecord => {
-        const containerId: string = defaultContainerIdForInsert(workspaceKind, project, container, prev)
-        return {
-          ...prev,
-          [newId]: createSyntheticPartForInsert(newId, partType, project.id, containerId),
-        }
-      })
-    },
-    [container, project, workspaceKind]
-  )
-
-  const handleDragStart = React.useCallback(
-    (slideId: string) =>
-      (e: DragEvent): void => {
-        setDraggingId(slideId)
-        e.dataTransfer.effectAllowed = 'move'
-        e.dataTransfer.setData('text/plain', slideId)
-        skipNextClickSelectRef.current = true
-      },
-    []
-  )
-
-  const handleDragEnd = React.useCallback((): void => {
-    setDraggingId(null)
-    setDragOverThumbIndex(null)
-    window.setTimeout((): void => {
-      skipNextClickSelectRef.current = false
-    }, 0)
-  }, [])
-
-  const handleDragOverThumb = React.useCallback((e: DragEvent, thumbIndex: number): void => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    setDragOverThumbIndex(thumbIndex)
-  }, [])
-
-  const handleDragLeaveThumb = React.useCallback((): void => {
-    setDragOverThumbIndex(null)
-  }, [])
-
-  const handleDropOnThumb = React.useCallback((e: DragEvent<HTMLDivElement>, toIndex: number): void => {
-    e.preventDefault()
-    const fromId: string = e.dataTransfer.getData('text/plain')
-    setLocalSlides((prev: LocalSlide[]): LocalSlide[] => {
-      const fromIndex: number = prev.findIndex((s: LocalSlide): boolean => s.id === fromId)
-      if (fromIndex < 0) {
-        return prev
-      }
-      return reorderSlides(prev, fromIndex, toIndex)
-    })
-    setDragOverThumbIndex(null)
-  }, [])
-
-  React.useEffect((): void | (() => void) => {
-    if (lastSavedSignatureRef.current === null) {
-      return
-    }
-    const slides: LocalSlide[] = localSlidesRef.current
-    const partsMap: Map<string, Part> = new Map(Object.entries(partsRecordRef.current))
-    const signature: string = workspaceSignature(slides, partsMap)
-    if (signature === lastSavedSignatureRef.current) {
-      return
-    }
-
-    const timeoutId: ReturnType<typeof setTimeout> = window.setTimeout((): void => {
-      flushWorkspaceToServer()
-    }, 500)
-
-    return (): void => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [flushWorkspaceToServer, localSlides, partsRecord])
 
   const slidePendingDelete: LocalSlide | undefined =
     deleteConfirmSlideId === null
@@ -1707,32 +1084,30 @@ const ProjectWorkspace = React.forwardRef<ProjectWorkspaceHandle, ProjectWorkspa
                         {t('page.project_view.part_state_missing')}
                       </p>
                     )
+                  ) : mainStageLayout !== undefined ? (
+                    <div className="flex max-h-full min-h-0 max-w-full min-w-0 flex-col items-center justify-start gap-1 overflow-hidden">
+                      <StagePartLayoutCaption
+                        partKindText={partKindTypeCode(selectedSlide.partType)}
+                        layoutName={mainStageLayout.name}
+                      />
+                      <TemplateLayoutSlide
+                        layout={mainStageLayout}
+                        fallbackSlideSize={templateFallbackSize}
+                        showLayoutTitle={false}
+                        maxContentWidthPx={
+                          mainStageBoxPx.layoutSlideMaxWidthPx !== null
+                            ? mainStageBoxPx.layoutSlideMaxWidthPx
+                            : Math.max(96, Math.floor(mainStageBoxPx.widthPx) - MAIN_STAGE_CARD_EDGE_PADDING_PX * 2)
+                        }
+                      />
+                    </div>
                   ) : (
-                    mainStageLayout !== undefined ? (
-                      <div className="flex max-h-full min-h-0 max-w-full min-w-0 flex-col items-center justify-start gap-1 overflow-hidden">
-                        <StagePartLayoutCaption
-                          partKindText={partKindTypeCode(selectedSlide.partType)}
-                          layoutName={mainStageLayout.name}
-                        />
-                        <TemplateLayoutSlide
-                          layout={mainStageLayout}
-                          fallbackSlideSize={templateFallbackSize}
-                          showLayoutTitle={false}
-                          maxContentWidthPx={
-                            mainStageBoxPx.layoutSlideMaxWidthPx !== null
-                              ? mainStageBoxPx.layoutSlideMaxWidthPx
-                              : Math.max(96, Math.floor(mainStageBoxPx.widthPx) - MAIN_STAGE_CARD_EDGE_PADDING_PX * 2)
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center gap-2 px-3">
-                        <StagePartLayoutCaption
-                          partKindText={partKindTypeCode(selectedSlide.partType)}
-                          layoutName={null}
-                        />
-                      </div>
-                    )
+                    <div className="flex flex-col items-center justify-center gap-2 px-3">
+                      <StagePartLayoutCaption
+                        partKindText={partKindTypeCode(selectedSlide.partType)}
+                        layoutName={null}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -2166,7 +1541,9 @@ export function ProjectContainerViewPage(): ReactElement | null {
       } catch (error: unknown) {
         const detail: string = error instanceof Error ? error.message : ''
         toast.error(
-          detail.length > 0 ? `${t('page.project_view.export_failed')} (${detail})` : t('page.project_view.export_failed')
+          detail.length > 0
+            ? `${t('page.project_view.export_failed')} (${detail})`
+            : t('page.project_view.export_failed')
         )
       }
     })()

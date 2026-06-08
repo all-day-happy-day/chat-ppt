@@ -30,10 +30,7 @@ export class RemotePowerpointRepository implements PowerpointRepository {
     formData.append('user_id', requestBody.userId)
     formData.append('template_name', requestBody.templateName)
 
-    const { response } = await httpClient.post<FormData, ReadTemplateResponse>(
-      `/powerpoint/template/read`,
-      formData
-    )
+    const { response } = await httpClient.post<FormData, ReadTemplateResponse>(`/powerpoint/template/read`, formData)
     return toTemplateResponse(response)
   }
 
@@ -87,14 +84,16 @@ export class RemotePowerpointRepository implements PowerpointRepository {
   async listLayouts(templateId: string): Promise<{ layouts: Layout[] }> {
     const { response } = await httpClient.get<ListLayoutsResponse>(`/powerpoint/template/layouts/${templateId}`)
     return {
-      layouts: response.map((row: LayoutWire): Layout => ({
-        id: row.id,
-        templateId,
-        name: row.name,
-        shapes: row.shapes,
-        backgroundColor: row.backgroundColor,
-        slideSize: row.slideSize,
-      })),
+      layouts: response.map(
+        (row: LayoutWire): Layout => ({
+          id: row.id,
+          templateId,
+          name: row.name,
+          shapes: row.shapes,
+          backgroundColor: row.backgroundColor,
+          slideSize: row.slideSize,
+        })
+      ),
     }
   }
 }

@@ -194,9 +194,7 @@ export function ProjectValuePlainEditor({
                   ? placeholderShapes.find((s: Shape): boolean => s.shapeId === shapeId)
                   : placeholderShapes[index]
               const layoutHint: string | null =
-                shapeForRow !== undefined &&
-                shapeForRow.text !== null &&
-                shapeForRow.text.trim().length > 0
+                shapeForRow !== undefined && shapeForRow.text !== null && shapeForRow.text.trim().length > 0
                   ? shapeForRow.text.trim()
                   : null
               const inputPlaceholder: string = layoutHint !== null ? layoutHint : row.placeholderName

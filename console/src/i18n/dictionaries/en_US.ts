@@ -12,6 +12,7 @@ export const en_US = {
   'common.global.email_or_username': 'Email or Username',
   'common.global.password': 'Password',
   'common.global.sign_in': 'Sign In',
+  'common.auth.invalid_credentials': 'Incorrect email/username or password.',
   'common.global.sign_up': 'Sign Up',
   'common.global.password_mismatch': 'Password does not match',
   'common.global.password_too_short': 'Password must be at least {{minLength}} characters',
@@ -127,9 +128,11 @@ export const en_US = {
   'page.project_view.container_list_empty': 'No containers yet.',
   'page.project_view.edit_panel_title': 'Edit slide',
   'page.project_view.edit_panel_placeholder': 'Slide editor will appear here.',
-  'page.project_view.edit_unsupported_part': 'This slide type can be edited here in a future update. Use reorder or delete for now.',
+  'page.project_view.edit_unsupported_part':
+    'This slide type can be edited here in a future update. Use reorder or delete for now.',
   'page.project_view.layout_picker_heading': 'Layouts',
-  'page.project_view.layout_picker_hint': 'Layouts with placeholders become a Value slide; layouts without placeholders become a Plain slide.',
+  'page.project_view.layout_picker_hint':
+    'Layouts with placeholders become a Value slide; layouts without placeholders become a Plain slide.',
   'page.project_view.layout_option_aria': 'Choose layout {{name}}',
   'page.project_view.placeholder_values_heading': 'Placeholder text',
   'page.project_view.pick_layout_hint': 'Open Edit and choose a layout to see the preview.',
@@ -181,7 +184,8 @@ export const en_US = {
   'page.project_view.lyrics_configure_remove_part': 'Remove part',
   'page.project_view.lyrics_configure_add_part': '+ Add part',
   'page.project_view.lyrics_configure_pool_title': 'Part pool',
-  'page.project_view.lyrics_configure_pool_hint': 'Drag a tile into the song form below, or click to append at the end.',
+  'page.project_view.lyrics_configure_pool_hint':
+    'Drag a tile into the song form below, or click to append at the end.',
   'page.project_view.lyrics_configure_form_title': 'Song form (performance order)',
   'page.project_view.lyrics_configure_form_hint':
     'Drag tiles to reorder (blue line shows where a drop lands). Drag from the pool to insert. Drag a tile outside this area to remove that step.',
@@ -234,8 +238,10 @@ export const en_US = {
   'page.project_view.bible_probe_book_not_found': 'That book was not found for this version.',
   'page.project_view.bible_probe_chapter_not_found': 'That chapter was not found for this book.',
   'page.project_view.bible_probe_verse_not_found': 'That verse (or range) was not found in this chapter.',
-  'page.project_view.bible_probe_unsupported_letter': 'Verse input contains a character that is not allowed (use digits, hyphen, or tilde).',
-  'page.project_view.bible_probe_multiple_separators': 'Verse range can only use one separator (e.g. 3-5), not multiple.',
+  'page.project_view.bible_probe_unsupported_letter':
+    'Verse input contains a character that is not allowed (use digits, hyphen, or tilde).',
+  'page.project_view.bible_probe_multiple_separators':
+    'Verse range can only use one separator (e.g. 3-5), not multiple.',
   'page.project_view.bible_probe_multiple_numbers': 'Verse input has invalid numbers for the range format.',
   'page.project_view.bible_probe_generic': 'Could not verify this reference: {{detail}}',
   'page.project_view.bible_probe_network': 'Could not reach the server to verify this reference.',
@@ -284,8 +290,7 @@ export const en_US = {
   'page.song_new.saving': 'Saving…',
   'page.song_new.not_this_song': 'Not this song',
   'page.song_new.refine_title': 'Search the catalog?',
-  'page.song_new.refine_description':
-    'Adjust the search keywords below, then search the catalog.',
+  'page.song_new.refine_description': 'Adjust the search keywords below, then search the catalog.',
   'page.song_new.refine_confirm': 'OK',
   'page.song_new.refine_cancel': 'Cancel',
   'page.song_new.catalog_heading': 'Catalog results',

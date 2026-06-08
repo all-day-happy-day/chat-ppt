@@ -12,6 +12,7 @@ export const ko_KR = {
   'common.global.email_or_username': '이메일 또는 사용자 이름',
   'common.global.password': '비밀번호',
   'common.global.sign_in': '로그인',
+  'common.auth.invalid_credentials': '이메일/사용자 이름 또는 비밀번호가 올바르지 않습니다.',
   'common.global.sign_up': '회원가입',
   'common.global.password_mismatch': '비밀번호가 일치하지 않습니다',
   'common.global.password_too_short': '비밀번호는 {{minLength}}자 이상이어야 합니다',
@@ -62,8 +63,7 @@ export const ko_KR = {
   'page.template_edit.not_found': '템플릿을 찾을 수 없거나 접근 권한이 없습니다.',
   'page.template_edit.load_error': '템플릿 목록을 불러오지 못했습니다.',
   'page.template_edit.layouts_error': '레이아웃을 불러오지 못했습니다.',
-  'page.template_edit.delete_template_confirm':
-    '템플릿 "{{name}}"을(를) 삭제할까요? 되돌릴 수 없습니다.',
+  'page.template_edit.delete_template_confirm': '템플릿 "{{name}}"을(를) 삭제할까요? 되돌릴 수 없습니다.',
   'page.template_edit.delete_template_aria': '템플릿 {{name}} 삭제',
   'page.template_edit.deleting': '삭제 중…',
 
@@ -128,9 +128,11 @@ export const ko_KR = {
   'page.project_view.container_list_empty': '아직 저장된 컨테이너가 없습니다.',
   'page.project_view.edit_panel_title': '슬라이드 편집',
   'page.project_view.edit_panel_placeholder': '슬라이드 편집 영역이 여기에 표시됩니다.',
-  'page.project_view.edit_unsupported_part': '이 슬라이드 유형은 아직 이 화면에서 편집할 수 없습니다. 순서 변경이나 삭제만 가능합니다.',
+  'page.project_view.edit_unsupported_part':
+    '이 슬라이드 유형은 아직 이 화면에서 편집할 수 없습니다. 순서 변경이나 삭제만 가능합니다.',
   'page.project_view.layout_picker_heading': '레이아웃',
-  'page.project_view.layout_picker_hint': '플레이스홀더가 있는 레이아웃은 값 슬라이드로, 없는 레이아웃은 일반 슬라이드로 적용됩니다.',
+  'page.project_view.layout_picker_hint':
+    '플레이스홀더가 있는 레이아웃은 값 슬라이드로, 없는 레이아웃은 일반 슬라이드로 적용됩니다.',
   'page.project_view.layout_option_aria': '레이아웃 {{name}} 선택',
   'page.project_view.placeholder_values_heading': '플레이스홀더 텍스트',
   'page.project_view.pick_layout_hint': '편집을 열고 레이아웃을 고르면 여기에 미리보기가 표시됩니다.',
@@ -155,7 +157,8 @@ export const ko_KR = {
   'page.project_view.lyrics_placeholder_targets': '가사를 넣을 플레이스홀더',
   'page.project_view.lyrics_keep_one_placeholder': '플레이스홀더는 최소 하나는 선택해야 합니다.',
   'page.project_view.lyrics_include_title_slide': '이 곡에 타이틀 슬라이드 포함',
-  'page.project_view.lyrics_song_search_hint': '저장한 곡 중 유사한 제목을 찾습니다. 항목을 고르면 제목·아티스트가 채워집니다.',
+  'page.project_view.lyrics_song_search_hint':
+    '저장한 곡 중 유사한 제목을 찾습니다. 항목을 고르면 제목·아티스트가 채워집니다.',
   'page.project_view.lyrics_song_library_loading': '곡 목록 불러오는 중…',
   'page.project_view.lyrics_song_library_error': '곡 목록을 불러오지 못했습니다.',
   'page.project_view.lyrics_song_pick_aria': '저장된 곡 적용',
@@ -234,7 +237,8 @@ export const ko_KR = {
   'page.project_view.bible_probe_book_not_found': '이 번역본에서 해당 책을 찾지 못했습니다.',
   'page.project_view.bible_probe_chapter_not_found': '이 책에서 해당 장을 찾지 못했습니다.',
   'page.project_view.bible_probe_verse_not_found': '이 장에 해당 절(또는 범위)이 없습니다.',
-  'page.project_view.bible_probe_unsupported_letter': '절 입력에 허용되지 않는 문자가 있습니다(숫자, 하이픈, 물결표만 사용).',
+  'page.project_view.bible_probe_unsupported_letter':
+    '절 입력에 허용되지 않는 문자가 있습니다(숫자, 하이픈, 물결표만 사용).',
   'page.project_view.bible_probe_multiple_separators': '절 범위에는 구분자를 하나만 쓸 수 있습니다(예: 3-5).',
   'page.project_view.bible_probe_multiple_numbers': '절 범위 형식에 맞지 않는 숫자 입력입니다.',
   'page.project_view.bible_probe_generic': '참조를 확인하지 못했습니다: {{detail}}',
@@ -284,8 +288,7 @@ export const ko_KR = {
   'page.song_new.saving': '저장 중…',
   'page.song_new.not_this_song': '이 곡이 아닙니다',
   'page.song_new.refine_title': '카탈로그를 검색할까요?',
-  'page.song_new.refine_description':
-    '아래에서 검색어를 수정한 뒤 카탈로그를 검색합니다.',
+  'page.song_new.refine_description': '아래에서 검색어를 수정한 뒤 카탈로그를 검색합니다.',
   'page.song_new.refine_confirm': '확인',
   'page.song_new.refine_cancel': '취소',
   'page.song_new.catalog_heading': '검색 결과',

@@ -105,15 +105,14 @@ function LyricsSongConfigureDialogBody({
   onApply,
   onClose,
 }: LyricsSongConfigureDialogBodyProps): React.ReactElement {
-  const { headingId, descId }: { readonly headingId: string; readonly descId: string } =
-    lyricsConfigureDomIds(snapshot.songIndex)
+  const { headingId, descId }: { readonly headingId: string; readonly descId: string } = lyricsConfigureDomIds(
+    snapshot.songIndex
+  )
 
-  const [lines, setLines] = React.useState<LyricsPart[]>(
-    (): LyricsPart[] => snapshot.lines.map((l: LyricsPart): LyricsPart => ({ ...l }))
+  const [lines, setLines] = React.useState<LyricsPart[]>((): LyricsPart[] =>
+    snapshot.lines.map((l: LyricsPart): LyricsPart => ({ ...l }))
   )
-  const [sequence, setSequence] = React.useState<number[]>(
-    (): number[] => [...snapshot.sequence]
-  )
+  const [sequence, setSequence] = React.useState<number[]>((): number[] => [...snapshot.sequence])
   const [configured, setConfigured] = React.useState<boolean>(() => snapshot.configured)
 
   React.useEffect((): void | (() => void) => {
@@ -215,14 +214,12 @@ export function LyricsSongConfigureOverlay({
     return null
   }
 
-  const { headingId, descId }: { readonly headingId: string; readonly descId: string } =
-    lyricsConfigureDomIds(snapshot.songIndex)
+  const { headingId, descId }: { readonly headingId: string; readonly descId: string } = lyricsConfigureDomIds(
+    snapshot.songIndex
+  )
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-100 flex items-start justify-center pt-6 pb-4 md:pt-10"
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-100 flex items-start justify-center pt-6 pb-4 md:pt-10" role="presentation">
       <div className="absolute inset-0 bg-black/50" role="presentation" onClick={onClose} />
       <div
         role="dialog"

@@ -1,5 +1,5 @@
 import type { PageResult, PagingQuery } from '../list-query'
-import type { ScrapeLyricsPreview, ScrapeSearchSongsResult,Song } from '../models/song'
+import type { ScrapeLyricsPreview, ScrapeSearchSongsResult, Song } from '../models/song'
 import type { SongRepository } from '../repositories/song-repository'
 import type { Lyrics, LyricsPart } from '../valueobjects/song'
 

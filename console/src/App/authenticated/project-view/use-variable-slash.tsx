@@ -351,8 +351,7 @@ export function useVariableSlash({
         ) : (
           filteredVariables.map((v: ProjectVariable, i: number): React.ReactElement => {
             const active: boolean = i === menu.highlightIndex
-            const line: string =
-              v.value.length > 0 ? `${v.name}: ${v.value}` : `${v.name}:`
+            const line: string = v.value.length > 0 ? `${v.name}: ${v.value}` : `${v.name}:`
             return (
               <button
                 key={v.name}
@@ -374,7 +373,7 @@ export function useVariableSlash({
                 }}
               >
                 <span className="block min-w-0 truncate whitespace-nowrap" title={line}>
-                  <span className="font-medium text-foreground">{v.name}</span>
+                  <span className="text-foreground font-medium">{v.name}</span>
                   <span className="text-muted-foreground">: </span>
                   <span className="text-muted-foreground font-normal">{v.value}</span>
                 </span>

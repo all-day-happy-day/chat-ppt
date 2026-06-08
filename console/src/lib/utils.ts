@@ -94,12 +94,10 @@ export function camelToSnake<TSnake>(data: OutgoingJson): TSnake {
 }
 
 /** Layout-picker selected chip + matching slide thumbnail selection (keep in sync visually). */
-export const LAYOUT_SELECTION_ACTIVE_CHROME: string =
-  'border-primary ring-primary ring-2 ring-inset'
+export const LAYOUT_SELECTION_ACTIVE_CHROME: string = 'border-primary ring-primary ring-2 ring-inset'
 
 /** Slide list drag-over target; same primary family, slightly muted. */
-export const LAYOUT_SELECTION_DRAG_TARGET_CHROME: string =
-  'border-primary/80 ring-primary/80 ring-2 ring-inset'
+export const LAYOUT_SELECTION_DRAG_TARGET_CHROME: string = 'border-primary/80 ring-primary/80 ring-2 ring-inset'
 
 /** Focused VALUE placeholder on slide previews (must match {@link LAYOUT_SELECTION_ACTIVE_CHROME} hue). */
 export const LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT: string =
@@ -109,5 +107,4 @@ export const LAYOUT_SELECTION_PLACEHOLDER_HIGHLIGHT: string =
  * Non-focused placeholder with filled interior (e.g. sidebar thumbnails).
  * Border follows shape bounds; inside is tinted primary.
  */
-export const PLACEHOLDER_FILL_BASE_CHROME: string =
-  'border-primary bg-primary/45 border-2 border-solid'
+export const PLACEHOLDER_FILL_BASE_CHROME: string = 'border-primary bg-primary/45 border-2 border-solid'

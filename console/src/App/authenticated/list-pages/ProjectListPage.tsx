@@ -7,11 +7,7 @@ import { useGetCurrentUser } from '@/api/query/auth.query'
 import { useListTemplates } from '@/api/query/powerpoint.query'
 import { useGetProjectsPage, usePatchProject } from '@/api/query/project.query'
 import { useGetUsers } from '@/api/query/user.query'
-import {
-  BASE_LIST_PAGE_SIZE,
-  BaseListFooter,
-  BaseListHeader,
-} from '@/App/layouts/base-list-layout/BaseListLayout'
+import { BASE_LIST_PAGE_SIZE, BaseListFooter, BaseListHeader } from '@/App/layouts/base-list-layout/BaseListLayout'
 import { ListSortTh } from '@/App/layouts/base-list-layout/ListSortTh'
 import { Button } from '@/components/ui/button/Button'
 import type { ListSort } from '@/domain/list-query'
@@ -92,12 +88,7 @@ interface ProjectListTableProps {
   readonly patchProject: ReturnType<typeof usePatchProject>
 }
 
-const ProjectListTable = ({
-  headerRow,
-  colCount,
-  rows,
-  patchProject,
-}: ProjectListTableProps): React.ReactElement => {
+const ProjectListTable = ({ headerRow, colCount, rows, patchProject }: ProjectListTableProps): React.ReactElement => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const tableRef: React.RefObject<HTMLTableElement | null> = React.useRef<HTMLTableElement | null>(null)
@@ -262,12 +253,7 @@ export function ProjectListPage(): React.ReactElement | null {
       <ListSortTh label={t('list.name')} column="name" sort={sort} onSortChange={handleSortChange} />
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.username')}</th>
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.template_name')}</th>
-      <ListSortTh
-        label={t('list.created_at')}
-        column="created_at"
-        sort={sort}
-        onSortChange={handleSortChange}
-      />
+      <ListSortTh label={t('list.created_at')} column="created_at" sort={sort} onSortChange={handleSortChange} />
       <th className="bg-secondary h-fit min-w-[50px] py-4 pl-4 text-left">{t('list.updated_at')}</th>
     </>
   )
@@ -305,17 +291,12 @@ export function ProjectListPage(): React.ReactElement | null {
         </div>
         <div className="min-h-0 flex-1">
           {totalItems > 0 ? (
-          <ProjectListTable
-            headerRow={headerRow}
-            colCount={5}
-            rows={projectRows}
-            patchProject={patchProject}
-          />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center p-4">
-            <div className="text-muted-foreground text-center text-sm">{t('common.global.no_content')}</div>
-          </div>
-        )}
+            <ProjectListTable headerRow={headerRow} colCount={5} rows={projectRows} patchProject={patchProject} />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center p-4">
+              <div className="text-muted-foreground text-center text-sm">{t('common.global.no_content')}</div>
+            </div>
+          )}
         </div>
       </div>
       <BaseListFooter

@@ -335,8 +335,7 @@ export function rebuildVariableChipFieldDom(
       const chip: HTMLSpanElement = document.createElement('span')
       chip.setAttribute(PROJECT_VAR_DATA_ATTR, rawName)
       chip.setAttribute('contenteditable', 'false')
-      chip.className =
-        'inline max-w-[12rem] cursor-pointer align-baseline text-[13px] font-bold leading-normal'
+      chip.className = 'inline max-w-[12rem] cursor-pointer align-baseline text-[13px] font-bold leading-normal'
       const colors: { readonly background: string; readonly foreground: string } = colorForName(rawName)
       chip.style.backgroundColor = 'transparent'
       chip.style.color = colors.foreground

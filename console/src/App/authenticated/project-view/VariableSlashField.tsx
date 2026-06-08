@@ -16,7 +16,7 @@ import type { ProjectVariable } from '@/domain/models/project'
 import { cn } from '@/lib/utils'
 
 import { useOptionalProjectVariablesScope } from './project-variables-scope-context'
-import { useVariableSlash,type VariableSlashEditorHost } from './use-variable-slash'
+import { useVariableSlash, type VariableSlashEditorHost } from './use-variable-slash'
 
 const EMPTY_PROJECT_VARIABLES: readonly ProjectVariable[] = []
 
@@ -39,10 +39,7 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | null | undefined>): React.Re
   }
 }
 
-export type VariableSlashTextInputProps = Omit<
-  React.ComponentPropsWithoutRef<'input'>,
-  'onChange' | 'value'
-> & {
+export type VariableSlashTextInputProps = Omit<React.ComponentPropsWithoutRef<'input'>, 'onChange' | 'value'> & {
   readonly value: string
   readonly onValueChange: (next: string) => void
 }
@@ -139,14 +136,7 @@ function tryDeleteLoneOpenBrace(
 
 export type VariableChipTextFieldProps = Omit<
   React.ComponentPropsWithoutRef<'div'>,
-  | 'onChange'
-  | 'onInput'
-  | 'children'
-  | 'dangerouslySetInnerHTML'
-  | 'contentEditable'
-  | 'onBlur'
-  | 'onFocus'
-  | 'onPaste'
+  'onChange' | 'onInput' | 'children' | 'dangerouslySetInnerHTML' | 'contentEditable' | 'onBlur' | 'onFocus' | 'onPaste'
 > & {
   readonly value: string
   readonly onValueChange: (next: string) => void
@@ -157,25 +147,12 @@ export type VariableChipTextFieldProps = Omit<
 
 export const VariableChipTextField = React.forwardRef<HTMLDivElement, VariableChipTextFieldProps>(
   function VariableChipTextField(
-    {
-      value,
-      onValueChange,
-      onKeyDown,
-      onInput,
-      onBlur,
-      onFocus,
-      onPaste,
-      disabled,
-      className,
-      placeholder,
-      ...rest
-    },
+    { value, onValueChange, onKeyDown, onInput, onBlur, onFocus, onPaste, disabled, className, placeholder, ...rest },
     forwardedRef
   ): React.ReactElement {
     const { t } = useTranslation()
     const scope = useOptionalProjectVariablesScope()
-    const variables: readonly ProjectVariable[] =
-      scope !== null ? scope.variables : EMPTY_PROJECT_VARIABLES
+    const variables: readonly ProjectVariable[] = scope !== null ? scope.variables : EMPTY_PROJECT_VARIABLES
     const rootRef = React.useRef<HTMLDivElement | null>(null)
     const mergedRef = React.useMemo(
       (): React.RefCallback<HTMLDivElement> => mergeRefs(rootRef, forwardedRef),
@@ -283,7 +260,7 @@ export const VariableChipTextField = React.forwardRef<HTMLDivElement, VariableCh
         <div className={cn('relative min-w-0', className)}>
           {showPlaceholder ? (
             <span
-              className="text-muted-foreground pointer-events-none absolute left-2 top-1/2 max-w-[calc(100%-1rem)] -translate-y-1/2 truncate text-sm select-none"
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 max-w-[calc(100%-1rem)] -translate-y-1/2 truncate text-sm select-none"
               aria-hidden
             >
               {placeholder}
@@ -298,7 +275,7 @@ export const VariableChipTextField = React.forwardRef<HTMLDivElement, VariableCh
             suppressContentEditableWarning
             tabIndex={disabled ? -1 : 0}
             className={cn(
-              'relative w-full min-w-0 min-h-[1.5rem] bg-transparent py-0.5 text-sm leading-normal outline-none empty:before:invisible',
+              'relative min-h-[1.5rem] w-full min-w-0 bg-transparent py-0.5 text-sm leading-normal outline-none empty:before:invisible',
               disabled && 'pointer-events-none opacity-60'
             )}
             onFocus={(e: React.FocusEvent<HTMLDivElement>): void => {
@@ -354,8 +331,7 @@ export const VariableChipTextField = React.forwardRef<HTMLDivElement, VariableCh
                     const serialized: string = serializeVariableChipField(el)
                     const caret: number = getSerializedCaretIndex(el)
                     const hit: { readonly next: string; readonly caret: number } | null =
-                      tryDeleteVariableTokenBeforeCaret(serialized, caret) ??
-                      tryDeleteLoneOpenBrace(serialized, caret)
+                      tryDeleteVariableTokenBeforeCaret(serialized, caret) ?? tryDeleteLoneOpenBrace(serialized, caret)
                     if (hit !== null) {
                       e.preventDefault()
                       const nextNorm: string = normalizeVariableTokensInSerialized(hit.next)
@@ -386,10 +362,7 @@ export const VariableChipTextField = React.forwardRef<HTMLDivElement, VariableCh
 
 VariableChipTextField.displayName = 'VariableChipTextField'
 
-export type VariableSlashTextareaProps = Omit<
-  React.ComponentPropsWithoutRef<'textarea'>,
-  'onChange' | 'value'
-> & {
+export type VariableSlashTextareaProps = Omit<React.ComponentPropsWithoutRef<'textarea'>, 'onChange' | 'value'> & {
   readonly value: string
   readonly onValueChange: (next: string) => void
 }
